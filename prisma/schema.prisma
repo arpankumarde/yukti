@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model HR {
+  hrId              String              @id @default(cuid())
+  name              String
+  email             String              @unique
+  password          String
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  jobs              Job[]
+  InterviewSchedule InterviewSchedule[]
+  MockInterview     MockInterview[]
+}
+
+model Applicant {
+  applicantId   String          @id @default(cuid())
+  name          String
+  email         String          @unique
+  password      String
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  applications  Application[]
+  MockInterview MockInterview[]
+}
+
+model Job {
+  id                String              @id @default(cuid())
+  title             String
+  description       String?
+  hr                HR                  @relation(fields: [hrId], references: [hrId])
+  hrId              String
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  applications      Application[]
+  InterviewSchedule InterviewSchedule[]
+}
+
+model Application {
+  applicationId String    @id @default(cuid())
+  applicant     Applicant @relation(fields: [applicantId], references: [applicantId])
+  applicantId   String
+  job           Job       @relation(fields: [jobId], references: [id])
+  jobId         String
+  status        String?
+  comments      String?
+  resume        String?
+  score         Int?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model InterviewSchedule {
+  interviewScheduleId String   @id @default(cuid())
+  scheduledAt         DateTime
+  location            String?
+  comments            String?
+  job                 Job      @relation(fields: [jobId], references: [id])
+  jobId               String
+  hr                  HR?      @relation(fields: [hrId], references: [hrId])
+  hrId                String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model MockInterview {
+  mockInterviewId String            @id @default(cuid())
+  scheduledAt     DateTime
+  location        String?
+  feedback        String?
+  applicant       Applicant         @relation(fields: [applicantId], references: [applicantId])
+  applicantId     String
+  hr              HR?               @relation(fields: [hrId], references: [hrId])
+  hrId            String?
+  questions       MockInterviewQA[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+}
+
+model MockInterviewQA {
+  mockInterviewQAId String        @id @default(cuid())
+  question          String
+  answer            String?
+  answerFeedback    String?
+  mockInterview     MockInterview @relation(fields: [mockInterviewId], references: [mockInterviewId])
+  mockInterviewId   String
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+}
