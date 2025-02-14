@@ -44,7 +44,7 @@ const Page = () => {
                     toast.error("Invalid credentials");
                     return;
                   } else {
-                    setCookie("yuktitoken", hr, {
+                    setCookie("ykhrauth", hr, {
                       maxAge: 60 * 60 * 24 * 7,
                     });
 
