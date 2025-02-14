@@ -30,3 +30,33 @@ export async function createHR(payload: {
     return { error: "Something went wrong" };
   }
 }
+
+export async function loginHR(payload: { email: string; password: string }) {
+  const { email, password } = payload;
+
+  if (!email || !password) {
+    return { error: "Missing required fields" };
+  }
+
+  try {
+    const hr = await prisma.hR.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    if (!hr) {
+      return { error: "Invalid credentials" };
+    }
+
+    const match = await bcrypt.compare(password, hr.password);
+
+    if (!match) {
+      return { error: "Invalid credentials" };
+    }
+
+    return { hr };
+  } catch (error) {
+    return { error: "Something went wrong" };
+  }
+}
