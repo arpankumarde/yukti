@@ -17,7 +17,7 @@ export async function createHR(payload: {
   const hashedPassword = await bcrypt.hash(payload?.password, 10);
 
   try {
-    const hr = await prisma.hR.create({
+    const recruiter = await prisma.recruiter.create({
       data: {
         name,
         email,
@@ -25,8 +25,9 @@ export async function createHR(payload: {
       },
     });
 
-    return { hr };
+    return { recruiter };
   } catch (error) {
+    console.error(error);
     return { error: "Something went wrong" };
   }
 }
@@ -39,24 +40,25 @@ export async function loginHR(payload: { email: string; password: string }) {
   }
 
   try {
-    const hr = await prisma.hR.findUnique({
+    const recruiter = await prisma.recruiter.findUnique({
       where: {
         email,
       },
     });
 
-    if (!hr) {
+    if (!recruiter) {
       return { error: "Invalid credentials" };
     }
 
-    const match = await bcrypt.compare(password, hr.password);
+    const match = await bcrypt.compare(password, recruiter.password);
 
     if (!match) {
       return { error: "Invalid credentials" };
     }
 
-    return { hr };
+    return { recruiter };
   } catch (error) {
+    console.error(error);
     return { error: "Something went wrong" };
   }
 }
@@ -85,6 +87,7 @@ export async function createApplicant(payload: {
 
     return { applicant };
   } catch (error) {
+    console.error(error);
     return { error: "Something went wrong" };
   }
 }
@@ -118,6 +121,7 @@ export async function loginApplicant(payload: {
 
     return { applicant };
   } catch (error) {
+    console.error(error);
     return { error: "Something went wrong" };
   }
 }

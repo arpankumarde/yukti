@@ -1,6 +1,6 @@
 "use client";
 
-import { loginHR } from "@/actions/auth";
+import { createHR } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,7 @@ const Page = () => {
   const router = useRouter();
 
   interface Payload {
+    name: string;
     email: string;
     password: string;
   }
@@ -31,24 +32,25 @@ const Page = () => {
                   const formData = Object.fromEntries(e.entries());
 
                   const payload: Payload = {
+                    name: formData["name"] as string,
                     email: formData["email"] as string,
                     password: formData["password"] as string,
                   };
 
-                  const { hr, error } = await loginHR(payload);
+                  const { recruiter, error } = await createHR(payload);
 
                   if (error) {
                     console.error("err: ", error);
                     toast.error("Invalid credentials");
                     return;
                   } else {
-                    setCookie("ykhrauth", hr, {
+                    setCookie("ykrecauth", recruiter, {
                       maxAge: 60 * 60 * 24 * 7,
                     });
 
-                    toast.success("Welcome back! Glad to see you here!");
+                    toast.success("Account created successfully");
 
-                    router.push("/hr/dashboard");
+                    router.push("/recruiter/dashboard");
                   }
                 }}
               >
@@ -56,8 +58,18 @@ const Page = () => {
                   <div className="flex flex-col items-center text-center">
                     <h1 className="text-2xl font-bold">Welcome back</h1>
                     <p className="text-balance text-muted-foreground">
-                      Login to your Yukti HR Account
+                      Create a new Yukti HR Account
                     </p>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="name">Name</Label>
+                    <Input
+                      id="name"
+                      name="name"
+                      type="text"
+                      placeholder="Enter your name"
+                      required
+                    />
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="email">Email</Label>
@@ -82,16 +94,16 @@ const Page = () => {
                     />
                   </div>
                   <Button type="submit" className="w-full">
-                    Login
+                    Create an Account
                   </Button>
 
                   <div className="text-center text-sm">
-                    Don&apos;t have an account?{" "}
+                    Already have an account?{" "}
                     <Link
-                      href="/hr/register"
+                      href="/recruiter/login"
                       className="underline underline-offset-4"
                     >
-                      Register
+                      Login
                     </Link>
                   </div>
                 </div>

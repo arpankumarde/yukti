@@ -7,8 +7,8 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model HR {
-  hrId              String              @id @default(cuid())
+model Recruiter {
+  recruiterId       String              @id @default(cuid())
   name              String
   email             String              @unique
   password          String
@@ -34,8 +34,8 @@ model Job {
   id                String              @id @default(cuid())
   title             String
   description       String?
-  hr                HR                  @relation(fields: [hrId], references: [hrId])
-  hrId              String
+  recruiter         Recruiter           @relation(fields: [recruiterId], references: [recruiterId])
+  recruiterId       String
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   applications      Application[]
@@ -57,16 +57,16 @@ model Application {
 }
 
 model InterviewSchedule {
-  interviewScheduleId String   @id @default(cuid())
+  interviewScheduleId String     @id @default(cuid())
   scheduledAt         DateTime
   location            String?
   comments            String?
-  job                 Job      @relation(fields: [jobId], references: [id])
+  job                 Job        @relation(fields: [jobId], references: [id])
   jobId               String
-  hr                  HR?      @relation(fields: [hrId], references: [hrId])
-  hrId                String?
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  recruiter           Recruiter? @relation(fields: [recruiterId], references: [recruiterId])
+  recruiterId         String?
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
 }
 
 model MockInterview {
@@ -76,8 +76,8 @@ model MockInterview {
   feedback        String?
   applicant       Applicant         @relation(fields: [applicantId], references: [applicantId])
   applicantId     String
-  hr              HR?               @relation(fields: [hrId], references: [hrId])
-  hrId            String?
+  recruiter       Recruiter?        @relation(fields: [recruiterId], references: [recruiterId])
+  recruiterId     String?
   questions       MockInterviewQA[]
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
