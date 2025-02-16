@@ -3,7 +3,8 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
-  title: "HRMS",
+  title: "Yukti AI",
+  icons: "/logo.png",
 };
 
 export default function RootLayout({
