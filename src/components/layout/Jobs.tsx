@@ -35,7 +35,8 @@ export default async function Jobs({ searchQuery }: { searchQuery?: string }) {
           </p>
         </div>
 
-        {/* Search Form */}
+        {/* Search Form - Temporarily commented out */}
+        {/*
         <form action="" className="mb-8">
           <div className="relative max-w-2xl mx-auto">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -65,6 +66,7 @@ export default async function Jobs({ searchQuery }: { searchQuery?: string }) {
             </button>
           </div>
         </form>
+        */}
 
         {jobs.length > 0 ? (
           <>

@@ -40,12 +40,12 @@ export default function App() {
   };
 
   const extractScores = (text: string) => {
-    const atsMatch = text.match(/ATS Compatibility Score.*?(\d+)/);
-    const jobMatch = text.match(/Job Match Score.*?(\d+)/);
+    const atsMatch = text.match(/ATS Compatibility Score(?:\s*:\s*|\s+)(\d+)/);
+    const jobMatch = text.match(/Job Match Score(?:\s*:\s*|\s+)(\d+)/);
     
     return {
-      atsScore: atsMatch ? parseInt(atsMatch[1]) : 0,
-      ...(jobMatch && { jobMatchScore: parseInt(jobMatch[1]) })
+      atsScore: atsMatch ? parseInt(atsMatch[1], 10) : 0,
+      ...(jobMatch && { jobMatchScore: parseInt(jobMatch[1], 10) })
     };
   };
 
@@ -92,17 +92,13 @@ export default function App() {
 
   const generatePieChartData = (scores: { atsScore: number; jobMatchScore?: number }) => {
     if (analysisType === "jobMatch" && scores.jobMatchScore !== undefined) {
-      return {
-        labels: ['ATS Compatibility', 'Job Match', 'Room for Improvement'],
-        datasets: [{
-          data: [
-            scores.atsScore,
-            scores.jobMatchScore,
-            Math.max(0, 100 - scores.atsScore - scores.jobMatchScore)
-          ],
-          backgroundColor: ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))'],
-        }]
-      };
+        return {
+            labels: ['ATS Compatibility', 'Room for Improvement'],
+            datasets: [{
+              data: [scores.atsScore, Math.max(0, 100 - scores.atsScore)],
+              backgroundColor: ['hsl(209, 100%, 40%)', 'hsl(36, 100%, 50%)'],
+            }]
+          };
     }
     
     return {

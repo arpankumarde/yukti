@@ -57,7 +57,7 @@ export function RecruiterSidebar({
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton className="py-6 text-lg duration-200 transition-colors" asChild>
-                  <Link href="/applicant/job-hunting">
+                  <Link href="/applicant/jobs">
                     <FaBriefcase className="!size-5" />
                     <span>Job hunting</span>
                   </Link>
