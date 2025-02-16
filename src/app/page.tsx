@@ -2,10 +2,12 @@
 
 import { LayoutGroup, motion } from "motion/react";
 import { TextRotate } from "@/components/ui/text-rotate";
+import Navbar from "@/components/layout/Navbar";
 
 const Page = () => {
   return (
     <>
+      <Navbar />
       <div className="w-full min-h-dvh text-2xl sm:text-3xl md:text-5xl flex flex-row items-center justify-center font-overusedGrotesk bg-white dark:text-muted text-foreground font-light overflow-hidden p-12 sm:p-20 md:p-24">
         <LayoutGroup>
           <motion.div className="flex whitespace-pre" layout>
