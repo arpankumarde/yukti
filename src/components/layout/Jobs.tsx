@@ -1,7 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 import React from "react";
-import { Briefcase, Building2, Search } from "lucide-react";
+import { Briefcase, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Link from 'next/link'
 
 const prisma = new PrismaClient();
 
@@ -131,7 +132,7 @@ export default async function Jobs({ searchQuery }: { searchQuery?: string }) {
                 : "Check back later for new opportunities"}
             </p>
             {searchTerms.length > 0 && (
-              <a 
+              <Link
                 href="/"
                 className={cn(
                   "mt-4 inline-block px-4 py-2 rounded-lg transition-colors duration-200 font-medium text-sm",
@@ -139,7 +140,7 @@ export default async function Jobs({ searchQuery }: { searchQuery?: string }) {
                 )}
               >
                 View all positions
-              </a>
+              </Link>
             )}
           </div>
         )}

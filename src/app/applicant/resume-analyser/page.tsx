@@ -14,7 +14,7 @@ import {
 } from 'chart.js';
 import { jsPDF } from 'jspdf';
 import { toPng } from 'html-to-image';
-import { Upload, FileText, PieChart, AlertCircle } from 'lucide-react';
+import {  FileText, PieChart, AlertCircle } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
