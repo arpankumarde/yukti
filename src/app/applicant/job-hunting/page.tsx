@@ -1,5 +1,5 @@
 import Jobs from "@/components/layout/Jobs";
 
-export default async function JobsPage() {
+export default async function JobHuntingPage() {
   return <Jobs />;
 }

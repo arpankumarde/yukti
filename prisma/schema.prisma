@@ -14,8 +14,8 @@ model Recruiter {
   password          String
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
-  jobs              Job[]
   InterviewSchedule InterviewSchedule[]
+  jobs              Job[]
   MockInterview     MockInterview[]
 }
 
@@ -34,19 +34,18 @@ model Job {
   id                String              @id @default(cuid())
   title             String
   description       String?
-  recruiter         Recruiter           @relation(fields: [recruiterId], references: [recruiterId])
-  recruiterId       String
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
+  recruiterId       String
+  experience        String              @default("Fresher")
   applications      Application[]
   InterviewSchedule InterviewSchedule[]
+  recruiter         Recruiter           @relation(fields: [recruiterId], references: [recruiterId])
 }
 
 model Application {
   applicationId String    @id @default(cuid())
-  applicant     Applicant @relation(fields: [applicantId], references: [applicantId])
   applicantId   String
-  job           Job       @relation(fields: [jobId], references: [id])
   jobId         String
   status        String?
   comments      String?
@@ -54,6 +53,8 @@ model Application {
   score         Int?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+  applicant     Applicant @relation(fields: [applicantId], references: [applicantId])
+  job           Job       @relation(fields: [jobId], references: [id])
 }
 
 model InterviewSchedule {
@@ -61,12 +62,12 @@ model InterviewSchedule {
   scheduledAt         DateTime
   location            String?
   comments            String?
-  job                 Job        @relation(fields: [jobId], references: [id])
   jobId               String
-  recruiter           Recruiter? @relation(fields: [recruiterId], references: [recruiterId])
-  recruiterId         String?
   createdAt           DateTime   @default(now())
   updatedAt           DateTime   @updatedAt
+  recruiterId         String?
+  job                 Job        @relation(fields: [jobId], references: [id])
+  recruiter           Recruiter? @relation(fields: [recruiterId], references: [recruiterId])
 }
 
 model MockInterview {
@@ -74,13 +75,13 @@ model MockInterview {
   scheduledAt     DateTime
   location        String?
   feedback        String?
-  applicant       Applicant         @relation(fields: [applicantId], references: [applicantId])
   applicantId     String
-  recruiter       Recruiter?        @relation(fields: [recruiterId], references: [recruiterId])
-  recruiterId     String?
-  questions       MockInterviewQA[]
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
+  recruiterId     String?
+  applicant       Applicant         @relation(fields: [applicantId], references: [applicantId])
+  recruiter       Recruiter?        @relation(fields: [recruiterId], references: [recruiterId])
+  questions       MockInterviewQA[]
 }
 
 model MockInterviewQA {
@@ -88,8 +89,8 @@ model MockInterviewQA {
   question          String
   answer            String?
   answerFeedback    String?
-  mockInterview     MockInterview @relation(fields: [mockInterviewId], references: [mockInterviewId])
   mockInterviewId   String
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
+  mockInterview     MockInterview @relation(fields: [mockInterviewId], references: [mockInterviewId])
 }
