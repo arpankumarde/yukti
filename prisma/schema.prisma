@@ -50,7 +50,9 @@ model Application {
   status        String?
   comments      String?
   resume        String?
-  score         Int?
+  score         String?  
+  strength      String?
+  weakness      String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   applicant     Applicant @relation(fields: [applicantId], references: [applicantId])
