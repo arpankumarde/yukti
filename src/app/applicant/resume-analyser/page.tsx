@@ -28,37 +28,34 @@ function App() {
     }
   };
 
-  // Calculate estimated time remaining
   const getEstimatedTime = () => {
     const remaining = Math.ceil((100 - uploadProgress) * 0.2);
     return remaining > 0 ? `${remaining} seconds remaining` : 'Completing...';
   };
 
-  // Calculate upload speed (simulated)
   const getUploadSpeed = () => {
     return '2.5 MB/s';
   };
 
   return (
-    <div className="min-h-screen bg-secondary/20 p-8">
-      <div className="max-w-3xl mx-auto">
-        <div className="bg-background rounded-xl shadow-lg overflow-hidden">
+    <div className="min-h-screen bg-secondary/20 flex items-center justify-center p-4">
+      <div className="max-w-md w-full">
+        <div className="bg-background rounded-xl shadow-sm border border-border overflow-hidden">
           {/* Header */}
-          <div className="p-8 border-b border-border">
-            <div className="flex items-center gap-3 mb-4">
-              <FileText className="w-8 h-8 text-primary" />
-              <h1 className="text-3xl font-bold text-foreground">Resume Analyzer</h1>
+          <div className="p-6 border-b border-border">
+            <div className="flex items-center gap-2 mb-2">
+              <FileText className="w-6 h-6 text-primary" />
+              <h1 className="text-2xl font-semibold text-foreground">Resume Analyzer</h1>
             </div>
-            <p className="text-muted-foreground text-lg">
+            <p className="text-muted-foreground text-sm">
               Upload your resume and let our AI analyze it for insights, suggestions, and improvements.
-              Get detailed feedback on formatting, content, and alignment with job market demands.
             </p>
           </div>
 
           {/* Upload Section */}
-          <div className="p-8">
+          <div className="p-6">
             <div className={cn(
-              "border-2 border-dashed rounded-lg p-8 text-center",
+              "border-2 border-dashed rounded-lg p-6 text-center",
               "border-input hover:border-border transition-colors duration-200"
             )}>
               <input
@@ -72,11 +69,11 @@ function App() {
                 htmlFor="resume"
                 className="cursor-pointer inline-flex flex-col items-center"
               >
-                <Upload className="w-12 h-12 text-primary mb-4" />
-                <span className="text-lg font-medium text-foreground mb-2">
+                <Upload className="w-10 h-10 text-primary mb-3" />
+                <span className="text-base font-medium text-foreground mb-1">
                   {selectedFile ? selectedFile.name : 'Choose a file'}
                 </span>
-                <span className="text-sm text-muted-foreground">
+                <span className="text-xs text-muted-foreground">
                   Supported formats: PDF, DOC, DOCX (Max 10MB)
                 </span>
               </label>
@@ -84,19 +81,19 @@ function App() {
 
             {/* Progress Bar */}
             {showProgress && (
-              <div className="mt-6">
-                <div className="flex justify-between text-sm text-muted-foreground mb-2">
+              <div className="mt-4">
+                <div className="flex justify-between text-xs text-muted-foreground mb-2">
                   <span>{uploadProgress}% uploaded</span>
                   <span>{getUploadSpeed()}</span>
                 </div>
-                <div className="h-2 bg-muted rounded-full overflow-hidden">
+                <div className="h-1.5 bg-muted rounded-full overflow-hidden">
                   <div
                     className="h-full bg-primary transition-all duration-300 ease-out"
                     style={{ width: `${uploadProgress}%` }}
                   />
                 </div>
-                <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
-                  <Clock className="w-4 h-4" />
+                <div className="flex items-center gap-1.5 mt-2 text-xs text-muted-foreground">
+                  <Clock className="w-3 h-3" />
                   <span>{getEstimatedTime()}</span>
                 </div>
               </div>
