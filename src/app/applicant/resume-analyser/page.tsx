@@ -1,7 +1,10 @@
 "use client";
-import React, { useState } from 'react';
-import { Upload, FileText, Clock } from 'lucide-react';
-import { cn } from "@/lib/utils";
+
+import { FilePond } from "react-filepond";
+import "filepond/dist/filepond.min.css";
+import { useState, useRef } from "react";
+import toast, { Toaster } from "react-hot-toast";
+import ReactMarkdown from 'react-markdown';
 import { Pie } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -9,21 +12,32 @@ import {
   Tooltip,
   Legend
 } from 'chart.js';
-import ReactMarkdown from 'react-markdown';
-import toast, { Toaster } from 'react-hot-toast';
+import { jsPDF } from 'jspdf';
+import { toPng } from 'html-to-image';
+import { Upload, FileText, PieChart, AlertCircle } from 'lucide-react';
+import { cn } from "@/lib/utils";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-function App() {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [showProgress, setShowProgress] = useState(false);
+export default function App() {
+  const [fileResponse, setFileResponse] = useState(null);
   const [analysis, setAnalysis] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [jobProfile, setJobProfile] = useState("");
-  const [analysisType, setAnalysisType] = useState<"normal" | "jobMatch">("normal");
+  const [analysisType, setAnalysisType] = useState("normal");
   const [showAnalysisOptions, setShowAnalysisOptions] = useState(false);
   const [scores, setScores] = useState<{ atsScore: number; jobMatchScore?: number }>({ atsScore: 0 });
+  const chartRef = useRef<HTMLDivElement>(null);
+  const reportRef = useRef<HTMLDivElement>(null);
+
+  const Notify = (status: string, message: string) => {
+    toast.dismiss();
+    if (status === "success") {
+      toast.success(message);
+    } else {
+      toast.error(message);
+    }
+  };
 
   const extractScores = (text: string) => {
     const atsMatch = text.match(/ATS Compatibility Score.*?(\d+)/);
@@ -35,57 +49,42 @@ function App() {
     };
   };
 
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-      setShowProgress(true);
-      setUploadProgress(0);
-
-      // Create FormData
-      const formData = new FormData();
-      formData.append("filepond", file);
-
-      try {
-        const response = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (!response.ok) throw new Error('Upload failed');
-
-        const data = await response.json();
-        setShowAnalysisOptions(true);
-        setShowProgress(false);
-        setUploadProgress(100);
-      } catch (error) {
-        toast.error('Failed to upload file');
-        setShowProgress(false);
-      }
-    }
-  };
-
   const analyzeResume = async (text: string) => {
+    if (analysisType === "jobMatch" && !jobProfile.trim()) {
+      Notify('error', 'Please enter a job profile first');
+      return;
+    }
+
     setIsAnalyzing(true);
     try {
       const response = await fetch('/api/analyze', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ 
           text, 
           jobProfile: analysisType === "jobMatch" ? jobProfile : "General ATS Analysis"
         }),
       });
 
-      if (!response.ok) throw new Error('Analysis failed');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
 
       const data = await response.json();
+      if (!data.choices?.[0]?.message?.content) {
+        throw new Error('Invalid response format from analysis service');
+      }
+
       const analysisText = data.choices[0].message.content;
       setAnalysis(analysisText);
       setScores(extractScores(analysisText));
-      toast.success('Analysis complete!');
+      Notify('success', 'Resume analysis complete!');
     } catch (error) {
-      toast.error('Analysis failed');
+      console.error('Resume analysis error:', error instanceof Error ? error.message : 'Unknown error occurred');
+      Notify('error', error instanceof Error ? error.message : 'Failed to analyze resume. Please try again.');
     } finally {
       setIsAnalyzing(false);
     }
@@ -96,8 +95,12 @@ function App() {
       return {
         labels: ['ATS Compatibility', 'Job Match', 'Room for Improvement'],
         datasets: [{
-          data: [scores.atsScore, scores.jobMatchScore, Math.max(0, 100 - scores.atsScore - scores.jobMatchScore)],
-          backgroundColor: ['#4CAF50', '#2196F3', '#FFA726'],
+          data: [
+            scores.atsScore,
+            scores.jobMatchScore,
+            Math.max(0, 100 - scores.atsScore - scores.jobMatchScore)
+          ],
+          backgroundColor: ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))'],
         }]
       };
     }
@@ -106,119 +109,208 @@ function App() {
       labels: ['ATS Compatibility', 'Room for Improvement'],
       datasets: [{
         data: [scores.atsScore, Math.max(0, 100 - scores.atsScore)],
-        backgroundColor: ['#4CAF50', '#FFA726'],
+        backgroundColor: ['hsl(var(--chart-1))', 'hsl(var(--chart-2))'],
       }]
     };
   };
 
+  const downloadReport = async () => {
+    if (!analysis || !reportRef.current || !chartRef.current) return;
+
+    try {
+      const chartImage = await toPng(chartRef.current);
+      const pdf = new jsPDF();
+      pdf.setFontSize(20);
+      pdf.text("ATS Analysis Report", 20, 20);
+      pdf.addImage(chartImage, 'PNG', 15, 40, 180, 100);
+      pdf.setFontSize(12);
+      const lines = pdf.splitTextToSize(analysis.replace(/[#*]/g, ''), 180);
+      pdf.text(lines, 15, 150);
+      pdf.save('ats-analysis-report.pdf');
+      Notify('success', 'Report downloaded successfully!');
+    } catch (error) {
+      console.error('PDF generation error:', error instanceof Error ? error.message : 'Unknown error occurred');
+      Notify('error', 'Failed to generate PDF report. Please try again.');
+    }
+  };
+
+  const handleFileUpload = (response: any) => {
+    try {
+      const fileResponse = JSON.parse(response);
+      setFileResponse(fileResponse);
+      setShowAnalysisOptions(true);
+      setAnalysis("");
+      setScores({ atsScore: 0 });
+    } catch (error) {
+      console.error('File upload error:', error instanceof Error ? error.message : 'Unknown error occurred');
+      Notify('error', 'Failed to process the uploaded file. Please try again.');
+    }
+  };
+
+  const startAnalysis = () => {
+    if (!fileResponse?.parsedText) {
+      Notify('error', 'No resume text found. Please upload a PDF file first.');
+      return;
+    }
+    analyzeResume(fileResponse.parsedText);
+  };
+
   return (
     <div className="min-h-screen bg-secondary/20 flex items-center justify-center p-4">
-      <Toaster />
-      <div className="max-w-md w-full">
-        <div className="bg-background rounded-xl shadow-lg border border-border overflow-hidden">
-          {/* Your existing header */}
-          <div className="p-6 border-b border-border">
-            <div className="flex items-center gap-2 mb-2">
-              <FileText className="w-6 h-6 text-primary" />
-              <h1 className="text-2xl font-semibold text-foreground">Resume Analyzer</h1>
-            </div>
-            <p className="text-muted-foreground text-sm font-normal">
-              Upload your resume and let our AI analyze it for insights.
-            </p>
-          </div>
-
-          {/* Upload Section */}
-          <div className="p-6">
-            {!showAnalysisOptions ? (
-              <div>
-                {/* Your existing upload UI */}
-                <div className={cn(
-                  "border-2 border-dashed rounded-lg p-6 text-center",
-                  "border-input hover:border-border transition-colors duration-200"
-                )}>
-                  <input
-                    type="file"
-                    id="resume"
-                    accept=".pdf"
-                    onChange={handleFileSelect}
-                    className="hidden"
+    <div className="w-full">
+      <div className="bg-background rounded-lg shadow-lg overflow-hidden">
+          <Toaster />
+          <h1 className="text-2xl font-bold text-foreground p-6 border-b border-border">
+            Resume Analyzer
+          </h1>
+          
+          <div className="p-6 space-y-6">
+            {!fileResponse ? (
+              <div className={cn(
+                "flex items-center gap-3 rounded-lg p-4",
+                "bg-muted border border-border"
+              )}>
+                <AlertCircle className="text-muted-foreground" size={20} />
+                <div className="filepond-wrapper w-full">
+                  <FilePond
+                    server={{
+                      process: {
+                        url: "/api/upload",
+                        method: "POST",
+                        withCredentials: false,
+                        onload: handleFileUpload,
+                        onerror: (response) => {
+                          Notify('error', 'Failed to upload file. Please try again.');
+                          return response;
+                        },
+                      },
+                      fetch: null,
+                      revert: null,
+                    }}
+                    acceptedFileTypes={['application/pdf']}
+                    labelFileTypeNotAllowed="Please upload a PDF file"
+                    maxFiles={1}
                   />
-                  <label htmlFor="resume" className="cursor-pointer inline-flex flex-col items-center">
-                    <Upload className="w-10 h-10 text-primary mb-3" />
-                    <span className="text-base font-semibold text-foreground mb-1">
-                      {selectedFile ? selectedFile.name : 'Choose a file'}
-                    </span>
-                    <span className="text-xs font-normal text-muted-foreground">
-                      Supported format: PDF (Max 10MB)
-                    </span>
-                  </label>
                 </div>
               </div>
             ) : (
-              <div className="space-y-4">
-                <div className="flex gap-4 justify-center">
-                  <button
-                    onClick={() => setAnalysisType("normal")}
-                    className={cn(
-                      "px-4 py-2 rounded-md transition-colors",
-                      analysisType === "normal" ? "bg-primary text-white" : "bg-secondary"
-                    )}
-                  >
-                    Normal ATS Check
-                  </button>
-                  <button
-                    onClick={() => setAnalysisType("jobMatch")}
-                    className={cn(
-                      "px-4 py-2 rounded-md transition-colors",
-                      analysisType === "jobMatch" ? "bg-primary text-white" : "bg-secondary"
-                    )}
-                  >
-                    Job Profile Match
-                  </button>
+              <div className="space-y-6">
+                <div className={cn(
+                  "flex items-start gap-3 rounded-lg p-4",
+                  "bg-muted border border-border"
+                )}>
+                  <FileText className="text-muted-foreground mt-1" size={20} />
+                  <div className="flex-1">
+                    <h2 className="text-lg font-semibold text-foreground mb-2">Extracted Text</h2>
+                    {/* @ts-expect-error - parsedText type issue */}
+                    <pre className="text-sm text-muted-foreground whitespace-pre-wrap">{fileResponse.parsedText}</pre>
+                  </div>
                 </div>
 
-                {analysisType === "jobMatch" && (
-                  <textarea
-                    placeholder="Paste job description here..."
-                    className="w-full p-2 border rounded"
-                    value={jobProfile}
-                    onChange={(e) => setJobProfile(e.target.value)}
-                  />
+                {showAnalysisOptions && (
+                  <div className={cn(
+                    "rounded-lg p-4",
+                    "bg-muted border border-border"
+                  )}>
+                    <div className="space-y-4">
+                      <div className="flex gap-4">
+                        <button
+                          onClick={() => setAnalysisType("normal")}
+                          className={cn(
+                            "px-4 py-2 rounded-md transition-colors",
+                            analysisType === "normal"
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                          )}
+                        >
+                          Normal ATS Check
+                        </button>
+                        <button
+                          onClick={() => setAnalysisType("jobMatch")}
+                          className={cn(
+                            "px-4 py-2 rounded-md transition-colors",
+                            analysisType === "jobMatch"
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                          )}
+                        >
+                          Job Profile Match
+                        </button>
+                      </div>
+
+                      {analysisType === "jobMatch" && (
+                        <div className="mt-4">
+                          <label htmlFor="jobProfile" className="block text-sm font-medium text-foreground mb-2">
+                            Job Profile Description
+                          </label>
+                          <textarea
+                            id="jobProfile"
+                            rows={4}
+                            className="w-full px-3 py-2 bg-background text-foreground border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                            placeholder="Paste the job description here..."
+                            value={jobProfile}
+                            onChange={(e) => setJobProfile(e.target.value)}
+                          />
+                        </div>
+                      )}
+
+                      <button
+                        onClick={startAnalysis}
+                        className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+                      >
+                        Start Analysis
+                      </button>
+                    </div>
+                  </div>
                 )}
+                
+                {isAnalyzing ? (
+                  <div className={cn(
+                    "flex items-center gap-3 rounded-lg p-4",
+                    "bg-muted border border-border"
+                  )}>
+                    <AlertCircle className="text-muted-foreground" size={20} />
+                    <p className="text-muted-foreground">Analyzing your resume...</p>
+                  </div>
+                ) : analysis ? (
+                  <div ref={reportRef} className={cn(
+                    "rounded-lg p-4",
+                    "bg-muted border border-border"
+                  )}>
+                    <div className="flex justify-between items-center mb-6">
+                      <div className="flex items-center gap-3">
+                        <PieChart className="text-foreground" size={20} />
+                        <h2 className="text-lg font-semibold text-foreground">Analysis Report</h2>
+                      </div>
+                      <button
+                        onClick={downloadReport}
+                        className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+                      >
+                        Download PDF
+                      </button>
+                    </div>
+                    
+                    <div ref={chartRef} className="w-full max-w-md mx-auto mb-8">
+                      <Pie 
+                        data={generatePieChartData(scores)}
+                        options={{
+                          plugins: {
+                            legend: {
+                              position: 'bottom',
+                              labels: {
+                                color: 'hsl(var(--foreground))'
+                              }
+                            }
+                          }
+                        }}
+                      />
+                    </div>
 
-                <button
-                  onClick={() => selectedFile && analyzeResume(selectedFile.name)}
-                  className="w-full px-4 py-2 bg-primary text-white rounded-md"
-                >
-                  Start Analysis
-                </button>
-              </div>
-            )}
-
-            {/* Analysis Results */}
-            {analysis && !isAnalyzing && (
-              <div className="mt-6">
-                <div className="w-full max-w-md mx-auto mb-6">
-                  <Pie data={generatePieChartData(scores)} />
-                </div>
-                <div className="prose dark:prose-invert max-w-none">
-                  <ReactMarkdown>{analysis}</ReactMarkdown>
-                </div>
-              </div>
-            )}
-
-            {/* Loading States */}
-            {(showProgress || isAnalyzing) && (
-              <div className="mt-4">
-                <div className="flex justify-between text-xs font-medium text-muted-foreground mb-2">
-                  <span>{isAnalyzing ? "Analyzing..." : `${uploadProgress}% uploaded`}</span>
-                </div>
-                <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-primary transition-all duration-300 ease-out"
-                    style={{ width: isAnalyzing ? "100%" : `${uploadProgress}%` }}
-                  />
-                </div>
+                    <div className="prose dark:prose-invert max-w-none">
+                      <ReactMarkdown>{analysis}</ReactMarkdown>
+                    </div>
+                  </div>
+                ) : null}
               </div>
             )}
           </div>
@@ -227,5 +319,3 @@ function App() {
     </div>
   );
 }
-
-export default App;
