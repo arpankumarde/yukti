@@ -40,14 +40,14 @@ function App() {
   return (
     <div className="min-h-screen bg-secondary/20 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
-        <div className="bg-background rounded-xl shadow-sm border border-border overflow-hidden">
+        <div className="bg-background rounded-xl shadow-lg border border-border overflow-hidden">
           {/* Header */}
           <div className="p-6 border-b border-border">
             <div className="flex items-center gap-2 mb-2">
               <FileText className="w-6 h-6 text-primary" />
               <h1 className="text-2xl font-semibold text-foreground">Resume Analyzer</h1>
             </div>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-muted-foreground text-sm font-normal">
               Upload your resume and let our AI analyze it for insights, suggestions, and improvements.
             </p>
           </div>
@@ -70,10 +70,10 @@ function App() {
                 className="cursor-pointer inline-flex flex-col items-center"
               >
                 <Upload className="w-10 h-10 text-primary mb-3" />
-                <span className="text-base font-medium text-foreground mb-1">
+                <span className="text-base font-semibold text-foreground mb-1">
                   {selectedFile ? selectedFile.name : 'Choose a file'}
                 </span>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-xs font-normal text-muted-foreground">
                   Supported formats: PDF, DOC, DOCX (Max 10MB)
                 </span>
               </label>
@@ -82,7 +82,7 @@ function App() {
             {/* Progress Bar */}
             {showProgress && (
               <div className="mt-4">
-                <div className="flex justify-between text-xs text-muted-foreground mb-2">
+                <div className="flex justify-between text-xs font-medium text-muted-foreground mb-2">
                   <span>{uploadProgress}% uploaded</span>
                   <span>{getUploadSpeed()}</span>
                 </div>
@@ -92,7 +92,7 @@ function App() {
                     style={{ width: `${uploadProgress}%` }}
                   />
                 </div>
-                <div className="flex items-center gap-1.5 mt-2 text-xs text-muted-foreground">
+                <div className="flex items-center gap-1.5 mt-2 text-xs font-medium text-muted-foreground">
                   <Clock className="w-3 h-3" />
                   <span>{getEstimatedTime()}</span>
                 </div>
