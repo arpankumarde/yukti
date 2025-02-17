@@ -50,7 +50,8 @@ model Application {
   status        String?
   comments      String?
   resume        String?
-  score         String?  
+  cover_letter  String?
+  score         String?
   strength      String?
   weakness      String?
   createdAt     DateTime  @default(now())
