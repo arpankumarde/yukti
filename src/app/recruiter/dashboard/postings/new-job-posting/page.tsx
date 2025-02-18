@@ -99,7 +99,7 @@ const NewJobPostingPage = () => {
               </form>
               <div className="relative hidden bg-primary md:block">
                 {/* <Image
-                  src="/logo.jpg"
+                  src="/logo.png"
                   alt="Image"
                   className="absolute inset-0 w-full my-auto object-cover dark:brightness-[0.2] dark:grayscale"
                   width={600}

@@ -96,12 +96,12 @@ const Page = () => {
                   </div>
                 </div>
               </form>
-              <div className="relative hidden bg-primary md:block">
+              <div className="relative hidden bg-white md:block">
                 <Image
-                  src="/logo.jpg"
+                  src="/logo-square.png"
                   alt="Image"
                   className="absolute inset-0 w-full my-auto object-cover dark:brightness-[0.2] dark:grayscale"
-                  width={600}
+                  width={800}
                   height={800}
                 />
               </div>
