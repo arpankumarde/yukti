@@ -16,9 +16,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "../ui/button";
 import { deleteCookie } from "cookies-next";
-
-
-
 import { MdDashboard } from "react-icons/md";
 import {
   FaBriefcase,
@@ -48,7 +45,10 @@ export function RecruiterSidebar({
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton className="py-6 text-lg duration-200 transition-colors" asChild>
+                <SidebarMenuButton
+                  className="py-6 text-lg duration-200 transition-colors"
+                  asChild
+                >
                   <Link href="/applicant/dashboard">
                     <MdDashboard className="!size-5" />
                     <span>Dashboard</span>
@@ -56,7 +56,10 @@ export function RecruiterSidebar({
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton className="py-6 text-lg duration-200 transition-colors" asChild>
+                <SidebarMenuButton
+                  className="py-6 text-lg duration-200 transition-colors"
+                  asChild
+                >
                   <Link href="/applicant/jobs">
                     <FaBriefcase className="!size-5" />
                     <span>Job hunting</span>
@@ -64,7 +67,10 @@ export function RecruiterSidebar({
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton className="py-6 text-lg duration-200 transition-colors" asChild>
+                <SidebarMenuButton
+                  className="py-6 text-lg duration-200 transition-colors"
+                  asChild
+                >
                   <Link href="/applicant/applied-jobs">
                     <FaClipboardCheck className="!size-5" />
                     <span>Applied jobs</span>
@@ -72,15 +78,21 @@ export function RecruiterSidebar({
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton className="py-6 text-lg duration-200 transition-colors" asChild>
-                  <Link href="/applicant/ai-assesment">
+                <SidebarMenuButton
+                  className="py-6 text-lg duration-200 transition-colors"
+                  asChild
+                >
+                  <Link href="/applicant/dashboard/ai-assessment">
                     <FaRobot className="!size-5" />
-                    <span>Ai Assesment</span>
+                    <span>AI Assessment</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton className="py-6 text-lg duration-200 transition-colors" asChild>
+                <SidebarMenuButton
+                  className="py-6 text-lg duration-200 transition-colors"
+                  asChild
+                >
                   <Link href="/applicant/english-proficiency-test">
                     <FaLanguage className="!size-5" />
                     <span>English Proficiency Test</span>
@@ -88,7 +100,10 @@ export function RecruiterSidebar({
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton className="py-6 text-lg duration-200 transition-colors" asChild>
+                <SidebarMenuButton
+                  className="py-6 text-lg duration-200 transition-colors"
+                  asChild
+                >
                   <Link href="/applicant/resume-analyser">
                     <FaFileAlt className="!size-5" />
                     <span>Resume Analyser</span>
@@ -104,7 +119,7 @@ export function RecruiterSidebar({
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <Link href="/my-profile">
+              <Link href="/applicant/dashboard/profile">
                 <FaUser className="!size-5" />
                 <span>My Profile</span>
               </Link>
@@ -114,8 +129,8 @@ export function RecruiterSidebar({
             <SidebarMenuButton asChild>
               <Button
                 onClick={() => {
-                  deleteCookie("ykrectoken");
-                  router.push("/recruiter/login");
+                  deleteCookie("ykapptoken");
+                  router.push("/applicant/login");
                 }}
               >
                 Logout
