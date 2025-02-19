@@ -29,4 +29,50 @@ export async function createJob(payload: {
     console.error(error);
     return { error: "Something went wrong" };
   }
-} 
+}
+
+export async function updateJob(payload: {
+  id: string;
+  title: string;
+  description: string;
+  experience: string;
+}) {
+  const { id, title, description, experience } = payload;
+
+  if (!id || !title || !description || !experience) {
+    return { error: "Missing required fields" };
+  }
+
+  try {
+    const job = await prisma.job.update({
+      where: { id },
+      data: {
+        title,
+        description,
+        experience,
+      },
+    });
+
+    return { job };
+  } catch (error) {
+    console.error(error);
+    return { error: "Something went wrong" };
+  }
+}
+
+export async function deleteJob(id: string) {
+  if (!id) {
+    return { error: "Missing job ID" };
+  }
+
+  try {
+    await prisma.job.delete({
+      where: { id },
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error(error);
+    return { error: "Something went wrong" };
+  }
+}
