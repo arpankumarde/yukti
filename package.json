@@ -71,7 +71,8 @@
       "bcrypt",
       "prisma",
       "sharp",
-      "core-js"
+      "core-js",
+      "canvas"
     ]
   }
 }

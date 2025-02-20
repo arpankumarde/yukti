@@ -60,7 +60,7 @@ export function RecruiterSidebar({
                   className="py-6 text-lg duration-200 transition-colors"
                   asChild
                 >
-                  <Link href="/applicant/jobs">
+                  <Link href="/applicant/dashboard/jobs">
                     <FaBriefcase className="!size-5" />
                     <span>Job hunting</span>
                   </Link>
@@ -71,7 +71,7 @@ export function RecruiterSidebar({
                   className="py-6 text-lg duration-200 transition-colors"
                   asChild
                 >
-                  <Link href="/applicant/applied-jobs">
+                  <Link href="/applicant/dashboard/applied-jobs">
                     <FaClipboardCheck className="!size-5" />
                     <span>Applied jobs</span>
                   </Link>
@@ -93,7 +93,7 @@ export function RecruiterSidebar({
                   className="py-6 text-lg duration-200 transition-colors"
                   asChild
                 >
-                  <Link href="/applicant/english-proficiency-test">
+                  <Link href="/applicant/dashboard/english-proficiency-test">
                     <FaLanguage className="!size-5" />
                     <span>English Proficiency Test</span>
                   </Link>
@@ -104,7 +104,7 @@ export function RecruiterSidebar({
                   className="py-6 text-lg duration-200 transition-colors"
                   asChild
                 >
-                  <Link href="/applicant/resume-analyser">
+                  <Link href="/applicant/dashboard/resume-analyser">
                     <FaFileAlt className="!size-5" />
                     <span>Resume Analyser</span>
                   </Link>
