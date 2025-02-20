@@ -21,6 +21,9 @@ export const uploadFile = async ({
   folderPath?: string;
 }) => {
   try {
+    // Convert File to ArrayBuffer
+    const fileBuffer = await file.arrayBuffer();
+
     const key = folderPath
       ? `${folderPath.replace(/^\/+|\/+$/g, "")}/${fileName}.${fileExt}`
       : fileName + "." + fileExt;
@@ -29,7 +32,8 @@ export const uploadFile = async ({
       new PutObjectCommand({
         Bucket: process.env.NEXT_PUBLIC_AWS_BUCKET,
         Key: key,
-        Body: file,
+        Body: Buffer.from(fileBuffer), // Convert ArrayBuffer to Buffer
+        ContentType: file.type, // Add content type for proper file handling
       })
     );
     const meta = sendRes.$metadata;
@@ -42,5 +46,6 @@ export const uploadFile = async ({
     return `${process.env.NEXT_PUBLIC_CLOUDFRONT_DIST}/${key}`;
   } catch (err) {
     console.error(err);
+    throw err; // Re-throw the error to handle it in the component
   }
 };

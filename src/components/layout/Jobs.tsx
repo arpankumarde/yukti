@@ -2,23 +2,24 @@ import { PrismaClient } from "@prisma/client";
 import React from "react";
 import { Briefcase, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import Link from 'next/link'
+import Link from "next/link";
 
 const prisma = new PrismaClient();
 
 export default async function Jobs({ searchQuery }: { searchQuery?: string }) {
-  const searchTerms = searchQuery
-    ?.trim()
-    .split(/\s+/)
-    .filter(term => term.length > 0) || [];
+  const searchTerms =
+    searchQuery?.trim().split(/\s+/).filter((term) => term.length > 0) || [];
 
   const jobs = await prisma.job.findMany({
-    where: searchTerms.length > 0 ? {
-      OR: searchTerms.flatMap(term => [
-        { title: { contains: term, mode: 'insensitive' } },
-        { description: { contains: term, mode: 'insensitive' } }
-      ])
-    } : undefined,
+    where:
+      searchTerms.length > 0
+        ? {
+            OR: searchTerms.flatMap((term) => [
+              { title: { contains: term, mode: "insensitive" } },
+              { description: { contains: term, mode: "insensitive" } },
+            ]),
+          }
+        : undefined,
     include: { recruiter: true },
   });
 
@@ -74,7 +75,7 @@ export default async function Jobs({ searchQuery }: { searchQuery?: string }) {
             {searchTerms.length > 0 && (
               <div className="text-center mb-8">
                 <p className="text-muted-foreground">
-                  Found {jobs.length} {jobs.length === 1 ? 'position' : 'positions'}
+                  Found {jobs.length} {jobs.length === 1 ? "position" : "positions"}
                   {searchQuery && ` matching "${searchQuery}"`}
                 </p>
               </div>
@@ -88,11 +89,11 @@ export default async function Jobs({ searchQuery }: { searchQuery?: string }) {
                   className={cn(
                     "bg-background rounded-xl overflow-hidden transition-all duration-200",
                     "border border-border",
-                    "shadow-sm hover:shadow-md",
-                    "hover:border-border group"
+                    "shadow-sm hover:shadow-md hover:border-border",
+                    "group flex flex-col h-full" // Added flex styling for fixed card height
                   )}
                 >
-                  <div className="p-6">
+                  <div className="p-6 flex-grow">
                     <h3 className="text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors duration-200">
                       {job.title}
                     </h3>
@@ -106,13 +107,17 @@ export default async function Jobs({ searchQuery }: { searchQuery?: string }) {
                       </span>
                     </div>
                   </div>
+
                   <div className="px-6 py-4 bg-muted border-t border-border">
-                    <button className={cn(
-                      "w-full py-2 px-4 rounded-lg transition-colors duration-200 font-medium text-sm",
-                      "bg-primary/10 hover:bg-primary/20 text-primary"
-                    )}>
+                    <Link
+                      href={`/applicant/jobs/${job.id}`}
+                      className={cn(
+                        "block w-full py-2 px-4 rounded-lg transition-colors duration-200 font-medium text-sm text-center",
+                        "bg-primary/10 hover:bg-primary/20 text-primary"
+                      )}
+                    >
                       View Details
-                    </button>
+                    </Link>
                   </div>
                 </div>
               ))}

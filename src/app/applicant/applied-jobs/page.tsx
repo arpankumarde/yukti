@@ -1,15 +1,35 @@
-import { PrismaClient } from "@prisma/client";
+import { cookies } from 'next/headers';
 import { Briefcase, Calendar, FileText, MessageSquare, Star, User2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import prisma from '@/lib/prisma';
 
-const prisma = new PrismaClient();
+interface AuthCookie {
+  applicantId: string;
+}
 
 export default async function AppliedJobsPage() {
-  const applicantId = "cm77crure0001rbuv6rfxj6ui";
+  const cookieStore = await cookies();
+  const authCookie = cookieStore.get('ykapptoken');
+  
+  if (!authCookie) {
+    throw new Error('Authentication required');
+  }
+
+  const userData = JSON.parse(authCookie.value) as AuthCookie;
+  const applicantId = userData.applicantId;
 
   const applications = await prisma.application.findMany({
     where: { applicantId },
-    include: { job: true },
+    select: {
+      applicationId: true,
+      score: true,
+      resume: true,
+      cover_letter: true,
+      comments: true,
+      createdAt: true,
+      status: true,
+      job: true,
+    }
   });
 
   return (
@@ -68,7 +88,18 @@ export default async function AppliedJobsPage() {
                     <FileText className="w-5 h-5 text-primary mt-0.5" />
                     <div>
                       <h4 className="text-sm font-medium text-foreground">Resume</h4>
-                      <p className="text-sm text-muted-foreground">{app.resume || 'Not provided'}</p>
+                      {app.resume ? (
+                        <a 
+                          href={app.resume}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-primary hover:underline"
+                        >
+                          View Resume
+                        </a>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">Not provided</p>
+                      )}
                     </div>
                   </div>
 
@@ -83,8 +114,19 @@ export default async function AppliedJobsPage() {
                   <div className="flex items-start gap-2">
                     <Star className="w-5 h-5 text-primary mt-0.5" />
                     <div>
-                      <h4 className="text-sm font-medium text-foreground">Score</h4>
-                      <p className="text-sm text-muted-foreground">{app.score ?? 'Not scored'}</p>
+                      <h4 className="text-sm font-medium text-foreground">Cover Letter</h4>
+                      {app.cover_letter ? (
+                        <a 
+                          href={app.cover_letter}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-primary hover:underline"
+                        >
+                          View Cover Letter
+                        </a>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">Not provided</p>
+                      )}
                     </div>
                   </div>
                 </div>

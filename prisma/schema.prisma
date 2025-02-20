@@ -20,14 +20,13 @@ model Recruiter {
 }
 
 model Applicant {
-  applicantId   String          @id @default(cuid())
-  name          String
-  email         String          @unique
-  password      String
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  applications  Application[]
-  MockInterview MockInterview[]
+  applicantId  String        @id @default(cuid())
+  name         String
+  email        String        @unique
+  password     String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  applications Application[]
 }
 
 model Job {
@@ -44,20 +43,21 @@ model Job {
 }
 
 model Application {
-  applicationId String    @id @default(cuid())
+  applicationId String          @id @default(cuid())
   applicantId   String
   jobId         String
   status        String?
   comments      String?
   resume        String?
   cover_letter  String?
-  score         String?
+  score         String?         @default("Not Scored")
   strength      String?
   weakness      String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  applicant     Applicant @relation(fields: [applicantId], references: [applicantId])
-  job           Job       @relation(fields: [jobId], references: [id])
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  applicant     Applicant       @relation(fields: [applicantId], references: [applicantId])
+  job           Job             @relation(fields: [jobId], references: [id])
+  mockInterview MockInterview[]
 }
 
 model InterviewSchedule {
@@ -78,11 +78,11 @@ model MockInterview {
   scheduledAt     DateTime
   location        String?
   feedback        String?
-  applicantId     String
+  applicationId   String
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   recruiterId     String?
-  applicant       Applicant         @relation(fields: [applicantId], references: [applicantId])
+  application     Application       @relation(fields: [applicationId], references: [applicationId])
   recruiter       Recruiter?        @relation(fields: [recruiterId], references: [recruiterId])
   questions       MockInterviewQA[]
 }
