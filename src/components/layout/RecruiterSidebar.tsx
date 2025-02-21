@@ -15,9 +15,8 @@ import {
 import Link from "next/link";
 import { GrTransaction } from "react-icons/gr";
 import { RiTeamLine } from "react-icons/ri";
-import { FaFileAlt } from "react-icons/fa";
+import { FaFileAlt, FaUser } from "react-icons/fa";
 import { MdSpaceDashboard } from "react-icons/md";
-import Image from "next/image";
 import { Button } from "../ui/button";
 import { deleteCookie } from "cookies-next";
 import { useRouter } from "next/navigation";
@@ -30,27 +29,12 @@ export function RecruiterSidebar({
   return (
     <Sidebar {...props}>
       <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <Link href="/recruiter/dashboard">
-                <Image
-                  src="/logo.png"
-                  alt="Logo"
-                  width={50}
-                  height={50}
-                  unoptimized
-                  className="aspect-square object-contain rounded-lg size-8"
-                />
-                <div className="flex flex-col gap-0.5 leading-none">
-                  <span className="font-semibold">Yukti</span>
-                  <span>Recruiter</span>
-                </div>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        {/* Logo/Header */}
+        <div className="p-4">
+          <img src="/logo.png" alt="Logo" />
+        </div>
       </SidebarHeader>
+
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
@@ -103,8 +87,17 @@ export function RecruiterSidebar({
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
       <SidebarFooter>
         <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild>
+              <Link href="/recruiter/dashboard/profile">
+                <FaUser className="!size-5" />
+                <span>My Profile</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
               <Button

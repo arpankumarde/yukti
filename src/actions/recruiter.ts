@@ -59,20 +59,3 @@ export async function updateJob(payload: {
     return { error: "Something went wrong" };
   }
 }
-
-export async function deleteJob(id: string) {
-  if (!id) {
-    return { error: "Missing job ID" };
-  }
-
-  try {
-    await prisma.job.delete({
-      where: { id },
-    });
-
-    return { success: true };
-  } catch (error) {
-    console.error(error);
-    return { error: "Something went wrong" };
-  }
-}

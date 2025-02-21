@@ -161,7 +161,7 @@ const ApplicationDetailsPage = async ({
         Additional Details
       </h2>
       <div className="min-h-screen bg-secondary/20 flex items-start justify-center p-4">
-        <div className="w-full">
+        <div className="w-screen">
           <div className="bg-background rounded-lg shadow-lg">
             <table className="min-w-full divide-y divide-gray-200">
               <thead>
@@ -174,7 +174,7 @@ const ApplicationDetailsPage = async ({
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white w-fit divide-y divide-gray-200">
                 <tr>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     Score
