@@ -8,27 +8,33 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { updateJob } from "@/actions/recruiter";
-import { getCookie } from "cookies-next";
-import prisma from "@/lib/prisma";
+import { updateJob, getJob } from "@/actions/recruiter";
 import NextLink from "next/link";
 
 const EditJobPostingPage = ({ params }: { params: { jid: string } }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [experience, setExperience] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
     const fetchJob = async () => {
-      const job = await prisma.job.findUnique({
-        where: { id: params.jid },
-      });
-
-      if (job) {
-        setTitle(job.title);
-        setDescription(job.description || "");
-        setExperience(job.experience);
+      try {
+        const { job, error } = await getJob(params.jid);
+        if (error) {
+          toast.error("Failed to load job details");
+          return;
+        }
+        if (job) {
+          setTitle(job.title);
+          setDescription(job.description || "");
+          setExperience(job.experience);
+        }
+      } catch (error) {
+        toast.error("Failed to load job details");
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -61,7 +67,7 @@ const EditJobPostingPage = ({ params }: { params: { jid: string } }) => {
       <div className="w-full max-w-sm md:max-w-3xl">
         <div className="flex flex-col gap-6">
           <Card className="overflow-hidden">
-            <CardContent className="grid p-0 md:grid-cols-2">
+            <CardContent className="flex flex-col gap-6">
               <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-4">
                 <div className="flex flex-col gap-6">
                   <div className="flex flex-col items-center text-center">
@@ -107,15 +113,6 @@ const EditJobPostingPage = ({ params }: { params: { jid: string } }) => {
                   </NextLink>
                 </div>
               </form>
-              <div className="relative hidden bg-primary md:block">
-                {/* <Image
-                  src="/logo.jpg"
-                  alt="Image"
-                  className="absolute inset-0 w-full my-auto object-cover dark:brightness-[0.2] dark:grayscale"
-                  width={600}
-                  height={800}
-                /> */}
-              </div>
             </CardContent>
           </Card>
         </div>

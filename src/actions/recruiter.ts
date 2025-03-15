@@ -59,3 +59,15 @@ export async function updateJob(payload: {
     return { error: "Something went wrong" };
   }
 }
+
+export async function getJob(id: string) {
+  try {
+    const job = await prisma.job.findUnique({
+      where: { id }
+    });
+    return { job };
+  } catch (error) {
+    console.error(error);
+    return { error: "Failed to fetch job" };
+  }
+}
