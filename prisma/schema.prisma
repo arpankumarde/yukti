@@ -36,6 +36,9 @@ model Job {
   id           String        @id @default(cuid())
   title        String
   description  String?
+  location     String        @default("Remote")
+  perks        String?
+  salary       String?
   recruiterId  String
   experience   String        @default("Fresher")
   createdAt    DateTime      @default(now())

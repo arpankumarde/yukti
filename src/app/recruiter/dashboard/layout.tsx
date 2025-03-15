@@ -10,7 +10,7 @@ export default function RootLayout({
     <SidebarProvider>
       <RecruiterSidebar collapsible="icon" />
       <SidebarInset>
-        <div className="p-4 md:p-6">{children}</div>
+        <div>{children}</div>
       </SidebarInset>
     </SidebarProvider>
   );

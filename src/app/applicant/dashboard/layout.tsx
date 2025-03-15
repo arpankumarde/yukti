@@ -1,4 +1,4 @@
-import { RecruiterSidebar } from "@/components/layout/ApplicantSidebar";
+import { ApplicantSidebar } from "@/components/layout/ApplicantSidebar";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 
 export default function RootLayout({
@@ -8,9 +8,9 @@ export default function RootLayout({
 }>) {
   return (
     <SidebarProvider>
-      <RecruiterSidebar collapsible="icon" />
+      <ApplicantSidebar collapsible="icon" />
       <SidebarInset>
-        <div className="p-0 md:p-0">{children}</div>
+        <div>{children}</div>
       </SidebarInset>
     </SidebarProvider>
   );

@@ -26,7 +26,7 @@ import {
   FaUser,
 } from "react-icons/fa";
 
-export function RecruiterSidebar({
+export function ApplicantSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
   const router = useRouter();

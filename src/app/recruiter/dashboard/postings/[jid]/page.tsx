@@ -1,16 +1,22 @@
 import { Button } from "@/components/ui/button";
 import prisma from "@/lib/prisma";
 import { cn } from "@/lib/utils";
-import { Job } from "@prisma/client";
+import Link from "next/link";
 import NextLink from "next/link";
 
-const JobDetailsPage = async ({ params }: { params: { jid: string } }) => {
-  const job: Job | null = await prisma.job.findUnique({
-    where: { id: params.jid },
+const JobDetailsPage = async ({
+  params,
+}: {
+  params: Promise<{ jid: string }>;
+}) => {
+  const { jid } = await params;
+  const job = await prisma.job.findUnique({
+    where: { id: jid },
     include: {
       recruiter: true,
+      interviews: true,
       _count: {
-        select: { applications: true },
+        select: { applications: true, interviews: true },
       },
     },
   });
@@ -155,6 +161,20 @@ const JobDetailsPage = async ({ params }: { params: { jid: string } }) => {
                 </tr>
               </tbody>
             </table>
+          </div>
+
+          <div>
+            <h2 className="text-xl font-semibold mt-4">Interviews</h2>
+            <div className="mt-2">
+              <p>No scheduled interviews at this time.</p>
+              {/* Placeholder for interview scheduling functionality */}
+
+              <Button asChild>
+                <Link href={`/recruiter/dashboard/interviews/${job.id}/new`}>
+                  Schedule Interviews
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
       </div>

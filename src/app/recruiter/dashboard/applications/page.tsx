@@ -8,7 +8,7 @@ export const dynamicParams = true;
 export const revalidate = 0;
 
 const Page = async () => {
-  const applications: Application[] = await prisma.application.findMany({
+  const applications = await prisma.application.findMany({
     include: {
       applicant: true,
       job: true,
