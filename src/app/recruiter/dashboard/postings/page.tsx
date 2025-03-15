@@ -4,8 +4,11 @@ import { cookies } from "next/headers";
 import { Job } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import NextLink from "next/link";
-import { cn } from "@/lib/utils";
+import { deleteJob } from "@/actions/recruiter";
+import { revalidatePath } from "next/cache";
+import Link from "next/link";
+import { MdDeleteForever } from "react-icons/md";
+import { TiEye } from "react-icons/ti";
 
 export const dynamicParams = true;
 export const revalidate = 0;
@@ -26,116 +29,98 @@ const Page = async () => {
   });
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6 p-10">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold text-primary">Jobs</h1>
-        <NextLink href="/recruiter/dashboard/postings/new">
-          <Button
-            type="button"
-            className={cn(
-              "inline-block py-3 px-6 rounded-lg transition-colors duration-200",
-              "bg-primary text-primary-foreground font-medium",
-              "hover:bg-primary/90"
-            )}
-          >
-            <div className=" flex items-center justify-center gap-2">
-              <Plus />
+        <h1 className="text-3xl font-bold text-primary">Job Postings</h1>
+        <Button>
+          <Link href="/recruiter/dashboard/postings/new">
+            <div className="flex items-center justify-center gap-2">
+              <Plus className="h-5 w-5" />
               Add Job Posting
             </div>
-          </Button>
-        </NextLink>
+          </Link>
+        </Button>
       </div>
-      <div className="min-h-screen bg-secondary/20 flex items-start justify-center p-4">
-        <div className="w-full">
-          <div className="bg-background rounded-lg shadow-lg">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead>
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Index
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Title
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Applications
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Experience
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Created At
-                  </th>
-                  {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Updated At
-                  </th> */}
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    ID
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {jobs.map((job, index) => (
-                  <tr key={job.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {index + 1}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {job.title}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {job._count.applications}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {job.experience}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(job.createdAt).toLocaleString()}
-                    </td>
-                    {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(job.updatedAt).toLocaleString()}
-                    </td> */}
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {/* <NextLink
-                        href={`/recruiter/dashboard/postings/${job.id}`}
-                      > */}
-                      {job.id}
-                      {/* </NextLink> */}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <Button
-                        type="button"
-                        className={cn(
-                          "inline-block py-3 px-6 rounded-lg transition-colors duration-200",
-                          "bg-red-500 text-primary-foreground font-medium",
-                          "hover:bg-primary/90"
-                        )}
+      <div className="bg-secondary/20 p-6 rounded-lg shadow-md">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  #
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Title
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Applications
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Experience
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Posted At
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  ID
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {jobs.map((job, index) => (
+                <tr key={job.id}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {index + 1}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {job.title}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <Button asChild variant="outline" className="gap-2">
+                      <Link
+                        href={`/recruiter/dashboard/applications/${job.id}`}
                       >
-                        <div className=" flex items-center justify-center gap-2">
-                          Delete
-                        </div>
+                        {job._count.applications}
+                        <TiEye className="h-5 w-5" />
+                      </Link>
+                    </Button>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {job.experience}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {new Date(job.createdAt).toLocaleString()}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {job.id}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 flex gap-2">
+                    <Button asChild>
+                      <Link href={`/recruiter/dashboard/postings/${job.id}`}>
+                        Details
+                      </Link>
+                    </Button>
+                    <form
+                      action={async () => {
+                        "use server";
+                        const result = await deleteJob(job.id);
+                        if (result.success) {
+                          revalidatePath("/recruiter/dashboard/postings");
+                        }
+                      }}
+                    >
+                      <Button type="submit" variant="destructive">
+                        <MdDeleteForever className="h-5 w-5" />
                       </Button>
-                    </td>
-                    <td>
-                      <NextLink
-                        href={`/recruiter/dashboard/postings/${job.id}`}
-                      >
-                        <Button
-                          className={cn(
-                            "inline-block py-3 px-6 rounded-lg transition-colors duration-200",
-                            "bg-primary text-primary-foreground font-medium",
-                            "hover:bg-primary/90"
-                          )}
-                        >
-                          Details
-                        </Button>
-                      </NextLink>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    </form>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

@@ -2,7 +2,9 @@ import { Button } from "@/components/ui/button";
 import prisma from "@/lib/prisma";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import NextLink from "next/link";
+import { ArrowLeft, Edit, Calendar } from "lucide-react";
+import { Card, CardHeader } from "@/components/ui/card";
+import { TiEye } from "react-icons/ti";
 
 const JobDetailsPage = async ({
   params,
@@ -25,158 +27,159 @@ const JobDetailsPage = async ({
     return <div>Job not found</div>;
   }
 
+  const jobDetails = [
+    { label: "ID", value: job.id },
+    { label: "Title", value: job.title },
+    {
+      label: "Description",
+      value: job.description || "No description provided",
+    },
+    { label: "Location", value: job.location },
+    { label: "Experience", value: job.experience },
+    { label: "Salary", value: job.salary || "Not specified" },
+    { label: "Perks", value: job.perks || "Not specified" },
+    {
+      label: "Total Applications",
+      value: job._count.applications,
+      hasViewButton: true,
+    },
+    { label: "Total Interviews", value: job._count.interviews },
+    { label: "Recruiter", value: job.recruiter.name },
+    {
+      label: "Created At",
+      value: new Date(job.createdAt).toLocaleString(),
+      className: "text-muted-foreground",
+    },
+    {
+      label: "Updated At",
+      value: new Date(job.updatedAt).toLocaleString(),
+      className: "text-muted-foreground",
+    },
+  ];
+
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-primary">Job Details</h1>
-      <div className="min-h-screen bg-secondary/20 flex items-start justify-center p-4">
-        <div className="w-full">
-          <div className="bg-background rounded-lg shadow-lg">
-            <table className="min-w-full divide-y divide-gray-200">
-              <tbody className="bg-white divide-y divide-gray-200">
-                <tr>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    ID
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {job.id}
-                  </td>
-                </tr>
-                <tr>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    Title
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {job.title}
-                  </td>
-                  <td>
-                    <NextLink
-                      href={`/recruiter/dashboard/postings/${job.id}/edit`}
-                    >
-                      <Button
-                        className={cn(
-                          "inline-block py-3 px-6 rounded-lg transition-colors duration-200",
-                          "bg-primary text-primary-foreground font-medium",
-                          "hover:bg-primary/90"
-                        )}
-                      >
-                        Edit
-                      </Button>
-                    </NextLink>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    Description
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {job.description}
-                  </td>
-                  <td>
-                    <NextLink
-                      href={`/recruiter/dashboard/postings/${job.id}/edit`}
-                    >
-                      <Button
-                        className={cn(
-                          "inline-block py-3 px-6 rounded-lg transition-colors duration-200",
-                          "bg-primary text-primary-foreground font-medium",
-                          "hover:bg-primary/90"
-                        )}
-                      >
-                        Edit
-                      </Button>
-                    </NextLink>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    Experience
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {job.experience}
-                  </td>
-                  <td>
-                    <NextLink
-                      href={`/recruiter/dashboard/postings/${job.id}/edit`}
-                    >
-                      <Button
-                        className={cn(
-                          "inline-block py-3 px-6 rounded-lg transition-colors duration-200",
-                          "bg-primary text-primary-foreground font-medium",
-                          "hover:bg-primary/90"
-                        )}
-                      >
-                        Edit
-                      </Button>
-                    </NextLink>
-                  </td>
-                </tr>
-                {/* <tr>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              Recruiter
-            </td>
-            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {job.recruiter.name}
-            </td>
-          </tr> */}
-                <tr>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    Total Applications
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {job._count.applications}
-                  </td>
-                  <td>
-                    {job._count.applications > 0 && (
-                      <NextLink
-                        href={`/recruiter/dashboard/applications/${job.id}`}
-                      >
+    <div className="space-y-6 p-6 md:p-10">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" asChild>
+            <Link href="/recruiter/dashboard/postings">
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
+          </Button>
+          <h1 className="text-2xl font-semibold text-primary">Job Details</h1>
+        </div>
+        <Button asChild>
+          <Link href={`/recruiter/dashboard/postings/${job.id}/edit`}>
+            <Edit className="h-4 w-4 mr-2" />
+            Edit Job
+          </Link>
+        </Button>
+      </div>
+
+      <div className="grid gap-6">
+        <Card className="bg-background shadow-lg">
+          <CardHeader className="border-b bg-muted/10 p-6">
+            <h2 className="text-xl font-semibold tracking-tight">
+              Basic Information
+            </h2>
+          </CardHeader>
+          <div className="p-6">
+            <div className="rounded-lg border divide-y">
+              {jobDetails.map(
+                ({ label, value, hasViewButton, className }, index) => (
+                  <div
+                    key={index}
+                    className="grid grid-cols-3 px-6 py-4 items-center text-sm"
+                  >
+                    <div className="font-medium text-gray-500">{label}</div>
+                    <div className={cn("col-span-2", className)}>
+                      <span>{value}</span>
+                      {hasViewButton && value > 0 && (
                         <Button
-                          className={cn(
-                            "inline-block py-3 px-5 rounded-lg transition-colors duration-200",
-                            "bg-primary text-primary-foreground font-medium",
-                            "hover:bg-primary/90"
-                          )}
+                          asChild
+                          variant="outline"
+                          size="sm"
+                          className="ml-4"
                         >
-                          View
+                          <Link
+                            href={`/recruiter/dashboard/applications/${job.id}`}
+                            className="flex items-center gap-2"
+                          >
+                            <TiEye className="h-4 w-4" />
+                            View Applications
+                          </Link>
                         </Button>
-                      </NextLink>
-                    )}
-                  </td>
-                </tr>
-                <tr>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    Created At
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(job.createdAt).toLocaleString()}
-                  </td>
-                </tr>
-                <tr>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    Updated At
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(job.updatedAt).toLocaleString()}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div>
-            <h2 className="text-xl font-semibold mt-4">Interviews</h2>
-            <div className="mt-2">
-              <p>No scheduled interviews at this time.</p>
-              {/* Placeholder for interview scheduling functionality */}
-
-              <Button asChild>
-                <Link href={`/recruiter/dashboard/interviews/${job.id}/new`}>
-                  Schedule Interviews
-                </Link>
-              </Button>
+                      )}
+                    </div>
+                  </div>
+                )
+              )}
             </div>
           </div>
-        </div>
+        </Card>
+
+        <Card className="bg-background shadow-lg">
+          <CardHeader className="border-b bg-muted/10 p-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold tracking-tight">
+                Interviews
+              </h2>
+              {job.interviews.length > 0 && (
+                <Button asChild>
+                  <Link href={`/recruiter/dashboard/interviews/${job.id}/new`}>
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Schedule Interview
+                  </Link>
+                </Button>
+              )}
+            </div>
+          </CardHeader>
+          <div className="p-6">
+            {job.interviews.length > 0 ? (
+              <div className="rounded-lg border divide-y">
+                {job.interviews.map((interview) => (
+                  <div key={interview.interviewId} className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="font-medium">{interview.title}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {interview.type} •{" "}
+                          {interview.conductWithAI
+                            ? "AI Interview"
+                            : "Manual Interview"}
+                        </p>
+                      </div>
+                      <Button asChild size="sm" variant="outline">
+                        <Link
+                          href={`/recruiter/dashboard/interviews/${job.id}/${interview.interviewId}`}
+                          className="flex items-center gap-2"
+                        >
+                          <TiEye className="h-4 w-4" />
+                          View Details
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Calendar className="h-12 w-12 mx-auto text-muted-foreground" />
+                <h3 className="mt-4 text-sm font-semibold">
+                  No Interviews Scheduled
+                </h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Get started by scheduling your first interview.
+                </p>
+                <Button className="mt-4" asChild>
+                  <Link href={`/recruiter/dashboard/interviews/${job.id}/new`}>
+                    Schedule Interview
+                  </Link>
+                </Button>
+              </div>
+            )}
+          </div>
+        </Card>
       </div>
     </div>
   );

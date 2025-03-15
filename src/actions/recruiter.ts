@@ -6,12 +6,15 @@ import { InterviewType } from "@prisma/client";
 export async function createJob(payload: {
   title: string;
   description: string;
-  experience: string;
+  location: string;
+  perks?: string;
+  salary?: string;
   recruiterId: string;
+  experience: string;
 }) {
-  const { title, description, experience, recruiterId } = payload;
+  const { title, description, experience, recruiterId, location, perks, salary } = payload;
 
-  if (!title || !description || !experience || !recruiterId) {
+  if (!title || !description || !experience || !recruiterId || !location) {
     return { error: "Missing required fields" };
   }
 
@@ -22,6 +25,9 @@ export async function createJob(payload: {
         description,
         experience,
         recruiterId,
+        location,
+        perks,
+        salary,
       },
     });
 
@@ -73,6 +79,19 @@ export async function getJob(id: string) {
   }
 }
 
+export async function deleteJob(id: string) {
+  try {
+    await prisma.job.delete({
+      where: { id },
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error(error);
+    return { error: "Failed to delete job" };
+  }
+}
+
 export async function createInterview(payload: {
   title: string;
   type: InterviewType;
@@ -118,3 +137,4 @@ export async function createInterview(payload: {
     return { error: "Something went wrong" };
   }
 }
+
