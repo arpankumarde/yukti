@@ -15,12 +15,37 @@ export async function addQuestionAction({
     const newQuestion = await prisma.interviewQA.create({
       data: {
         question,
-        answer,
+        answer: answer?.length ? answer : null,
         interviewId,
       },
     });
 
     return { question: newQuestion };
+  } catch (error) {
+    console.error(error);
+    return { error };
+  }
+}
+
+export async function updateQuestionAction({
+  question,
+  answer,
+  interviewQAId,
+}: {
+  question: string;
+  answer?: string;
+  interviewQAId: string;
+}) {
+  try {
+    const updatedQuestion = await prisma.interviewQA.update({
+      where: { interviewQAId },
+      data: {
+        question,
+        answer: answer?.length ? answer : null,
+      },
+    });
+
+    return { question: updatedQuestion };
   } catch (error) {
     console.error(error);
     return { error };
