@@ -7,93 +7,104 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum InterviewType {
+  CODE
+  NOCODE
+}
+
 model Recruiter {
-  recruiterId       String              @id @default(cuid())
-  name              String
-  email             String              @unique
-  password          String
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  InterviewSchedule InterviewSchedule[]
-  jobs              Job[]
-  MockInterview     MockInterview[]
+  recruiterId String   @id @default(cuid())
+  name        String
+  email       String   @unique
+  password    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  jobs        Job[]
 }
 
 model Applicant {
-  applicantId   String          @id @default(cuid())
-  name          String
-  email         String          @unique
-  password      String
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  applications  Application[]
-  MockInterview MockInterview[]
+  applicantId  String        @id @default(cuid())
+  name         String
+  email        String        @unique
+  password     String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  applications Application[]
 }
 
 model Job {
-  id                String              @id @default(cuid())
-  title             String
-  description       String?
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  recruiterId       String
-  experience        String              @default("Fresher")
-  applications      Application[]
-  InterviewSchedule InterviewSchedule[]
-  recruiter         Recruiter           @relation(fields: [recruiterId], references: [recruiterId])
+  id           String        @id @default(cuid())
+  title        String
+  description  String?
+  recruiterId  String
+  experience   String        @default("Fresher")
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  applications Application[]
+  recruiter    Recruiter     @relation(fields: [recruiterId], references: [recruiterId], onDelete: Cascade)
+  interviews   Interview[]
 }
 
 model Application {
-  applicationId String    @id @default(cuid())
-  applicantId   String
-  jobId         String
-  status        String?
-  comments      String?
-  resume        String?
-  score         String?   @default("Not Scored")
+  applicationId    String             @id @default(cuid())
+  applicantId      String
+  jobId            String
+  status           String?
+  comments         String?
+  resume           String?
+  cover_letter     String?
+  score            Int?
+  keywords         String[]           @default([])
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  strength         String?
+  weakness         String?
+  applicant        Applicant          @relation(fields: [applicantId], references: [applicantId], onDelete: Cascade)
+  job              Job                @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  InterviewSession InterviewSession[]
+
+  @@unique([applicantId, jobId])
+}
+
+model Interview {
+  interviewId      String             @id @default(cuid())
+  jobId            String
+  title            String
+  type             InterviewType      @default(NOCODE)
+  conductWithAI    Boolean            @default(true)
+  conductOffline   Boolean            @default(false)
+  scheduledAt      DateTime?
+  completeBy       DateTime?
+  location         String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  questions        InterviewQA[]
+  InterviewSession InterviewSession[]
+  job              Job                @relation(fields: [jobId], references: [id], onDelete: Cascade)
+}
+
+model InterviewQA {
+  interviewQAId String    @id @default(cuid())
+  interviewId   String
+  question      String
+  answer        String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-  strength      String?
-  weakness      String?
-  cover_letter  String?
-  applicant     Applicant @relation(fields: [applicantId], references: [applicantId])
-  job           Job       @relation(fields: [jobId], references: [id])
+  interview     Interview @relation(fields: [interviewId], references: [interviewId], onDelete: Cascade)
 }
 
-model InterviewSchedule {
-  interviewScheduleId String     @id @default(cuid())
-  scheduledAt         DateTime
-  location            String?
-  comments            String?
-  jobId               String
-  createdAt           DateTime   @default(now())
-  updatedAt           DateTime   @updatedAt
-  recruiterId         String?
-  job                 Job        @relation(fields: [jobId], references: [id])
-  recruiter           Recruiter? @relation(fields: [recruiterId], references: [recruiterId])
-}
+model InterviewSession {
+  interviewSessionId String      @id @default(cuid())
+  interviewId        String
+  applicationId      String
+  transcript         Json[]      @default([])
+  rating             Int?
+  feedback           String?
+  attempted          Boolean     @default(false)
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  interview          Interview   @relation(fields: [interviewId], references: [interviewId], onDelete: Cascade)
+  application        Application @relation(fields: [applicationId], references: [applicationId], onDelete: Cascade)
 
-model MockInterview {
-  mockInterviewId String            @id @default(cuid())
-  scheduledAt     DateTime
-  location        String?
-  feedback        String?
-  applicantId     String
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  recruiterId     String?
-  Applicant       Applicant         @relation(fields: [applicantId], references: [applicantId])
-  recruiter       Recruiter?        @relation(fields: [recruiterId], references: [recruiterId])
-  questions       MockInterviewQA[]
-}
-
-model MockInterviewQA {
-  mockInterviewQAId String        @id @default(cuid())
-  question          String
-  answer            String?
-  answerFeedback    String?
-  mockInterviewId   String
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
-  mockInterview     MockInterview @relation(fields: [mockInterviewId], references: [mockInterviewId])
+  @@unique([interviewId, applicationId])
 }
