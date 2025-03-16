@@ -3,9 +3,11 @@ import { Button } from "@/components/ui/button";
 import { getCookie } from "cookies-next";
 import { cookies } from "next/headers";
 import Link from "next/link";
-import { TiEye } from "react-icons/ti";
-import { MdDeleteForever } from "react-icons/md";
+import { MdDeleteForever, MdOutlineContentCopy } from "react-icons/md";
 import { revalidatePath } from "next/cache";
+import CopyToClipboard from "@/components/block/CopyToClipboard";
+import ExportXLSXButton from "./_components/ExportXLSXButton";
+import ExportCSVButton from "./_components/ExportCSVButton";
 
 export const dynamicParams = true;
 export const revalidate = 0;
@@ -24,32 +26,38 @@ const Page = async () => {
   return (
     <div className="space-y-6 p-10">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-primary">Applications</h1>
+        <h1 className="text-3xl font-bold text-primary">
+          Applications ({applications.length})
+        </h1>
+        <div className="flex gap-4">
+          <ExportXLSXButton applications={applications} />
+          <ExportCSVButton applications={applications} />
+        </div>
       </div>
-      <div className="bg-secondary/20 p-6 rounded-lg shadow-md">
+      <div className="bg-secondary/20 pb-4 rounded-lg shadow-md">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+            <thead className="bg-gray-100">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
                   #
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
                   Applicant Name
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
                   Job Title
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
                   Applied At
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Application ID
+                <th className="px-6 py-4 text-center text-xs font-medium uppercase tracking-wider">
+                  AID
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -70,10 +78,20 @@ const Page = async () => {
                     {application.status || "Pending"}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {new Date(application.createdAt).toLocaleString()}
+                    {new Date(application.createdAt).toLocaleString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {application.applicationId}
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+                    <CopyToClipboard text={application.applicantId.toString()}>
+                      <Button variant="outline">
+                        <MdOutlineContentCopy />
+                      </Button>
+                    </CopyToClipboard>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 flex gap-2">
                     <Button asChild>
@@ -83,21 +101,6 @@ const Page = async () => {
                         Details
                       </Link>
                     </Button>
-                    <form
-                      action={async () => {
-                        "use server";
-                        const result = await prisma.application.delete({
-                          where: { applicationId: application.applicationId },
-                        });
-                        if (result) {
-                          revalidatePath(`/recruiter/dashboard/applications`);
-                        }
-                      }}
-                    >
-                      <Button type="submit" variant="destructive">
-                        <MdDeleteForever className="h-5 w-5" />
-                      </Button>
-                    </form>
                   </td>
                 </tr>
               ))}
