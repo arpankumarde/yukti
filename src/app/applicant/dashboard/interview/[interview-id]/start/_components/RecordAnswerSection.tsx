@@ -1,4 +1,5 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
@@ -6,30 +7,79 @@ import Webcam from "react-webcam";
 import useSpeechToText from "react-hook-speech-to-text";
 import { Mic, StopCircle } from "lucide-react";
 import { toast } from "sonner";
-import { chatSession } from "@/utils/OpenAiModel";
-import { db } from "@/utils/db";
-import { UserAnswer } from "@/utils/schema";
+import { saveAnswer } from "@/actions/interview";
+import { InterviewQA } from "@prisma/client";
 import { useUser } from "@clerk/nextjs";
-import moment from "moment";
 
-function RecordAnswerSection({
-  mockInterviewQuestion,
+// Helper function to call OpenAI for feedback
+async function getAIFeedback(question: string, userAnswer: string) {
+  try {
+    const feedbackPrompt = `Evaluate the user's answer to the interview question below. Assign a rating (1-10) based on these guidelines:
+- 1-3: Empty, irrelevant, or nonsensical response.
+- 4-6: Partially addresses the question but lacks depth, structure, or clarity.
+- 7-8: Relevant and coherent but missing key details or examples.
+- 9-10: Clear, structured, and comprehensive with specific examples.
+
+Consider accuracy, completeness, and articulation. Penalize empty answers with a 1-3 rating.
+
+Question: ${question}
+User Answer: ${userAnswer}
+
+Provide strictly formatted JSON:
+{
+  "rating": [insert score],
+  "feedback": "[concise evaluation of gaps/strengths]"
+}`;
+
+    const response = await fetch("/api/ai/feedback", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ prompt: feedbackPrompt }),
+    });
+    
+    const data = await response.json();
+    
+    // Parse the JSON response
+    if (data.result) {
+      let jsonResult;
+      try {
+        // Clean the response if needed
+        const cleanedResponse = data.result.replace(/```json|```/g, "").trim();
+        jsonResult = JSON.parse(cleanedResponse);
+      } catch (error) {
+        console.error("Failed to parse AI feedback:", error);
+        return { rating: 5, feedback: "Unable to generate detailed feedback" };
+      }
+      
+      return jsonResult;
+    }
+    return { rating: 5, feedback: "Unable to generate detailed feedback" };
+  } catch (error) {
+    console.error("Error getting AI feedback:", error);
+    return { rating: 5, feedback: "Unable to generate feedback due to an error" };
+  }
+}
+
+interface RecordAnswerSectionProps {
+  questions: InterviewQA[];
+  activeQuestionIndex: number;
+  interviewData: any;
+  sessionId: string;
+}
+
+export default function RecordAnswerSection({
+  questions,
   activeQuestionIndex,
   interviewData,
-}) {
+  sessionId,
+}: RecordAnswerSectionProps) {
   const [userAnswer, setUserAnswer] = useState("");
   const { user } = useUser();
   const [loading, setLoading] = useState(false);
   const [hasPermission, setHasPermission] = useState(false);
   const [hasRecorded, setHasRecorded] = useState(false);
-
-  useEffect(() => {
-    console.log("Component Props:", {
-      mockInterviewQuestion,
-      activeQuestionIndex,
-      interviewData,
-    });
-  }, [mockInterviewQuestion, activeQuestionIndex, interviewData]);
 
   const {
     error,
@@ -65,11 +115,9 @@ function RecordAnswerSection({
 
   useEffect(() => {
     if (results?.length > 0) {
-      console.log("New speech results:", results);
       results.forEach((result) => {
         setUserAnswer((prevAns) => {
           const newAnswer = prevAns + result.transcript;
-          console.log("Updated user answer:", newAnswer);
           return newAnswer;
         });
       });
@@ -82,7 +130,7 @@ function RecordAnswerSection({
         "Recording stopped, triggering UpdateUserAnswer with answer:",
         userAnswer
       );
-      UpdateUserAnswer();
+      handleSaveAnswer();
       setHasRecorded(false);
     }
   }, [isRecording]);
@@ -92,7 +140,6 @@ function RecordAnswerSection({
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       stream.getTracks().forEach((track) => track.stop());
       setHasPermission(true);
-      console.log("Microphone permission granted");
       return true;
     } catch (error) {
       console.error("Microphone permission error:", error);
@@ -101,13 +148,11 @@ function RecordAnswerSection({
     }
   };
 
-  const StartStopRecording = async () => {
+  const handleRecording = async () => {
     try {
       if (isRecording) {
-        console.log("Stopping recording");
         stopSpeechToText();
       } else {
-        console.log("Starting recording");
         const permissionGranted = await requestMicrophonePermission();
         if (permissionGranted) {
           setHasRecorded(true);
@@ -120,73 +165,45 @@ function RecordAnswerSection({
     }
   };
 
-  const UpdateUserAnswer = async () => {
+  const handleSaveAnswer = async () => {
     try {
-      console.log("Starting UpdateUserAnswer with:", userAnswer);
       setLoading(true);
-
-      const feedbackPrompt = `Evaluate the user's answer to the interview question below. Assign a rating (1-10) based on these guidelines:
-- **1-3**: Empty, irrelevant, or nonsensical response.
-- **4-6**: Partially addresses the question but lacks depth, structure, or clarity.
-- **7-8**: Relevant and coherent but missing key details or examples.
-- **9-10**: Clear, structured, and comprehensive with specific examples.
-
-Consider accuracy, completeness, and articulation. Penalize empty answers with a 1-3 rating.
-
-Question: ${mockInterviewQuestion[activeQuestionIndex]?.question}
-User Answer: ${userAnswer}
-
-Provide strictly formatted JSON:
-{
-  "rating": [insert score],
-  "feedback": "[concise evaluation of gaps/strengths]"
-}`;
-      console.log("Feedback prompt prepared:", feedbackPrompt);
-
-      console.log("Before calling OpenAI with feedback prompt");
-      const result = await chatSession.sendMessage(feedbackPrompt);
-      console.log("After receiving response from OpenAI:", result);
-
-      let JsonFeedbackResp;
-      try {
-        const mockJsonResp = result.replace(/```json|```/g, "").trim();
-        console.log("Cleaned JSON response:", mockJsonResp);
-        JsonFeedbackResp = JSON.parse(mockJsonResp);
-        console.log("Parsed feedback:", JsonFeedbackResp);
-      } catch (parseError) {
-        console.error("Failed to parse JSON response:", result, parseError);
-        toast.error("Failed to parse feedback from AI");
+      
+      if (!userAnswer.trim()) {
+        toast.error("Please provide an answer before submitting");
         return;
       }
-
-      const values = {
-        mockIdRef: (interviewData && interviewData.mockId) || "unknown",
-        question: mockInterviewQuestion[activeQuestionIndex]?.question,
-        correctAns: mockInterviewQuestion[activeQuestionIndex]?.answer,
-        userAns: userAnswer,
-        feedback: JsonFeedbackResp?.feedback,
-        rating: JsonFeedbackResp?.rating,
-        userEmail: "anonymous",
-        createdAt: moment().format("DD-MM-yyyy"),
-      };
-
-      console.log("Before inserting into database, values:", values);
-      const resp = await db.insert(UserAnswer).values(values);
-      console.log("After database insertion, response:", resp);
-
-      if (resp) {
-        toast.success("User Answer recorded successfully");
+      
+      const currentQuestion = questions[activeQuestionIndex];
+      
+      // Get AI feedback on the answer
+      const aiResponse = await getAIFeedback(
+        currentQuestion.question,
+        userAnswer
+      );
+      
+      // Save the answer to the database
+      const { success, error } = await saveAnswer({
+        sessionId,
+        questionId: currentQuestion.interviewQAId,
+        question: currentQuestion.question,
+        userAnswer,
+        correctAnswer: currentQuestion.answer || "No model answer provided",
+        feedback: aiResponse.feedback,
+        rating: aiResponse.rating,
+      });
+      
+      if (success) {
+        toast.success("Answer recorded successfully");
         setUserAnswer("");
         setResults([]);
+      } else {
+        toast.error(error || "Failed to save answer");
       }
     } catch (error) {
-      console.error("Error in UpdateUserAnswer:", {
-        error,
-        message: error.message,
-        stack: error.stack,
-      });
+      console.error("Error in saving answer:", error);
       toast.error(
-        "Failed to save answer: " + (error?.message || "Unknown error occurred")
+        "Failed to save answer: " + (error.message || "Unknown error occurred")
       );
     } finally {
       setLoading(false);
@@ -197,7 +214,7 @@ Provide strictly formatted JSON:
     <div className="flex items-center justify-center flex-col">
       <div className="flex flex-col mt-20 justify-center items-center bg-black rounded-lg p-5">
         <Image
-          src={"/webcam.png"}
+          src="/webcam.png"
           width={200}
           height={200}
           className="absolute"
@@ -209,24 +226,42 @@ Provide strictly formatted JSON:
           audio={false}
         />
       </div>
-      <Button
-        disabled={loading}
-        variant="outline"
-        className="my-10"
-        onClick={() => StartStopRecording()}
-      >
-        {isRecording ? (
-          <h2 className="text-red-600 animate-pulse flex gap-2 items-center">
-            <StopCircle /> Stop Recording
-          </h2>
-        ) : (
-          <h2 className="text-primary flex gap-2 items-center">
-            <Mic /> Record Answer
-          </h2>
-        )}
-      </Button>
+      
+      <div className="w-full mt-6 space-y-4">
+        <textarea
+          value={userAnswer}
+          onChange={(e) => setUserAnswer(e.target.value)}
+          className="w-full p-3 border rounded-lg h-24"
+          placeholder="Your answer will appear here as you speak..."
+          disabled={isRecording}
+        />
+        
+        <div className="flex justify-between">
+          <Button
+            disabled={loading}
+            variant="outline"
+            className="my-2"
+            onClick={handleRecording}
+          >
+            {isRecording ? (
+              <span className="text-red-600 animate-pulse flex gap-2 items-center">
+                <StopCircle /> Stop Recording
+              </span>
+            ) : (
+              <span className="text-primary flex gap-2 items-center">
+                <Mic /> Record Answer
+              </span>
+            )}
+          </Button>
+          
+          <Button
+            disabled={loading || isRecording || !userAnswer.trim()}
+            onClick={handleSaveAnswer}
+          >
+            {loading ? "Saving..." : "Save Answer"}
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
-
-export default RecordAnswerSection;

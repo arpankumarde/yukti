@@ -1,70 +1,69 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useParams, useRouter } from "next/navigation"
-import Link from "next/link"
-import { Lightbulb, WebcamIcon } from "lucide-react"
-import Webcam from "react-webcam"
-
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import prisma from "@/lib/prisma"
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import { Lightbulb, WebcamIcon } from "lucide-react";
+import Webcam from "react-webcam";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getInterviewSession } from "@/actions/interview";
 
 interface InterviewSession {
-  interviewSessionId: string
+  interviewSessionId: string;
+  attempted: boolean;
   interview: {
-    title: string
+    title: string;
     job: {
-      title: string
-      description: string
-      experience: string
-    }
-  }
-  attempted: boolean
+      title: string;
+      description: string;
+      experience: string;
+    };
+  };
 }
 
-function InterviewPage() {
-  const params = useParams()
-  const router = useRouter()
-  const [interviewSession, setInterviewSession] = useState<InterviewSession | null>(null)
-  const [webCamEnabled, setWebCamEnabled] = useState(false)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+export default function InterviewPage() {
+  const params = useParams();
+  const router = useRouter();
+  const [interviewSession, setInterviewSession] = useState<InterviewSession | null>(null);
+  const [webCamEnabled, setWebCamEnabled] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const getInterviewDetails = async () => {
+    const fetchInterviewDetails = async () => {
       try {
-        const sessionId = params.interviewsessionid as string
-        if (!sessionId) return
+        const sessionId = params.interviewsessionid as string;
+        if (!sessionId) return;
 
-        const response = await fetch(`/api/interview-sessions/${sessionId}`)
-        if (!response.ok) {
-          throw new Error("Failed to fetch interview details")
+        const { session, error } = await getInterviewSession(sessionId);
+        
+        if (error) {
+          throw new Error(error);
         }
         
-        const data = await response.json()
-        setInterviewSession(data)
+        setInterviewSession(session);
       } catch (err) {
-        console.error("Error fetching interview details:", err)
-        setError("Error loading interview. Please try again later.")
+        console.error("Error fetching interview details:", err);
+        setError("Error loading interview. Please try again later.");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    getInterviewDetails()
-  }, [params.interviewsessionid])
+    fetchInterviewDetails();
+  }, [params.interviewsessionid]);
 
   if (loading) {
-    return <div className="flex justify-center items-center min-h-screen">Loading interview details...</div>
+    return <div className="flex justify-center items-center min-h-screen">Loading interview details...</div>;
   }
 
   if (error) {
-    return <div className="flex justify-center items-center min-h-screen text-red-500">{error}</div>
+    return <div className="flex justify-center items-center min-h-screen text-red-500">{error}</div>;
   }
 
   if (!interviewSession) {
-    return <div className="flex justify-center items-center min-h-screen">Interview not found</div>
+    return <div className="flex justify-center items-center min-h-screen">Interview not found</div>;
   }
 
   return (
@@ -142,7 +141,5 @@ function InterviewPage() {
         </Link>
       </div>
     </div>
-  )
+  );
 }
-
-export default InterviewPage
