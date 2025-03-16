@@ -7,6 +7,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { createInterview } from "@/actions/recruiter";
 import { InterviewType } from "@prisma/client";
 import { useParams, useRouter } from "next/navigation";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 
 interface Payload {
@@ -70,9 +77,15 @@ const Page = () => {
         </div>
         <div>
           <Label htmlFor="type">Type</Label>
-          <select title="type" id="type" name="type" required disabled>
-            <option value="NOCODE">No Code</option>
-          </select>
+          <Select defaultValue="NOCODE" required>
+            <SelectTrigger title="type" className="w-[180px]">
+              <SelectValue title="type" placeholder="Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="NOCODE">Non Coding Round</SelectItem>
+              <SelectItem value="CODE">Coding Round</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <div>
           <Label htmlFor="conductWithAI">Conduct with AI</Label>

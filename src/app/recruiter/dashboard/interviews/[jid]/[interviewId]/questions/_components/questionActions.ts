@@ -51,3 +51,16 @@ export async function updateQuestionAction({
     return { error };
   }
 }
+
+export async function deleteQuestionAction(interviewQAId: string) {
+  try {
+    const question = await prisma.interviewQA.delete({
+      where: { interviewQAId },
+    });
+
+    return { question };
+  } catch (error) {
+    console.error(error);
+    return { error };
+  }
+}

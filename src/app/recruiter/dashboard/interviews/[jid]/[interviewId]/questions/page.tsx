@@ -12,6 +12,7 @@ const Page = async ({
     where: { interviewId },
     include: {
       questions: true,
+      job: true,
     },
   });
 
@@ -29,6 +30,8 @@ const Page = async ({
         <Questions
           questionProps={interview?.questions}
           interviewId={interviewId}
+          interviewTitle={interview?.title}
+          job={interview?.job}
         />
       </div>
     </div>

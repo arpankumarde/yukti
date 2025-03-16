@@ -1,6 +1,6 @@
 "use client";
 
-import { InterviewQA } from "@prisma/client";
+import { InterviewQA, Job } from "@prisma/client";
 import {
   Sheet,
   SheetClose,
@@ -15,15 +15,30 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Pencil, Plus } from "lucide-react";
 import { useState } from "react";
-import { addQuestionAction, updateQuestionAction } from "./questionActions";
+import {
+  addQuestionAction,
+  deleteQuestionAction,
+  updateQuestionAction,
+} from "./questionActions";
+import { useRouter } from "next/navigation";
+
+interface AIQuestion {
+  question: string;
+  answer: string;
+}
 
 const Questions = ({
   questionProps,
   interviewId,
+  job,
+  interviewTitle,
 }: {
   questionProps: InterviewQA[];
   interviewId: string;
+  job: Job;
+  interviewTitle: string;
 }) => {
+  const router = useRouter();
   let [questions, setQuestions] = useState<InterviewQA[]>(questionProps);
   const [open, setOpen] = useState(false);
   const [open2, setOpen2] = useState(false);
@@ -79,6 +94,70 @@ const Questions = ({
       console.error(error);
       alert("Failed to update question");
     }
+  };
+
+  const handleDeleteQuestion = async (interviewQAId: string) => {
+    try {
+      const { question } = await deleteQuestionAction(interviewQAId);
+      console.log("Question deleted", question?.interviewQAId);
+      setQuestions((prev) =>
+        prev.filter((q) => q.interviewQAId !== question?.interviewQAId)
+      );
+    } catch (error) {
+      console.error(error);
+      alert("Failed to delete question");
+    }
+  };
+
+  const handlePageForward = () => {
+    if (questions.length < 5) {
+      alert("Please add atleast 5 questions to proceed");
+      return;
+    }
+
+    router.push(`applicants`);
+
+    console.log("Navigating to the next page");
+  };
+
+  const generateQuestions = async () => {
+    const response = await fetch("/api/question-creation", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title: job.title,
+        description: job.description,
+        experience: job.experience.toString(),
+        interviewTitle: interviewTitle,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error("Failed to generate questions");
+      return;
+    }
+
+    const jsonRes: AIQuestion[] = await response.json();
+    console.log("Questions generated", jsonRes);
+
+    jsonRes.forEach(async (q) => {
+      try {
+        const questionCont = await addQuestionAction({
+          question: q.question,
+          answer: q.answer,
+          interviewId: interviewId,
+        });
+        if (questionCont?.question) {
+          setQuestions((prev) => [...prev, questionCont.question]);
+        }
+        console.log("Question added", questionCont?.question?.interviewQAId);
+      } catch (error) {
+        console.error(error);
+        alert("Failed to add question");
+      }
+    });
   };
 
   return (
@@ -144,22 +223,6 @@ const Questions = ({
         </SheetContent>
       </Sheet>
 
-      {questions.length === 0 ? (
-        <p>No questions available.</p>
-      ) : (
-        questions.map((question) => (
-          <div key={question.interviewQAId}>
-            <p>{question.question}</p>
-            <p>{question.answer || "Sample answer not provided"}</p>
-
-            <Button onClick={() => openEditModal(question)}>
-              <Pencil />
-              <span>Edit QnA</span>
-            </Button>
-          </div>
-        ))
-      )}
-
       <Sheet open={open2} onOpenChange={setOpen2}>
         <SheetContent>
           <SheetHeader>
@@ -218,6 +281,37 @@ const Questions = ({
           </SheetHeader>
         </SheetContent>
       </Sheet>
+
+      <Button variant={"outline"} onClick={generateQuestions}>
+        Generate Questions
+      </Button>
+
+      {questions.length === 0 ? (
+        <p>No questions available.</p>
+      ) : (
+        questions.map((question) => (
+          <div key={question.interviewQAId}>
+            <p>{question.question}</p>
+            <p>{question.answer || "Sample answer not provided"}</p>
+
+            <Button onClick={() => openEditModal(question)}>
+              <Pencil />
+              Edit QnA
+            </Button>
+
+            <Button
+              variant={"destructive"}
+              onClick={() => handleDeleteQuestion(question.interviewQAId)}
+            >
+              Delete
+            </Button>
+          </div>
+        ))
+      )}
+
+      <Button variant={"secondary"} onClick={handlePageForward}>
+        Proceed to Candidate Selection
+      </Button>
     </div>
   );
 };
