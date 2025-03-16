@@ -90,7 +90,7 @@ export default function RecordAnswerSection({
     stopSpeechToText,
     setResults,
   } = useSpeechToText({
-    continuous: false,
+    continuous: true,
     useLegacyResults: false,
   });
 
