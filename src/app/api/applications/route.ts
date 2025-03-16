@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
         applicantId,
         status,
         resume,
-        score: score ? String(score) : null,
+        score: score ? Number(score) : null,
         strength: strength ? String(strength) : null,
         weakness: weakness ? String(weakness) : null,
         cover_letter: coverLetter ? String(coverLetter) : null,

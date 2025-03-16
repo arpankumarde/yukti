@@ -164,53 +164,60 @@ const ApplyJobPage = ({ params }: { params: Promise<{ jid: string }> }) => {
       toast.error("Failed to upload cover letter")
     }
   }
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!resume) {
-      toast.error("Please upload your resume first")
-      return
-    }
-
-    const applicantCookie = getCookie("ykapptoken")
-    const applicant = applicantCookie ? JSON.parse(applicantCookie as string) : null
-
-    if (!applicant) {
-      toast.error("You must be logged in to apply for jobs")
-      return
-    }
-
-    try {
-      const response = await fetch("/api/applications", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          jobId: jobId,
-          applicantId: applicant.applicantId,
-          status: "PENDING",
-          resume: resume,
-          cover: coverLetter,
-          score: analysisResults?.score || null,
-          strength: analysisResults?.strength?.join(", ") || null,
-          weakness: analysisResults?.weakness?.join(", ") || null,
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to submit application")
-      }
-
-      toast.success("Application submitted successfully")
-      router.push("/applicant/applied-jobs")
-    } catch (error) {
-      console.error("Error submitting application:", error)
-      toast.error("Failed to submit application")
-    }
+  if (!resume) {
+    toast.error("Please upload your resume first");
+    return;
   }
 
+  const applicantCookie = getCookie("ykapptoken");
+  const applicant = applicantCookie ? JSON.parse(applicantCookie as string) : null;
+
+  if (!applicant) {
+    toast.error("You must be logged in to apply for jobs");
+    return;
+  }
+
+  try {
+    // Clean up the score by removing any percentage symbol
+    let cleanScore = null;
+    if (analysisResults?.score) {
+      // Remove % if present and convert to number
+      cleanScore = analysisResults.score.toString().replace(/%/g, '');
+      // Ensure it's a valid number
+      cleanScore = !isNaN(Number(cleanScore)) ? Number(cleanScore) : null;
+    }
+
+    const response = await fetch("/api/applications", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        jobId: jobId,
+        applicantId: applicant.applicantId,
+        status: "PENDING",
+        resume: resume,
+        coverLetter: coverLetter,
+        score: cleanScore,
+        strength: analysisResults?.strength?.join(", ") || null,
+        weakness: analysisResults?.weakness?.join(", ") || null,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to submit application");
+    }
+
+    toast.success("Application submitted successfully");
+    router.push("/applicant/dashboard/applied-jobs");
+  } catch (error) {
+    console.error("Error submitting application:", error);
+    toast.error("Failed to submit application");
+  }
+};
   const handlePreview = () => {
     if (resume) {
       window.open(resume, "_blank")
