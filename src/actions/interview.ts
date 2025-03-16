@@ -121,16 +121,42 @@ export async function saveAnswer({
  */
 export async function completeInterview(sessionId: string) {
   try {
-    // Mark as attempted if not already
-    const session = await prisma.interviewSession.update({
+    // Get session with transcript
+    const session = await prisma.interviewSession.findUnique({
       where: { interviewSessionId: sessionId },
-      data: { attempted: true },
+      select: { transcript: true },
     });
     
-    revalidatePath(`/dashboard/interview/${sessionId}`);
-    revalidatePath(`/dashboard/interview/${sessionId}/feedback`);
+    if (!session?.transcript?.length) {
+      return { error: "No answers found in session" };
+    }
     
-    return { success: true, session };
+    // Calculate average rating from all answers
+    const ratings = session.transcript.map((entry: any) => entry.rating || 0);
+    const averageRating = Math.round(
+      ratings.reduce((sum: number, rating: number) => sum + rating, 0) / ratings.length
+    );
+    
+    // Generate comprehensive feedback
+    const feedbackEntries = session.transcript.map((entry: any) => entry.feedback);
+    const overallFeedback = `Overall performance rating: ${averageRating}/10. 
+    Summary: You completed ${session.transcript.length} interview questions with varying levels of effectiveness.
+    Key strengths and areas for improvement are reflected in the individual question feedback.`;
+    
+    // Update session with final rating and feedback
+    const updatedSession = await prisma.interviewSession.update({
+      where: { interviewSessionId: sessionId },
+      data: { 
+        attempted: true,
+        rating: averageRating,
+        feedback: overallFeedback
+      },
+    });
+    
+    revalidatePath(`/applicant/dashboard/interview/${sessionId}`);
+    revalidatePath(`/applicant/dashboard/interview/${sessionId}/feedback`);
+    
+    return { success: true, session: updatedSession };
   } catch (error) {
     console.error("Error completing interview:", error);
     return { error: "Failed to complete interview" };

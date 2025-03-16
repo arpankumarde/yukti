@@ -131,7 +131,7 @@ export default function InterviewPage() {
         </div>
       </div>
       <div className="flex justify-end mt-8">
-        <Link href={`/dashboard/interview/${params.interviewsessionid}/start`}>
+        <Link href={`/applicant//dashboard/interview/${params.interviewsessionid}/start`}>
           <Button 
             className="py-2 px-4 rounded-lg transition-colors duration-200 font-medium text-sm bg-primary/10 hover:bg-primary/20 text-primary"
             disabled={interviewSession.attempted}
