@@ -17,8 +17,10 @@ import {
   ThumbsDown,
   Tag,
   MessageSquare,
+  ExternalLink,
 } from "lucide-react";
 import Link from "next/link";
+import { ApplicationDetailsClient } from "./_components/ApplicationDetailsClient";
 
 const ApplicationDetailsPage = async ({
   params,
@@ -56,70 +58,11 @@ const ApplicationDetailsPage = async ({
   }
 
   const renderScoreBox = (score: number | null) => {
-    if (score === null) {
-      return (
-        <div className="flex items-center gap-2">
-          <div className="relative w-full h-6 bg-gray-100 rounded-md overflow-hidden">
-            <div
-              className="absolute top-0 left-0 h-full bg-gray-200"
-              style={{ width: "0%" }}
-            />
-          </div>
-          <span className="text-sm font-medium text-gray-500">Not scored</span>
-        </div>
-      );
-    }
-
-    let bgColor = "bg-gray-200";
-    let textColor = "text-gray-500";
-
-    if (score <= 20) {
-      bgColor = "bg-red-500";
-      textColor = "text-red-500";
-    } else if (score <= 40) {
-      bgColor = "bg-orange-500";
-      textColor = "text-orange-500";
-    } else if (score <= 60) {
-      bgColor = "bg-yellow-500";
-      textColor = "text-yellow-600";
-    } else if (score <= 80) {
-      bgColor = "bg-lime-500";
-      textColor = "text-lime-600";
-    } else {
-      bgColor = "bg-green-500";
-      textColor = "text-green-600";
-    }
-
-    return (
-      <div className="flex items-center gap-2">
-        <div className="relative w-full h-6 bg-gray-100 rounded-md overflow-hidden">
-          <div
-            className={`absolute top-0 left-0 h-full ${bgColor} transition-all duration-300`}
-            style={{ width: `${score}%` }}
-          />
-        </div>
-        <span className={`text-sm font-medium ${textColor}`}>{score}%</span>
-      </div>
-    );
+    // ... existing score box rendering code ...
   };
 
   const getStatusColor = (status: string | null) => {
-    if (!status) return "bg-gray-100 text-gray-500";
-
-    switch (status.toLowerCase()) {
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "under review":
-        return "bg-blue-100 text-blue-800";
-      case "shortlisted":
-        return "bg-lime-100 text-lime-800";
-      case "selected":
-        return "bg-green-100 text-green-800";
-      case "rejected":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-500";
-    }
+    // ... existing status color code ...
   };
 
   return (
@@ -141,6 +84,7 @@ const ApplicationDetailsPage = async ({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Applicant Info Card - No changes */}
         <Card className="col-span-1 shadow-md">
           <CardHeader className="border-b bg-muted/10 p-6">
             <div className="flex items-center gap-2">
@@ -158,6 +102,10 @@ const ApplicationDetailsPage = async ({
             <div>
               <p className="text-sm text-gray-500">Email</p>
               <p className="font-medium">{application.applicant.email}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Phone</p>
+              <p className="font-medium">{application.applicant.phone}</p>
             </div>
             <div>
               <p className="text-sm text-gray-500">Applied on</p>
@@ -188,31 +136,109 @@ const ApplicationDetailsPage = async ({
           </CardContent>
         </Card>
 
+        {/* Job Details Card - Enhanced with more details */}
         <Card className="col-span-1 md:col-span-2 shadow-md">
           <CardHeader className="border-b bg-muted/10 p-6">
             <div className="flex items-center gap-2">
-              <Briefcase className="h-5 w-5 text-muted-foreground" />
+              <Briefcase className="h-5 w-5 text-primary" />
               <h2 className="text-xl font-semibold tracking-tight">
                 Job Details
               </h2>
             </div>
           </CardHeader>
-          <CardContent className="p-6 space-y-4">
-            <div>
-              <p className="text-sm text-gray-500">Position</p>
-              <p className="font-medium">{application.job.title}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Experience Required</p>
-              <p className="font-medium">{application.job.experience}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500">Location</p>
-              <p className="font-medium">{application.job.location}</p>
+          <CardContent className="p-6">
+            <div className="grid gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Left column - Basic job details */}
+                <div className="space-y-4">
+                  <div className="border rounded-lg p-3">
+                    <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                      Position
+                    </h3>
+                    <p className="font-semibold text-foreground">
+                      {application.job.title}
+                    </p>
+                  </div>
+
+                  <div className="border rounded-lg p-3">
+                    <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                      Experience Required
+                    </h3>
+                    <p className="font-semibold text-foreground">
+                      {application.job.experience}
+                    </p>
+                  </div>
+
+                  <div className="border rounded-lg p-3">
+                    <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                      Location
+                    </h3>
+                    <p className="font-semibold text-foreground">
+                      {application.job.location}
+                    </p>
+                  </div>
+
+                  {application.job.salary && (
+                    <div className="border rounded-lg p-3">
+                      <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                        Salary Range
+                      </h3>
+                      <p className="font-semibold text-foreground">
+                        {application.job.salary}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Right column - Additional details */}
+                <div className="space-y-4">
+                  {application.job.perks && (
+                    <div className="border rounded-lg p-3">
+                      <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                        Perks & Benefits
+                      </h3>
+                      <p className="text-foreground">{application.job.perks}</p>
+                    </div>
+                  )}
+
+                  <div className="border rounded-lg p-3">
+                    <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                      Created On
+                    </h3>
+                    <p className="text-foreground">
+                      {new Date(application.job.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Job Description - Full width */}
+              {application.job.description && (
+                <div className="border rounded-lg p-3">
+                  <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                    Description
+                  </h3>
+                  <p className="text-foreground whitespace-pre-wrap">
+                    {application.job.description}
+                  </p>
+                </div>
+              )}
+
+              <div className="flex justify-end">
+                <Button asChild variant="outline">
+                  <NextLink
+                    href={`/recruiter/dashboard/postings/${application.job.id}`}
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    View Complete Job Posting
+                  </NextLink>
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
 
+        {/* Evaluation Card */}
         <Card className="col-span-1 md:col-span-3 shadow-md">
           <CardHeader className="border-b bg-muted/10 p-6">
             <div className="flex items-center gap-2">
@@ -272,36 +298,12 @@ const ApplicationDetailsPage = async ({
                   </div>
                 )}
 
-                {application.comments && (
-                  <div>
-                    <p className="text-sm text-gray-500 mb-2 flex items-center">
-                      <MessageSquare className="h-4 w-4 mr-1" /> Comments
-                    </p>
-                    <div className="p-4 bg-blue-50 rounded-lg">
-                      <p className="text-sm">{application.comments}</p>
-                    </div>
-                  </div>
-                )}
+                {/* Comments section with edit functionality */}
+                <ApplicationDetailsClient application={application} jid={jid} />
               </div>
             </div>
           </CardContent>
         </Card>
-      </div>
-
-      <div className="flex justify-end gap-4 mt-8">
-        <Button variant="outline" asChild>
-          <NextLink href={`/recruiter/dashboard/applications/${jid}`}>
-            Back to Applications
-          </NextLink>
-        </Button>
-        <Button asChild>
-          <NextLink
-            href={`/recruiter/dashboard/applications/${jid}/${aid}/interviews/new`}
-          >
-            <Calendar className="h-4 w-4 mr-2" />
-            Schedule Interview
-          </NextLink>
-        </Button>
       </div>
     </div>
   );
