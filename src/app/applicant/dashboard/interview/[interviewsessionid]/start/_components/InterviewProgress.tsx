@@ -18,7 +18,7 @@ export default function InterviewProgress({
   return (
     <div className="mb-6">
       <div className="flex justify-between mb-2 text-sm text-gray-500">
-        <span>Question {currentQuestion} of {totalQuestions}</span>
+        <span className="font-medium">Question {currentQuestion} of {totalQuestions}</span>
         <span>{Math.round(progressPercentage)}% Complete</span>
       </div>
       <Progress value={progressPercentage} className="h-2" />

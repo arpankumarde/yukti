@@ -2,6 +2,8 @@ import { cookies } from 'next/headers';
 import { Briefcase, Calendar, FileText, MessageSquare, Star, User2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import prisma from '@/lib/prisma';
+import ExportXLSXButton from './_components/ExportXLSXButton';
+import ExportCSVButton from './_components/ExportCSVButton';
 
 interface AuthCookie {
   applicantId: string;
@@ -36,16 +38,25 @@ export default async function AppliedJobsPage() {
     <div className="min-h-screen bg-secondary/20 p-8">
       <div className="max-w-6xl mx-auto">
         {/* Header Section */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-foreground mb-4 flex items-center justify-center gap-3">
-            <User2 className="w-8 h-8 text-primary" />
-            My Applied Jobs
-          </h1>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Track the status of your job applications and stay updated on your career journey
-          </p>
+        <div className="flex justify-between items-center mb-12">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold text-foreground mb-4 flex items-center justify-center gap-3">
+              <User2 className="w-8 h-8 text-primary" />
+              My Applied Jobs
+            </h1>
+            <p className="text-muted-foreground">
+              Track the status of your job applications and stay updated on your career journey
+            </p>
+          </div>
+          
+          {/* Export Buttons */}
+          <div className="flex gap-4">
+            <ExportXLSXButton applications={applications} />
+            <ExportCSVButton applications={applications} />
+          </div>
         </div>
 
+        {/* Rest of your existing code */}
         {/* Applications Grid */}
         <div className="grid gap-6">
           {applications.map((app) => (
@@ -57,6 +68,7 @@ export default async function AppliedJobsPage() {
                 "border border-border"
               )}
             >
+              {/* Existing application card content */}
               <div className="p-6">
                 <div className="flex justify-between items-start mb-4">
                   <div>
@@ -68,6 +80,7 @@ export default async function AppliedJobsPage() {
                       <span>Applied on {new Date(app.createdAt).toLocaleDateString()}</span>
                     </div>
                   </div>
+                  {/* Status indicator */}
                   <div className="flex items-center gap-2">
                     <span className={cn(
                       "px-3 py-1 rounded-full text-sm font-medium",
@@ -83,6 +96,7 @@ export default async function AppliedJobsPage() {
                   </div>
                 </div>
 
+                {/* Application details */}
                 <div className="grid md:grid-cols-3 gap-4 mt-6">
                   <div className="flex items-start gap-2">
                     <FileText className="w-5 h-5 text-primary mt-0.5" />

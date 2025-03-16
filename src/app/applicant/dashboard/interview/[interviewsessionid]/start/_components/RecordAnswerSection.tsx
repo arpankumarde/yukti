@@ -5,7 +5,7 @@ import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import Webcam from "react-webcam";
 import useSpeechToText from "react-hook-speech-to-text";
-import { Mic, StopCircle } from "lucide-react";
+import { Mic, StopCircle, Save } from "lucide-react";
 import { toast } from "sonner";
 import { saveAnswer } from "@/actions/interview";
 import { InterviewQA } from "@prisma/client";
@@ -67,6 +67,11 @@ interface RecordAnswerSectionProps {
   activeQuestionIndex: number;
   interviewData: any;
   sessionId: string;
+  webcamRef?: any;
+  setWebcamRef?: (ref: any) => void;
+  showWebcam?: boolean;
+  webcamOnly?: boolean;
+  controlsOnly?: boolean;
 }
 
 export default function RecordAnswerSection({
@@ -74,12 +79,20 @@ export default function RecordAnswerSection({
   activeQuestionIndex,
   interviewData,
   sessionId,
+  webcamRef,
+  setWebcamRef,
+  showWebcam = true,
+  webcamOnly = false,
+  controlsOnly = false
 }: RecordAnswerSectionProps) {
   const [userAnswer, setUserAnswer] = useState("");
   const { user } = useUser();
   const [loading, setLoading] = useState(false);
   const [hasPermission, setHasPermission] = useState(false);
   const [hasRecorded, setHasRecorded] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const timerRef = React.useRef<any>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const {
     error,
@@ -125,15 +138,14 @@ export default function RecordAnswerSection({
   }, [results]);
 
   useEffect(() => {
-    if (!isRecording && hasRecorded) {
-      console.log(
-        "Recording stopped, triggering UpdateUserAnswer with answer:",
-        userAnswer
-      );
-      handleSaveAnswer();
-      setHasRecorded(false);
+    // Reset recording time and answer when changing questions
+    setRecordingTime(0);
+    setUserAnswer("");
+    setResults([]);
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
     }
-  }, [isRecording]);
+  }, [activeQuestionIndex, setResults]);
 
   const requestMicrophonePermission = async () => {
     try {
@@ -148,29 +160,42 @@ export default function RecordAnswerSection({
     }
   };
 
-  const handleRecording = async () => {
-    try {
-      if (isRecording) {
-        stopSpeechToText();
-      } else {
-        const permissionGranted = await requestMicrophonePermission();
-        if (permissionGranted) {
-          setHasRecorded(true);
-          await startSpeechToText();
-        }
+  const handleStartRecording = async () => {
+    const permissionGranted = await requestMicrophonePermission();
+    if (permissionGranted) {
+      setHasRecorded(true);
+      setRecordingTime(0);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
       }
-    } catch (error) {
-      console.error("Recording error:", error);
-      toast.error("Error starting recording");
+      await startSpeechToText();
+      // Start timer
+      timerRef.current = setInterval(() => {
+        setRecordingTime(prevTime => prevTime + 1);
+      }, 1000);
     }
   };
 
+  const handleStopRecording = () => {
+    stopSpeechToText();
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+    setRecordingTime(0);
+  };
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  };
+
   const handleSaveAnswer = async () => {
+    setIsSaving(true);
     try {
-      setLoading(true);
-      
       if (!userAnswer.trim()) {
         toast.error("Please provide an answer before submitting");
+        setIsSaving(false);
         return;
       }
       
@@ -206,28 +231,117 @@ export default function RecordAnswerSection({
         "Failed to save answer: " + (error.message || "Unknown error occurred")
       );
     } finally {
-      setLoading(false);
+      setIsSaving(false);
     }
   };
 
-  return (
-    <div className="flex items-center justify-center flex-col">
-      <div className="flex flex-col mt-20 justify-center items-center bg-black rounded-lg p-5">
-        <Image
-          src="/webcam.png"
-          width={200}
-          height={200}
-          className="absolute"
-          alt="webcam overlay"
-        />
+  // For webcam only display
+  if (webcamOnly && showWebcam) {
+    return (
+      <div className="w-full h-full flex items-center justify-center">
         <Webcam
-          mirrored={true}
-          style={{ height: 500, width: 500, zIndex: 10 }}
           audio={false}
+          ref={setWebcamRef}
+          mirrored={true}
+          videoConstraints={{
+            width: 720,
+            height: 405,
+            facingMode: "user"
+          }}
+          className="w-full h-auto rounded-md shadow-md"
         />
       </div>
+    );
+  }
+
+  // For controls only display
+  if (controlsOnly) {
+    return (
+      <div className="w-full">
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2">Your Answer</label>
+          <textarea
+            value={userAnswer}
+            onChange={(e) => setUserAnswer(e.target.value)}
+            className="w-full p-3 border rounded-lg h-24 focus:ring-2 focus:ring-primary/50 focus:border-primary"
+            placeholder="Your answer will appear here as you speak..."
+            disabled={isRecording}
+          />
+        </div>
+        
+        <div className="flex justify-between items-center">
+          <div className="text-center font-mono font-bold text-lg">
+            {isRecording ? (
+              <span className="text-red-600 animate-pulse">{formatTime(recordingTime)}</span>
+            ) : (
+              <span className="text-gray-700">{formatTime(recordingTime)}</span>
+            )}
+          </div>
+          
+          <div className="flex gap-2">
+            <Button
+              disabled={isSaving}
+              variant={isRecording ? "destructive" : "outline"}
+              onClick={isRecording ? handleStopRecording : handleStartRecording}
+              className="my-2"
+            >
+              {isRecording ? (
+                <span className="flex gap-2 items-center">
+                  <StopCircle className="h-4 w-4" /> Stop Recording
+                </span>
+              ) : (
+                <span className="text-primary flex gap-2 items-center">
+                  <Mic className="h-4 w-4" /> Record Answer
+                </span>
+              )}
+            </Button>
+            
+            <Button
+              type="button"
+              onClick={handleSaveAnswer}
+              disabled={recordingTime > 0 || isRecording || isSaving || !userAnswer.trim()}
+              className="my-2"
+            >
+              <span className="flex gap-2 items-center">
+                <Save className="h-4 w-4" />
+                {isSaving ? "Saving..." : "Save Answer"}
+              </span>
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Default full component
+  return (
+    <div className="w-full">
+      <div className="flex justify-center mb-4">
+        {showWebcam && (
+          <div className="relative">
+            <Webcam
+              audio={true}
+              ref={setWebcamRef}
+              mirrored={true}
+              videoConstraints={{
+                width: 720,
+                height: 405,
+                facingMode: "user"
+              }}
+              className="w-full h-auto rounded-md shadow-md"
+            />
+            <Image
+              src="/webcam.png"
+              width={200}
+              height={200}
+              className="absolute"
+              alt="webcam overlay"
+            />
+          </div>
+        )}
+      </div>
       
-      <div className="w-full mt-6 space-y-4">
+      <div className="w-full space-y-4">
         <textarea
           value={userAnswer}
           onChange={(e) => setUserAnswer(e.target.value)}
@@ -236,29 +350,39 @@ export default function RecordAnswerSection({
           disabled={isRecording}
         />
         
+        <div className="text-center font-mono font-bold text-lg">
+          {isRecording ? (
+            <span className="text-red-600 animate-pulse">{formatTime(recordingTime)}</span>
+          ) : (
+            <span className="text-gray-700">{formatTime(recordingTime)}</span>
+          )}
+        </div>
+        
         <div className="flex justify-between">
           <Button
-            disabled={loading}
-            variant="outline"
+            disabled={isSaving}
+            variant={isRecording ? "destructive" : "outline"}
+            onClick={isRecording ? handleStopRecording : handleStartRecording}
             className="my-2"
-            onClick={handleRecording}
           >
             {isRecording ? (
-              <span className="text-red-600 animate-pulse flex gap-2 items-center">
-                <StopCircle /> Stop Recording
+              <span className="flex gap-2 items-center">
+                <StopCircle className="h-4 w-4" /> Stop Recording
               </span>
             ) : (
               <span className="text-primary flex gap-2 items-center">
-                <Mic /> Record Answer
+                <Mic className="h-4 w-4" /> Record Answer
               </span>
             )}
           </Button>
           
           <Button
-            disabled={loading || isRecording || !userAnswer.trim()}
+            type="button"
             onClick={handleSaveAnswer}
+            disabled={recordingTime > 0 || isRecording || isSaving || !userAnswer.trim()}
+            className="my-2"
           >
-            {loading ? "Saving..." : "Save Answer"}
+            {isSaving ? "Saving..." : "Save Answer"}
           </Button>
         </div>
       </div>
