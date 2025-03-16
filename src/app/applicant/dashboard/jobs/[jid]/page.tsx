@@ -1,21 +1,21 @@
-import { PrismaClient } from "@prisma/client";
 import { Briefcase, Building2, CalendarDays } from "lucide-react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
-
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
+import { Button } from "@/components/ui/button";
 
 interface PageProps {
   params: Promise<{ jid: string }>;
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
   const resolvedParams = await params;
   return {
     title: `Job Details - ${resolvedParams.jid}`,
-    description: 'View detailed information about this job position',
+    description: "View detailed information about this job position",
   };
 }
 
@@ -29,11 +29,11 @@ export default async function JobDetails({ params }: PageProps) {
 
   const job = await prisma.job.findUnique({
     where: {
-      id: jid
+      id: jid,
     },
     include: {
-      recruiter: true
-    }
+      recruiter: true,
+    },
   });
 
   if (!job) {
@@ -65,26 +65,29 @@ export default async function JobDetails({ params }: PageProps) {
           {/* Details */}
           <div className="space-y-6 mb-8">
             <div>
-              <h2 className="text-lg font-semibold text-foreground mb-2">Experience Required</h2>
-              <p className="text-muted-foreground">{job.experience || "Not specified"}</p>
+              <h2 className="text-lg font-semibold text-foreground mb-2">
+                Experience Required
+              </h2>
+              <p className="text-muted-foreground">
+                {job.experience || "Not specified"}
+              </p>
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-foreground mb-2">Job Description</h2>
-              <p className="text-muted-foreground whitespace-pre-wrap">{job.description}</p>
+              <h2 className="text-lg font-semibold text-foreground mb-2">
+                Job Description
+              </h2>
+              <p className="text-muted-foreground whitespace-pre-wrap">
+                {job.description}
+              </p>
             </div>
           </div>
 
           {/* Apply Button */}
-          <Link
-            href={`/applicant/jobs/${job.id}/apply`}
-            className={cn(
-              "inline-block py-3 px-6 rounded-lg transition-colors duration-200",
-              "bg-primary text-primary-foreground font-medium",
-              "hover:bg-primary/90"
-            )}
-          >
-            Apply Now
-          </Link>
+          <Button asChild>
+            <Link href={`/applicant/dashboard/jobs/${job.id}/apply`}>
+              Apply Now
+            </Link>
+          </Button>
         </div>
       </div>
     </div>

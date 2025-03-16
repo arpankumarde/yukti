@@ -1,14 +1,14 @@
-import { PrismaClient } from "@prisma/client";
-import React from "react";
 import { Briefcase, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 export default async function Jobs({ searchQuery }: { searchQuery?: string }) {
   const searchTerms =
-    searchQuery?.trim().split(/\s+/).filter((term) => term.length > 0) || [];
+    searchQuery
+      ?.trim()
+      .split(/\s+/)
+      .filter((term) => term.length > 0) || [];
 
   const jobs = await prisma.job.findMany({
     where:
@@ -33,7 +33,8 @@ export default async function Jobs({ searchQuery }: { searchQuery?: string }) {
             Available Positions
           </h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Discover your next career opportunity among our curated list of positions
+            Discover your next career opportunity among our curated list of
+            positions
           </p>
         </div>
 
@@ -75,7 +76,8 @@ export default async function Jobs({ searchQuery }: { searchQuery?: string }) {
             {searchTerms.length > 0 && (
               <div className="text-center mb-8">
                 <p className="text-muted-foreground">
-                  Found {jobs.length} {jobs.length === 1 ? "position" : "positions"}
+                  Found {jobs.length}{" "}
+                  {jobs.length === 1 ? "position" : "positions"}
                   {searchQuery && ` matching "${searchQuery}"`}
                 </p>
               </div>
@@ -103,14 +105,16 @@ export default async function Jobs({ searchQuery }: { searchQuery?: string }) {
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <Building2 className="w-4 h-4" />
                       <span className="text-sm">
-                        {job.recruiter ? job.recruiter.name : "Company not specified"}
+                        {job.recruiter
+                          ? job.recruiter.name
+                          : "Company not specified"}
                       </span>
                     </div>
                   </div>
 
                   <div className="px-6 py-4 bg-muted border-t border-border">
                     <Link
-                      href={`/applicant/jobs/${job.id}`}
+                      href={`/applicant/dashboard/jobs/${job.id}`}
                       className={cn(
                         "block w-full py-2 px-4 rounded-lg transition-colors duration-200 font-medium text-sm text-center",
                         "bg-primary/10 hover:bg-primary/20 text-primary"

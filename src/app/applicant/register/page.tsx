@@ -17,6 +17,7 @@ const Page = () => {
   interface Payload {
     name: string;
     email: string;
+    phone: string;
     password: string;
   }
 
@@ -34,6 +35,7 @@ const Page = () => {
                   const payload: Payload = {
                     name: formData["name"] as string,
                     email: formData["email"] as string,
+                    phone: formData["phone"] as string,
                     password: formData["password"] as string,
                   };
 
@@ -56,9 +58,9 @@ const Page = () => {
               >
                 <div className="flex flex-col gap-6">
                   <div className="flex flex-col items-center text-center">
-                    <h1 className="text-2xl font-bold">Welcome back</h1>
+                    <h1 className="text-2xl font-bold">Welcome to Yukti</h1>
                     <p className="text-balance text-muted-foreground">
-                      Create a new Yukti Applicant Account
+                      Create a new Applicant Account
                     </p>
                   </div>
                   <div className="grid gap-2">
@@ -82,6 +84,16 @@ const Page = () => {
                     />
                   </div>
                   <div className="grid gap-2">
+                    <Label htmlFor="phone">Phone</Label>
+                    <Input
+                      id="phone"
+                      name="phone"
+                      type="tel"
+                      placeholder="Enter your phone number"
+                      required
+                    />
+                  </div>
+                  <div className="grid gap-2">
                     <div className="flex items-center">
                       <Label htmlFor="password">Password</Label>
                     </div>
@@ -96,7 +108,6 @@ const Page = () => {
                   <Button type="submit" className="w-full">
                     Create an Account
                   </Button>
-
                   <div className="text-center text-sm">
                     Already have an account?{" "}
                     <Link

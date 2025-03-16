@@ -26,6 +26,7 @@ model Applicant {
   applicantId  String        @id @default(cuid())
   name         String
   email        String        @unique
+  phone        String
   password     String
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt

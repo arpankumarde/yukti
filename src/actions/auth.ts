@@ -66,11 +66,12 @@ export async function loginHR(payload: { email: string; password: string }) {
 export async function createApplicant(payload: {
   name: string;
   email: string;
+  phone: string;
   password: string;
 }) {
-  const { name, email, password } = payload;
+  const { name, email, phone, password } = payload;
 
-  if (!name || !email || !password) {
+  if (!name || !email || !phone || !password) {
     return { error: "Missing required fields" };
   }
 
@@ -81,6 +82,7 @@ export async function createApplicant(payload: {
       data: {
         name,
         email,
+        phone,
         password: hashedPassword,
       },
     });
