@@ -1,33 +1,70 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
-import Webcam from "react-webcam"
 import { Lightbulb, WebcamIcon } from "lucide-react"
+import Webcam from "react-webcam"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { db } from "@/utils/db"
-import { MockInterview } from "@/utils/schema"
-import { eq } from "drizzle-orm"
+import prisma from "@/lib/prisma"
 
-function Interview() {
+interface InterviewSession {
+  interviewSessionId: string
+  interview: {
+    title: string
+    job: {
+      title: string
+      description: string
+      experience: string
+    }
+  }
+  attempted: boolean
+}
+
+function InterviewPage() {
   const params = useParams()
-  const [interviewData, setInterviewData] = useState(null)
+  const router = useRouter()
+  const [interviewSession, setInterviewSession] = useState<InterviewSession | null>(null)
   const [webCamEnabled, setWebCamEnabled] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    getInterviewDetails()
-  }, [])
+    const getInterviewDetails = async () => {
+      try {
+        const sessionId = params.interviewsessionid as string
+        if (!sessionId) return
 
-  const getInterviewDetails = async () => {
-    if (!params.interviewId) return
-    const result = await db
-      .select()
-      .from(MockInterview)
-      .where(eq(MockInterview.mockId, params.interviewId))
-    setInterviewData(result[0] || null)
+        const response = await fetch(`/api/interview-sessions/${sessionId}`)
+        if (!response.ok) {
+          throw new Error("Failed to fetch interview details")
+        }
+        
+        const data = await response.json()
+        setInterviewSession(data)
+      } catch (err) {
+        console.error("Error fetching interview details:", err)
+        setError("Error loading interview. Please try again later.")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    getInterviewDetails()
+  }, [params.interviewsessionid])
+
+  if (loading) {
+    return <div className="flex justify-center items-center min-h-screen">Loading interview details...</div>
+  }
+
+  if (error) {
+    return <div className="flex justify-center items-center min-h-screen text-red-500">{error}</div>
+  }
+
+  if (!interviewSession) {
+    return <div className="flex justify-center items-center min-h-screen">Interview not found</div>
   }
 
   return (
@@ -41,14 +78,19 @@ function Interview() {
             </CardHeader>
             <CardContent className="space-y-4">
               <p>
-                <strong>Job Role:</strong> {interviewData?.jobPosition}
+                <strong>Job Role:</strong> {interviewSession.interview.job.title}
               </p>
               <p>
-                <strong>Tech Stack:</strong> {interviewData?.jobDesc}
+                <strong>Description:</strong> {interviewSession.interview.job.description}
               </p>
               <p>
-                <strong>Experience Required:</strong> {interviewData?.jobExperience} years
+                <strong>Experience Required:</strong> {interviewSession.interview.job.experience}
               </p>
+              {interviewSession.attempted && (
+                <p className="text-amber-600 font-medium">
+                  You have already attempted this interview
+                </p>
+              )}
             </CardContent>
           </Card>
           <Card className="bg-yellow-50 border-yellow-200">
@@ -60,7 +102,7 @@ function Interview() {
             </CardHeader>
             <CardContent className="text-yellow-700">
               <p className="mb-3">Please sit in a quiet place and record your answers.</p>
-              <p>{process.env.NEXT_PUBLIC_INFORMATION}</p>
+              <p>Your answers will be saved and evaluated. Make sure your microphone and camera are working properly.</p>
             </CardContent>
           </Card>
         </div>
@@ -90,16 +132,17 @@ function Interview() {
         </div>
       </div>
       <div className="flex justify-end mt-8">
-  <Link href={`/dashboard/interview/${params.interviewId}/start`}>
-    <Button 
-      className="py-2 px-4 rounded-lg transition-colors duration-200 font-medium text-sm bg-primary/10 hover:bg-primary/20 text-primary"
-    >
-      Start Interview
-    </Button>
-  </Link>
-</div>
+        <Link href={`/dashboard/interview/${params.interviewsessionid}/start`}>
+          <Button 
+            className="py-2 px-4 rounded-lg transition-colors duration-200 font-medium text-sm bg-primary/10 hover:bg-primary/20 text-primary"
+            disabled={interviewSession.attempted}
+          >
+            {interviewSession.attempted ? "Review Interview" : "Start Interview"}
+          </Button>
+        </Link>
+      </div>
     </div>
   )
 }
 
-export default Interview
+export default InterviewPage
