@@ -195,7 +195,22 @@ const JobDetailsPage = async ({
                             </Badge>
 
                             {interview.conductWithAI ? (
-                              <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-200 border-purple-200">
+                              <Badge className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white border-0 shadow-sm py-1 px-3 flex items-center gap-1.5">
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  className="h-3.5 w-3.5"
+                                >
+                                  <path d="M12 2a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-4a2 2 0 0 1-2-2V4a2 2 0 0 0-2-2z" />
+                                  <path d="M9 16c.85-.63 1.87-1 3-1s2.15.37 3 1" />
+                                  <circle cx="8" cy="12" r="1" />
+                                  <circle cx="16" cy="12" r="1" />
+                                </svg>
                                 AI Interview
                               </Badge>
                             ) : interview.conductOffline ? (
