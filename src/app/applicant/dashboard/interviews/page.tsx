@@ -76,23 +76,30 @@ export default async function InterviewsPage() {
     );
   }
 
-  // Separate interviews into upcoming and past
+  // Separate interviews into upcoming, past, and attempted
   const now = new Date();
   
+  // Get attempted interviews separately
+  const attemptedInterviews = interviewSessions.filter(session => 
+    session.attempted
+  );
+  
+  // Upcoming interviews that haven't been attempted
   const upcomingInterviews = interviewSessions.filter(session => {
     const completeByDate = session.interview.completeBy;
     const scheduledDate = session.interview.scheduledAt;
     const targetDate = completeByDate || scheduledDate;
     
-    return targetDate && !isPast(targetDate);
+    return targetDate && !isPast(targetDate) && !session.attempted;
   });
   
+  // Expired interviews that haven't been attempted
   const expiredInterviews = interviewSessions.filter(session => {
     const completeByDate = session.interview.completeBy;
     const scheduledDate = session.interview.scheduledAt;
     const targetDate = completeByDate || scheduledDate;
     
-    return !targetDate || isPast(targetDate);
+    return (!targetDate || isPast(targetDate)) && !session.attempted;
   });
 
   return (
@@ -123,6 +130,7 @@ export default async function InterviewsPage() {
                     key={session.interviewSessionId} 
                     session={session} 
                     isExpired={false} 
+                    showAttemptedButton={false}
                   />
                 ))
               ) : (
@@ -148,7 +156,8 @@ export default async function InterviewsPage() {
                   <InterviewCard 
                     key={session.interviewSessionId} 
                     session={session} 
-                    isExpired={true} 
+                    isExpired={true}
+                    showAttemptedButton={false}
                   />
                 ))
               ) : (
@@ -167,12 +176,47 @@ export default async function InterviewsPage() {
             </div>
           </TabsContent>
         </Tabs>
+        
+        {/* Attempted Interviews Section */}
+        <div className="mt-12">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <h2 className="text-2xl font-bold">Attempted Interviews</h2>
+            <p className="text-muted-foreground">
+              You have completed {attemptedInterviews.length} interview(s)
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 gap-6">
+            {attemptedInterviews.length > 0 ? (
+              attemptedInterviews.map((session) => (
+                <InterviewCard 
+                  key={session.interviewSessionId} 
+                  session={session} 
+                  isExpired={false}
+                  showAttemptedButton={true}
+                />
+              ))
+            ) : (
+              <Card>
+                <CardContent className="py-8">
+                  <div className="flex flex-col items-center justify-center text-center">
+                    <CheckCircle className="h-12 w-12 text-muted-foreground mb-4" />
+                    <h3 className="text-xl font-medium mb-2">No Attempted Interviews</h3>
+                    <p className="text-muted-foreground">
+                      You haven't completed any interviews yet.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
 }
 
-function InterviewCard({ session, isExpired }) {
+function InterviewCard({ session, isExpired, showAttemptedButton }) {
   const interview = session.interview;
   const job = interview.job;
   
@@ -202,9 +246,29 @@ function InterviewCard({ session, isExpired }) {
               )}
             </Badge>
             
-            <Badge variant={interview.conductWithAI ? "outline" : "destructive"} className={interview.conductWithAI ? "bg-blue-50 text-blue-700" : ""}>
-              {interview.conductWithAI ? "AI Interview" : "Manual Interview"}
-            </Badge>
+            {interview.conductWithAI && !interview.conductOffline ? (
+              <Badge variant="outline" className="bg-purple-100 text-purple-700 border-purple-200">
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="mr-1 h-3 w-3"
+                >
+                  <circle cx="8" cy="12" r="1" />
+                  <circle cx="16" cy="12" r="1" />
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                </svg>
+                Powered By Yukti AI
+              </Badge>
+            ) : interview.conductOffline ? (
+              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                Offline Interview
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                Video Interview
+              </Badge>
+            )}
             
             {session.attempted && (
               <Badge variant="outline" className="bg-green-50 text-green-700">
@@ -259,7 +323,7 @@ function InterviewCard({ session, isExpired }) {
       <CardFooter className="bg-muted/5 p-4">
         <div className="w-full flex justify-end">
           {/* Different button states based on interview type */}
-          {!interview.conductOffline && !isExpired && !session.attempted && (
+          {!interview.conductOffline && !isExpired && !session.attempted && !showAttemptedButton && (
             <Button asChild>
               <Link href={
                 interview.conductWithAI 
@@ -271,11 +335,10 @@ function InterviewCard({ session, isExpired }) {
             </Button>
           )}
           
-          {session.attempted && (
-            <Button variant="secondary" asChild>
-              <Link href={`/applicant/dashboard/interview/${session.interviewSessionId}/feedback`}>
-                View Feedback
-              </Link>
+          {/* Attempted button (grayed out) */}
+          {showAttemptedButton && (
+            <Button variant="outline" disabled className="text-gray-500 bg-gray-100">
+              <CheckCircle className="mr-2 h-4 w-4" /> Attempted
             </Button>
           )}
           
