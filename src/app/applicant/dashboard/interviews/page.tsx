@@ -21,11 +21,16 @@ export default async function InterviewsPage() {
   if (!authCookie) {
     return (
       <div className="container mx-auto py-10 px-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>Authentication Required</CardTitle>
+        <Card className="max-w-md mx-auto border shadow-sm">
+          <CardHeader className="text-center">
+            <CardTitle className="text-xl">Authentication Required</CardTitle>
             <CardDescription>Please log in to view your interviews</CardDescription>
           </CardHeader>
+          <CardFooter className="flex justify-center pb-6">
+            <Button asChild className="shadow-sm">
+              <Link href="/auth/login">Sign In</Link>
+            </Button>
+          </CardFooter>
         </Card>
       </div>
     );
@@ -57,16 +62,18 @@ export default async function InterviewsPage() {
   // No interviews case
   if (interviewSessions.length === 0) {
     return (
-      <div className="container mx-auto py-10 px-4">
+      <div className="container mx-auto py-12 px-4">
         <div className="max-w-5xl mx-auto">
-          <h1 className="text-3xl font-bold mb-6">My Interviews</h1>
-          <Card>
-            <CardContent className="py-8">
+          <h1 className="text-4xl font-bold mb-8 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">My Interviews</h1>
+          <Card className="border shadow-sm overflow-hidden">
+            <CardContent className="py-16">
               <div className="flex flex-col items-center justify-center text-center">
-                <AlertTriangle className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-xl font-medium mb-2">No Interviews Found</h3>
-                <p className="text-muted-foreground">
-                  You don't have any interviews scheduled at the moment.
+                <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center mb-6">
+                  <AlertTriangle className="h-10 w-10 text-muted-foreground" />
+                </div>
+                <h3 className="text-2xl font-medium mb-3">No Interviews Found</h3>
+                <p className="text-muted-foreground max-w-md">
+                  You don't have any interviews scheduled at the moment. Check back later or contact your recruiter.
                 </p>
               </div>
             </CardContent>
@@ -103,24 +110,43 @@ export default async function InterviewsPage() {
   });
 
   return (
-    <div className="container mx-auto py-10 px-4">
-      <div className="max-w-5xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-          <h1 className="text-3xl font-bold">My Interviews</h1>
-          <p className="text-muted-foreground">
-            You have {interviewSessions.length} interview(s) assigned
-          </p>
+    <div className="container mx-auto py-12 px-4">
+      <div className="max-w-6xl mx-auto space-y-10">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              My Interviews
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              You have {interviewSessions.length} interview(s) assigned
+            </p>
+          </div>
+          
+          <div className="flex items-center space-x-2 text-sm">
+            <span className="flex h-2 w-2 rounded-full bg-green-500"></span>
+            <span className="text-muted-foreground">Last updated: {format(new Date(), "PPP")}</span>
+          </div>
         </div>
 
         <Tabs defaultValue="upcoming" className="w-full">
-          <TabsList className="grid grid-cols-2 w-[400px] mb-6">
-            <TabsTrigger value="upcoming">
-              Upcoming ({upcomingInterviews.length})
-            </TabsTrigger>
-            <TabsTrigger value="expired">
-              Past Interviews ({expiredInterviews.length})
-            </TabsTrigger>
-          </TabsList>
+          <div className="border-b mb-8">
+            <TabsList className="w-full md:w-[400px] grid grid-cols-2 mb-0 bg-transparent">
+              <TabsTrigger 
+                value="upcoming"
+                className="data-[state=active]:bg-background data-[state=active]:shadow-sm"
+              >
+                <Calendar className="mr-2 h-4 w-4" />
+                Upcoming ({upcomingInterviews.length})
+              </TabsTrigger>
+              <TabsTrigger 
+                value="expired"
+                className="data-[state=active]:bg-background data-[state=active]:shadow-sm"
+              >
+                <Clock className="mr-2 h-4 w-4" />
+                Past Interviews ({expiredInterviews.length})
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="upcoming">
             <div className="grid grid-cols-1 gap-6">
@@ -134,15 +160,15 @@ export default async function InterviewsPage() {
                   />
                 ))
               ) : (
-                <Card>
-                  <CardContent className="py-8">
-                    <div className="flex flex-col items-center justify-center text-center">
-                      <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
-                      <h3 className="text-xl font-medium mb-2">No Upcoming Interviews</h3>
-                      <p className="text-muted-foreground">
-                        You don't have any upcoming interviews scheduled at the moment.
-                      </p>
+                <Card className="overflow-hidden border shadow-sm">
+                  <CardContent className="py-12 flex flex-col items-center justify-center text-center">
+                    <div className="h-16 w-16 rounded-full bg-muted/20 flex items-center justify-center mb-4">
+                      <Calendar className="h-8 w-8 text-muted-foreground" />
                     </div>
+                    <h3 className="text-xl font-medium mb-2">No Upcoming Interviews</h3>
+                    <p className="text-muted-foreground max-w-sm">
+                      You don't have any upcoming interviews scheduled at the moment.
+                    </p>
                   </CardContent>
                 </Card>
               )}
@@ -161,15 +187,15 @@ export default async function InterviewsPage() {
                   />
                 ))
               ) : (
-                <Card>
-                  <CardContent className="py-8">
-                    <div className="flex flex-col items-center justify-center text-center">
-                      <CheckCircle className="h-12 w-12 text-muted-foreground mb-4" />
-                      <h3 className="text-xl font-medium mb-2">No Past Interviews</h3>
-                      <p className="text-muted-foreground">
-                        You don't have any past interviews in your history.
-                      </p>
+                <Card className="overflow-hidden border shadow-sm">
+                  <CardContent className="py-12 flex flex-col items-center justify-center text-center">
+                    <div className="h-16 w-16 rounded-full bg-muted/20 flex items-center justify-center mb-4">
+                      <CheckCircle className="h-8 w-8 text-muted-foreground" />
                     </div>
+                    <h3 className="text-xl font-medium mb-2">No Past Interviews</h3>
+                    <p className="text-muted-foreground max-w-sm">
+                      You don't have any past interviews in your history.
+                    </p>
                   </CardContent>
                 </Card>
               )}
@@ -178,37 +204,44 @@ export default async function InterviewsPage() {
         </Tabs>
         
         {/* Attempted Interviews Section */}
-        <div className="mt-12">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-            <h2 className="text-2xl font-bold">Attempted Interviews</h2>
-            <p className="text-muted-foreground">
-              You have completed {attemptedInterviews.length} interview(s)
-            </p>
-          </div>
+        <div className="mt-16 relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl opacity-25 dark:opacity-5" />
           
-          <div className="grid grid-cols-1 gap-6">
-            {attemptedInterviews.length > 0 ? (
-              attemptedInterviews.map((session) => (
-                <InterviewCard 
-                  key={session.interviewSessionId} 
-                  session={session} 
-                  isExpired={false}
-                  showAttemptedButton={true}
-                />
-              ))
-            ) : (
-              <Card>
-                <CardContent className="py-8">
-                  <div className="flex flex-col items-center justify-center text-center">
-                    <CheckCircle className="h-12 w-12 text-muted-foreground mb-4" />
+          <div className="relative p-6 rounded-xl border">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+              <div className="flex items-center">
+                <CheckCircle className="h-5 w-5 mr-2 text-green-500" />
+                <h2 className="text-2xl font-bold">Attempted Interviews</h2>
+              </div>
+              <p className="text-muted-foreground">
+                You have completed {attemptedInterviews.length} interview(s)
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 gap-6">
+              {attemptedInterviews.length > 0 ? (
+                attemptedInterviews.map((session) => (
+                  <InterviewCard 
+                    key={session.interviewSessionId} 
+                    session={session} 
+                    isExpired={false}
+                    showAttemptedButton={true}
+                  />
+                ))
+              ) : (
+                <Card className="overflow-hidden border shadow-sm">
+                  <CardContent className="py-10 flex flex-col items-center justify-center text-center">
+                    <div className="h-16 w-16 rounded-full bg-muted/20 flex items-center justify-center mb-4">
+                      <CheckCircle className="h-8 w-8 text-muted-foreground" />
+                    </div>
                     <h3 className="text-xl font-medium mb-2">No Attempted Interviews</h3>
-                    <p className="text-muted-foreground">
+                    <p className="text-muted-foreground max-w-sm">
                       You haven't completed any interviews yet.
                     </p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+                  </CardContent>
+                </Card>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -226,19 +259,20 @@ function InterviewCard({ session, isExpired, showAttemptedButton }) {
     : interview.scheduledAt;
 
   return (
-    <Card className="overflow-hidden border">
-      <CardHeader className="bg-muted/30">
+    <Card className="overflow-hidden border hover:shadow-md transition-shadow">
+      <CardHeader className="bg-muted/20 border-b">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <CardTitle className="text-xl">{interview.title}</CardTitle>
+            <CardTitle className="text-xl font-bold">{interview.title}</CardTitle>
             <CardDescription className="mt-1.5">
               <span className="font-medium text-foreground">{job.title}</span>
-              <span className="mx-2">•</span>
+              <span className="mx-2 text-muted-foreground">•</span>
               <span>{job.location}</span>
             </CardDescription>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Badge variant={interview.type === "CODE" ? "secondary" : "default"}>
+            <Badge variant={interview.type === "CODE" ? "secondary" : "default"} 
+                  className="shadow-sm">
               {interview.type === "CODE" ? (
                 <><Code className="mr-1 h-3 w-3" /> Coding</>
               ) : (
@@ -247,7 +281,7 @@ function InterviewCard({ session, isExpired, showAttemptedButton }) {
             </Badge>
             
             {interview.conductWithAI && !interview.conductOffline ? (
-              <Badge variant="outline" className="bg-purple-100 text-purple-700 border-purple-200">
+              <Badge variant="outline" className="bg-purple-100 text-purple-700 border-purple-200 shadow-sm">
                 <svg 
                   xmlns="http://www.w3.org/2000/svg" 
                   viewBox="0 0 24 24"
@@ -261,17 +295,26 @@ function InterviewCard({ session, isExpired, showAttemptedButton }) {
                 Powered By Yukti AI
               </Badge>
             ) : interview.conductOffline ? (
-              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 shadow-sm">
+                <MapPin className="mr-1 h-3 w-3" />
                 Offline Interview
               </Badge>
             ) : (
-              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 shadow-sm">
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="mr-1 h-3 w-3"
+                >
+                  <path d="M15 8v8H5V8h10m1-2H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4V7c0-.55-.45-1-1-1z" />
+                </svg>
                 Video Interview
               </Badge>
             )}
             
             {session.attempted && (
-              <Badge variant="outline" className="bg-green-50 text-green-700">
+              <Badge variant="outline" className="bg-green-50 text-green-700 shadow-sm">
                 <CheckCircle className="mr-1 h-3 w-3" /> Attempted
               </Badge>
             )}
@@ -279,43 +322,44 @@ function InterviewCard({ session, isExpired, showAttemptedButton }) {
         </div>
       </CardHeader>
       
-      <CardContent className="pt-6">
-        <div className="space-y-4">
-          {/* Date information */}
-          {dateToDisplay && (
-            <div className="flex items-center text-sm">
-              <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
+      <CardContent className="pt-6 space-y-4">
+        {/* Date information */}
+        {dateToDisplay && (
+          <div className="flex items-center text-sm rounded-md p-3 bg-muted/10">
+            <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
+            <span>
               <span className="text-muted-foreground">
                 {interview.conductWithAI ? "Complete by: " : "Scheduled for: "}
-                <span className="font-medium text-foreground">
-                  {format(new Date(dateToDisplay), "PPP")}
+              </span>
+              <span className="font-medium text-foreground">
+                {format(new Date(dateToDisplay), "PPP")}
+              </span>
+              {!isExpired && (
+                <span className="ml-2 text-xs rounded-full bg-muted px-2 py-0.5">
+                  {formatDistanceToNow(new Date(dateToDisplay), { addSuffix: true })}
                 </span>
-                {!isExpired && (
-                  <span className="ml-2 text-xs text-muted-foreground">
-                    ({formatDistanceToNow(new Date(dateToDisplay), { addSuffix: true })})
-                  </span>
-                )}
-              </span>
-            </div>
-          )}
-          
-          {/* Location for offline interviews */}
-          {interview.conductOffline && interview.location && (
-            <div className="flex items-center text-sm">
-              <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
-              <span className="text-muted-foreground">
-                Location: <span className="font-medium text-foreground">{interview.location}</span>
-              </span>
-            </div>
-          )}
-          
-          {isExpired && !session.attempted && (
-            <div className="rounded-md bg-destructive/10 p-4 text-sm text-destructive">
-              <AlertTriangle className="h-4 w-4 inline-block mr-2" />
-              This interview has expired and was not attempted
-            </div>
-          )}
-        </div>
+              )}
+            </span>
+          </div>
+        )}
+        
+        {/* Location for offline interviews */}
+        {interview.conductOffline && interview.location && (
+          <div className="flex items-center text-sm rounded-md p-3 bg-muted/10">
+            <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
+            <span>
+              <span className="text-muted-foreground">Location: </span>
+              <span className="font-medium text-foreground">{interview.location}</span>
+            </span>
+          </div>
+        )}
+        
+        {isExpired && !session.attempted && (
+          <div className="rounded-md bg-destructive/10 p-4 text-sm text-destructive flex items-center">
+            <AlertTriangle className="h-5 w-5 mr-3" />
+            <p>This interview has expired and was not attempted</p>
+          </div>
+        )}
       </CardContent>
       
       <Separator />
@@ -324,13 +368,23 @@ function InterviewCard({ session, isExpired, showAttemptedButton }) {
         <div className="w-full flex justify-end">
           {/* Different button states based on interview type */}
           {!interview.conductOffline && !isExpired && !session.attempted && !showAttemptedButton && (
-            <Button asChild>
+            <Button asChild className="shadow-sm">
               <Link href={
                 interview.conductWithAI 
                   ? `/applicant/dashboard/interview/${session.interviewSessionId}`
                   : interview.location || "#"
               }>
-                Start Interview
+                <span className="flex items-center">
+                  Start Interview
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    viewBox="0 0 20 20" 
+                    fill="currentColor" 
+                    className="ml-2 h-4 w-4"
+                  >
+                    <path fillRule="evenodd" d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z" clipRule="evenodd" />
+                  </svg>
+                </span>
               </Link>
             </Button>
           )}
@@ -343,14 +397,14 @@ function InterviewCard({ session, isExpired, showAttemptedButton }) {
           )}
           
           {interview.conductOffline && !session.attempted && !isExpired && (
-            <Button variant="outline" disabled>
-              In-person Interview
+            <Button variant="outline" disabled className="shadow-sm">
+              <MapPin className="mr-2 h-4 w-4" /> In-person Interview
             </Button>
           )}
           
           {isExpired && !session.attempted && (
-            <Button variant="outline" disabled>
-              Interview Expired
+            <Button variant="outline" disabled className="shadow-sm">
+              <AlertTriangle className="mr-2 h-4 w-4" /> Interview Expired
             </Button>
           )}
         </div>
