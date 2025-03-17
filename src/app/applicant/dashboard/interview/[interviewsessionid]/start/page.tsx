@@ -3,14 +3,14 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
-import { getInterviewSession, completeInterview } from "@/actions/interview";
+import { completeInterview } from "@/actions/interview";
 import { CircleCheckBig, Loader2, Clock } from "lucide-react";
 import QuestionDisplay from "./_components/QuestionDisplay";
 import InterviewProgress from "./_components/InterviewProgress";
 import { Badge } from "@/components/ui/badge";
 import dynamic from "next/dynamic";
+import { protectInterviewRoute } from "@/actions/protectInterviewRoute";
 
 // Fix for "navigator is not defined" error - Import with SSR disabled
 const RecordAnswerSection = dynamic(
@@ -25,7 +25,6 @@ export default function InterviewPage({ params }: { params: { interviewsessionid
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(59 * 60); // 59 minutes in seconds
-  const { user } = useUser();
   const router = useRouter();
   const sessionId = params.interviewsessionid;
   const webcamRef = useRef(null);
@@ -58,29 +57,21 @@ export default function InterviewPage({ params }: { params: { interviewsessionid
   useEffect(() => {
     async function fetchInterviewData() {
       try {
-        const result = await getInterviewSession(sessionId);
+        // Use protectInterviewRoute instead of getInterviewSession
+        const session = await protectInterviewRoute(sessionId);
         
-        if (result.error) {
-          toast.error(result.error);
-          return;
-        }
-        
-        if (!result.session) {
-          toast.error("Failed to load interview");
-          return;
-        }
-        
-        setInterviewData(result.session);
-        setQuestions(result.session.interview.questions);
+        setInterviewData(session);
+        setQuestions(session.interview.questions);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching interview data:", error);
         toast.error("Failed to load interview session");
+        router.push('/applicant/dashboard');
       }
     }
     
     fetchInterviewData();
-  }, [sessionId]);
+  }, [sessionId, router]);
 
   const handleNextQuestion = () => {
     if (activeQuestionIndex < questions.length - 1) {

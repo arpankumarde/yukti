@@ -7,7 +7,7 @@ import { Check, Lightbulb, MicIcon, WebcamIcon, XCircle } from "lucide-react";
 import Webcam from "react-webcam";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { getInterviewSession } from "@/actions/interview";
+import { protectInterviewRoute } from "@/actions/protectInterviewRoute";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 
@@ -20,6 +20,13 @@ interface InterviewSession {
       title: string;
       description: string;
       experience: string;
+    };
+    questions: any[];
+  };
+  application: {
+    applicant: {
+      firstName: string;
+      lastName: string;
     };
   };
 }
@@ -39,11 +46,8 @@ export default function InterviewPage() {
         const sessionId = params.interviewsessionid as string;
         if (!sessionId) return;
 
-        const { session, error } = await getInterviewSession(sessionId);
-        
-        if (error) {
-          throw new Error(error);
-        }
+        // Use protectInterviewRoute instead of getInterviewSession
+        const session = await protectInterviewRoute(sessionId);
         
         setInterviewSession(session);
         // Update document title with interview title

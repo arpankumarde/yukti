@@ -9,10 +9,11 @@ const getAnalysisPrompt = (isJobMatch: boolean) => {
 1. ATS Compatibility Score (0-100) without any percentage symbol 
 2. Key strengths 
 3.weakness
+4. Keywords: Extract 5-8 most relevant skills or technical keywords from the resume
 
 The Strength are weakness are advisable to be around 60 words each..
 
-Format your response as a JSON with fields : score , strength , weakness.
+Format your response as a JSON with fields : score, strength, weakness, keywords (as a string array).
 Make sure strictly the response doesn't contain anything else but just a JSON.
 `;
   }
@@ -22,9 +23,9 @@ Make sure strictly the response doesn't contain anything else but just a JSON.
 1. ATS Compatibility Score (0-100%)
 2. Key strengths 
 3.weakness
+4. Keywords: Extract 5-8 most relevant skills or technical keywords from the resume
 
-
-Format your response as a JSON with fields : score , strength , weakness.
+Format your response as a JSON with fields : score, strength, weakness, keywords (as a string array).
 Make sure strictly the response doesn't contain anything else but just a JSON.
 `;
 };

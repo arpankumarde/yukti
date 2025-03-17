@@ -104,6 +104,8 @@ export default function ResumeAnalyzer() {
 
     try {
       const pdf = new jsPDF();
+      
+      // Title and header setup
       pdf.setFontSize(20);
       pdf.text("ATS Analysis Report", 20, 20);
       
@@ -115,11 +117,28 @@ export default function ResumeAnalyzer() {
       pdf.setTextColor(0, 0, 0);
       pdf.text(`Score: ${score}%`, 25, 43);
       
-      // Add analysis text
+      // Add analysis text with pagination support
       pdf.setFontSize(12);
       pdf.setTextColor(50, 50, 50);
-      const lines = pdf.splitTextToSize(analysis.replace(/[#*]/g, ''), 170);
-      pdf.text(lines, 20, 60);
+      
+      const cleanText = analysis.replace(/[#*]/g, '');
+      const textLines = pdf.splitTextToSize(cleanText, 170);
+      
+      let y = 60; // Starting y position
+      const pageHeight = pdf.internal.pageSize.height;
+      const margin = 20;
+      
+      for (let i = 0; i < textLines.length; i++) {
+        // Add a new page if we've reached the bottom margin
+        if (y > pageHeight - margin) {
+          pdf.addPage();
+          y = margin; // Reset y position for the new page
+        }
+        
+        // Add the line of text
+        pdf.text(textLines[i], 20, y);
+        y += 7; // Move to next line (adjust spacing as needed)
+      }
       
       pdf.save('ats-analysis-report.pdf');
       toast.success('Report downloaded successfully!');
@@ -316,7 +335,7 @@ export default function ResumeAnalyzer() {
 
                   <Separator />
                   
-                                   <CardContent className="pt-6">
+                  <CardContent className="pt-6">
                     <div className="prose max-w-none dark:prose-invert overflow-hidden">
                       <div className="break-words whitespace-normal overflow-wrap-anywhere">
                         <ReactMarkdown>{analysis}</ReactMarkdown>

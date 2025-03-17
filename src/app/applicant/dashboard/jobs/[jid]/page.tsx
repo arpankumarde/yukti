@@ -1,12 +1,14 @@
-import { Briefcase, Building2, CalendarDays, MapPin, Coins, Gift, Clock } from "lucide-react";
+import { Briefcase, Building2, CalendarDays, MapPin, Coins, Gift, Clock, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
+import { cookies } from "next/headers";
 import prisma from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface PageProps {
   params: Promise<{ jid: string }>;
@@ -28,6 +30,37 @@ export default async function JobDetails({ params }: PageProps) {
 
   if (!jid) {
     notFound();
+  }
+
+  // Get the current user information from cookies
+  const cookieStore = cookies();
+  const authCookie = (await cookieStore).get('ykapptoken');
+  
+  let hasApplied = false;
+  let applicantId: string | null = null;
+  
+  // Check if the user is logged in and get applicantId
+  if (authCookie && authCookie.value) {
+    try {
+      const userData = JSON.parse(authCookie.value);
+      applicantId = userData.applicantId;
+      
+      // Check if the user has already applied for this job
+      if (applicantId) {
+        const existingApplication = await prisma.application.findUnique({
+          where: {
+            applicantId_jobId: {
+              applicantId,
+              jobId: jid
+            }
+          }
+        });
+        
+        hasApplied = !!existingApplication;
+      }
+    } catch (error) {
+      console.error("Error checking application status:", error);
+    }
   }
 
   const job = await prisma.job.findUnique({
@@ -153,17 +186,42 @@ export default async function JobDetails({ params }: PageProps) {
           </CardContent>
 
           <CardFooter className="border-t border-border p-6 bg-muted/20">
-            <div className="w-full flex flex-col sm:flex-row items-center gap-4">
-              <Button className="w-full sm:w-auto" asChild>
-                <Link href={`/applicant/dashboard/jobs/${job.id}/apply`}>
-                  Apply Now
-                </Link>
-              </Button>
-              <Button variant="outline" className="w-full sm:w-auto" asChild>
-                <Link href="/applicant/dashboard/jobs">
-                  Back to Jobs
-                </Link>
-              </Button>
+            <div className="w-full space-y-4">
+              {hasApplied && (
+                <Alert className="bg-amber-50 border-amber-200">
+                  <AlertCircle className="h-4 w-4 text-amber-600" />
+                  <AlertDescription className="text-amber-600">
+                    You have already applied for this job. Track your application status at{" "}
+                    <Link href="/applicant/dashboard/applied-jobs" className="font-medium underline underline-offset-2">
+                      Applied Jobs
+                    </Link>
+                    .
+                  </AlertDescription>
+                </Alert>
+              )}
+              
+              <div className="w-full flex flex-col sm:flex-row items-center gap-4">
+                {hasApplied ? (
+                  <Button 
+                    className="w-full sm:w-auto opacity-60 cursor-not-allowed" 
+                    disabled={true}
+                  >
+                    Already Applied
+                  </Button>
+                ) : (
+                  <Button className="w-full sm:w-auto" asChild>
+                    <Link href={`/applicant/dashboard/jobs/${job.id}/apply`}>
+                      Apply Now
+                    </Link>
+                  </Button>
+                )}
+                
+                <Button variant="outline" className="w-full sm:w-auto" asChild>
+                  <Link href="/applicant/dashboard/jobs">
+                    Back to Jobs
+                  </Link>
+                </Button>
+              </div>
             </div>
           </CardFooter>
         </Card>

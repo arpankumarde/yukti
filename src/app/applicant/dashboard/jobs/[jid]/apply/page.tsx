@@ -13,8 +13,9 @@ import { Upload, FileText, Eye } from "lucide-react"
 
 interface AnalysisResult {
   score: string
-  strength: string[]
-  weakness: string[]
+  strength: string | string[]
+  weakness: string | string[]
+  keywords: string[]
 }
 
 const ApplyJobPage = ({ params }: { params: Promise<{ jid: string }> }) => {
@@ -45,21 +46,37 @@ const ApplyJobPage = ({ params }: { params: Promise<{ jid: string }> }) => {
 
       const data = await response.json()
       console.log("Raw API Response:", data)
-      console.log("Message Content:", data.choices[0].message.content)
-
+      
+      if (!data?.choices?.[0]?.message?.content) {
+        throw new Error("Invalid response format from analysis API")
+      }
+      
       let analysisResult = data.choices[0].message.content
+      console.log("Message Content:", analysisResult)
 
+      // Clean up the JSON string
       analysisResult = analysisResult
-        .replace(/^[\s\S]*?```json\s*/, "")
-        .replace(/\s*```[\s\S]*$/, "")
+        .replace(/^[\s\S]*?```json\s*/, "")  // Remove everything before JSON
+        .replace(/\s*```[\s\S]*$/, "")       // Remove everything after JSON
         .trim()
 
       console.log("Cleaned Analysis Result:", analysisResult)
 
       try {
-        const parsedAnalysis = JSON.parse(analysisResult) as AnalysisResult
-        console.log("Successfully Parsed Analysis:", parsedAnalysis)
-        return parsedAnalysis
+        const parsedAnalysis = JSON.parse(analysisResult)
+        
+        // Format and normalize the data structure
+        const formattedAnalysis: AnalysisResult = {
+          score: parsedAnalysis.score?.toString() || "0",
+          strength: parsedAnalysis.strength || "",
+          weakness: parsedAnalysis.weakness || "",
+          keywords: Array.isArray(parsedAnalysis.keywords) ? 
+            parsedAnalysis.keywords : 
+            (parsedAnalysis.keywords ? [parsedAnalysis.keywords] : [])
+        }
+        
+        console.log("Successfully Formatted Analysis:", formattedAnalysis)
+        return formattedAnalysis
       } catch (parseError) {
         console.error("JSON Parse Error:", parseError)
         console.error("Failed JSON string:", analysisResult)
@@ -164,60 +181,87 @@ const ApplyJobPage = ({ params }: { params: Promise<{ jid: string }> }) => {
       toast.error("Failed to upload cover letter")
     }
   }
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
 
-  if (!resume) {
-    toast.error("Please upload your resume first");
-    return;
-  }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  const applicantCookie = getCookie("ykapptoken");
-  const applicant = applicantCookie ? JSON.parse(applicantCookie as string) : null;
-
-  if (!applicant) {
-    toast.error("You must be logged in to apply for jobs");
-    return;
-  }
-
-  try {
-    // Clean up the score by removing any percentage symbol
-    let cleanScore = null;
-    if (analysisResults?.score) {
-      // Remove % if present and convert to number
-      cleanScore = analysisResults.score.toString().replace(/%/g, '');
-      // Ensure it's a valid number
-      cleanScore = !isNaN(Number(cleanScore)) ? Number(cleanScore) : null;
+    if (!resume) {
+      toast.error("Please upload your resume first");
+      return;
     }
 
-    const response = await fetch("/api/applications", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        jobId: jobId,
-        applicantId: applicant.applicantId,
-        status: "PENDING",
-        resume: resume,
-        coverLetter: coverLetter,
-        score: cleanScore,
-        strength: analysisResults?.strength?.join(", ") || null,
-        weakness: analysisResults?.weakness?.join(", ") || null,
-      }),
-    });
+    const applicantCookie = getCookie("ykapptoken");
+    const applicant = applicantCookie ? JSON.parse(applicantCookie as string) : null;
 
-    if (!response.ok) {
-      throw new Error("Failed to submit application");
+    if (!applicant) {
+      toast.error("You must be logged in to apply for jobs");
+      return;
     }
 
-    toast.success("Application submitted successfully");
-    router.push("/applicant/dashboard/applied-jobs");
-  } catch (error) {
-    console.error("Error submitting application:", error);
-    toast.error("Failed to submit application");
-  }
-};
+    try {
+      // Format and clean up the data
+      let cleanScore = null;
+      if (analysisResults?.score) {
+        // Remove % if present and convert to number
+        const scoreStr = analysisResults.score.toString().replace(/%/g, '');
+        cleanScore = !isNaN(Number(scoreStr)) ? Number(scoreStr) : null;
+      }
+
+      // Format strength (handle both string and array cases)
+      const strength = analysisResults?.strength ? 
+        (typeof analysisResults.strength === 'string' ? analysisResults.strength : 
+         Array.isArray(analysisResults.strength) ? analysisResults.strength.join(", ") : null) : 
+        null;
+      
+      // Format weakness (handle both string and array cases)
+      const weakness = analysisResults?.weakness ? 
+        (typeof analysisResults.weakness === 'string' ? analysisResults.weakness : 
+         Array.isArray(analysisResults.weakness) ? analysisResults.weakness.join(", ") : null) : 
+        null;
+      
+      // Ensure keywords is always a valid array
+      const keywords = analysisResults?.keywords && Array.isArray(analysisResults.keywords) 
+        ? analysisResults.keywords.filter(k => typeof k === 'string' && k.trim() !== '')
+        : [];
+      
+      // Log the data we're about to send
+      console.log("Submitting application with data:", {
+        jobId, applicantId: applicant.applicantId, 
+        score: cleanScore, strength, weakness, keywords
+      });
+
+      const response = await fetch("/api/applications", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          jobId: jobId,
+          applicantId: applicant.applicantId,
+          status: "PENDING",
+          resume: resume,
+          coverLetter: coverLetter || null,
+          score: cleanScore,
+          strength: strength,
+          weakness: weakness,
+          keywords: keywords,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Application submission error:", errorData);
+        throw new Error("Failed to submit application");
+      }
+
+      toast.success("Application submitted successfully");
+      router.push("/applicant/dashboard/applied-jobs");
+    } catch (error) {
+      console.error("Error submitting application:", error);
+      toast.error("Failed to submit application");
+    }
+  };
+
   const handlePreview = () => {
     if (resume) {
       window.open(resume, "_blank")
