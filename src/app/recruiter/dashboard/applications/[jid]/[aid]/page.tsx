@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { ApplicationDetailsClient } from "./_components/ApplicationDetailsClient";
+import Markdown from "react-markdown";
 
 const ApplicationDetailsPage = async ({
   params,
@@ -266,8 +267,8 @@ const ApplicationDetailsPage = async ({
                     <p className="text-sm text-gray-500 mb-2 flex items-center">
                       <ThumbsUp className="h-4 w-4 mr-1" /> Strengths
                     </p>
-                    <div className="p-4 bg-green-50 rounded-lg">
-                      <p className="text-sm">{application.strength}</p>
+                    <div className="p-4 bg-green-50 rounded-lg prose prose-sm max-w-none">
+                      <Markdown>{application.strength}</Markdown>
                     </div>
                   </div>
                 )}
@@ -279,8 +280,8 @@ const ApplicationDetailsPage = async ({
                     <p className="text-sm text-gray-500 mb-2 flex items-center">
                       <ThumbsDown className="h-4 w-4 mr-1" /> Weaknesses
                     </p>
-                    <div className="p-4 bg-red-50 rounded-lg">
-                      <p className="text-sm">{application.weakness}</p>
+                    <div className="p-4 bg-red-50 rounded-lg prose prose-sm max-w-none">
+                      <Markdown>{application.weakness}</Markdown>
                     </div>
                   </div>
                 )}

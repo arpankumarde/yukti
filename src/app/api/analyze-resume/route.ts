@@ -7,11 +7,11 @@ const getAnalysisPrompt = (isJobMatch: boolean) => {
     return `You are an expert ATS (Applicant Tracking System) analyzer and professional resume reviewer. Analyze the following resume text and provide a detailed report covering:
 
 1. ATS Compatibility Score (0-100) without any percentage symbol 
-2. Key strengths 
-3.weakness
+2. Key strengths - Format this using markdown with **bold** for key points, _italics_ for emphasis, and bullet points (- ) for listing different strengths
+3. Weakness - Format this using markdown with **bold** for key points, _italics_ for emphasis, and bullet points (- ) for listing different weaknesses
 4. Keywords: Extract 5-8 most relevant skills or technical keywords from the resume
 
-The Strength are weakness are advisable to be around 60 words each..
+The Strength and weakness sections are advisable to be around 60 words each, well-formatted with markdown to highlight important parts.
 
 Format your response as a JSON with fields : score, strength, weakness, keywords (as a string array).
 Make sure strictly the response doesn't contain anything else but just a JSON.
@@ -20,10 +20,12 @@ Make sure strictly the response doesn't contain anything else but just a JSON.
 
   return `You are an expert ATS (Applicant Tracking System) analyzer and professional resume reviewer. Analyze the following resume text and provide a detailed report covering:
 
-1. ATS Compatibility Score (0-100%)
-2. Key strengths 
-3.weakness
+1. ATS Compatibility Score (0-100) without any percentage symbol 
+2. Key strengths - Format this using markdown with **bold** for key points, _italics_ for emphasis, and bullet points (- ) for listing different strengths
+3. Weakness - Format this using markdown with **bold** for key points, _italics_ for emphasis, and bullet points (- ) for listing different weaknesses
 4. Keywords: Extract 5-8 most relevant skills or technical keywords from the resume
+
+The Strength and weakness sections are advisable to be around 60 words each, well-formatted with markdown to highlight important parts.
 
 Format your response as a JSON with fields : score, strength, weakness, keywords (as a string array).
 Make sure strictly the response doesn't contain anything else but just a JSON.

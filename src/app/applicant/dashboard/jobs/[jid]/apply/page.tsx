@@ -277,6 +277,12 @@ const ApplyJobPage = ({ params }: { params: Promise<{ jid: string }> }) => {
     }
   }
 
+  const handleCoverLetterPreview = () => {
+    if (coverLetter) {
+      window.open(coverLetter, "_blank")
+    }
+  }
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-muted p-6 md:p-10">
       <div className="w-full max-w-xl">
@@ -371,6 +377,10 @@ const ApplyJobPage = ({ params }: { params: Promise<{ jid: string }> }) => {
                     {coverLetter && (
                       <div className="flex items-center gap-2">
                         <p className="text-sm font-medium">{coverLetterFileName}</p>
+                        <Button type="button" variant="ghost" size="sm" onClick={handleCoverLetterPreview}>
+                          <Eye className="w-4 h-4 mr-2" />
+                          Preview
+                        </Button>
                       </div>
                     )}
                     <p className="text-sm text-muted-foreground">
