@@ -180,7 +180,7 @@ const Questions = ({
       <div className="flex flex-wrap gap-3">
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
-            <Button className="bg-indigo-600 hover:bg-indigo-700">
+            <Button>
               <Plus className="h-4 w-4 mr-2" />
               Add Question
             </Button>
@@ -385,11 +385,7 @@ const Questions = ({
       </Sheet>
 
       <div className="mt-8 flex justify-end">
-        <Button
-          onClick={handlePageForward}
-          className="bg-indigo-600 hover:bg-indigo-700 gap-2"
-          size="lg"
-        >
+        <Button onClick={handlePageForward} className=" gap-2" size="lg">
           Proceed to Candidate Selection
           <ChevronRight className="h-4 w-4" />
         </Button>

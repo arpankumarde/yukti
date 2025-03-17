@@ -8,7 +8,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Users, CalendarCheck } from "lucide-react";
+import { Users, CalendarCheck, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 const Page = async ({
   params,
@@ -53,39 +55,52 @@ const Page = async ({
   }
 
   return (
-    <div className="container mx-auto px-4 py-10">
-      <Card className="border shadow-lg">
-        <CardHeader className="space-y-1 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-lg">
-          <div className="flex items-center gap-2">
-            <Users className="h-6 w-6 text-indigo-600" />
-            <CardTitle className="text-2xl font-bold text-gray-800">
-              Select Applicants
-            </CardTitle>
-          </div>
-          <CardDescription className="text-gray-600">
-            Choose the applicants who will participate in &quot;{interview.title}&quot;
+    <div className="space-y-6 p-6 md:p-10">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" asChild>
+            <Link
+              href={`/recruiter/dashboard/interviews/${jid}/${interviewId}/questions`}
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
+          </Button>
+          <h1 className="text-2xl font-semibold">Select Applicants</h1>
+        </div>
+        <Users className="h-6 w-6 text-muted-foreground" />
+      </div>
+
+      <Card className="bg-background shadow-xl border-muted">
+        <CardHeader className="border-b bg-muted/10 p-6">
+          <CardTitle>Available Candidates</CardTitle>
+          <CardDescription>
+            Choose the applicants who will participate in &quot;
+            {interview.title}&quot;
           </CardDescription>
-          
-          <div className="flex items-center gap-2 text-sm text-indigo-600 mt-2">
+
+          <div className="flex items-center gap-2 text-sm text-primary mt-2">
             <CalendarCheck className="h-4 w-4" />
-            {interview.conductWithAI 
-              ? `Complete by: ${interview.completeBy?.toLocaleDateString() || 'Not specified'}`
-              : `Scheduled for: ${interview.scheduledAt?.toLocaleDateString() || 'Not specified'}`
-            }
+            {interview.conductWithAI
+              ? `Complete by: ${
+                  interview.completeBy?.toLocaleDateString() || "Not specified"
+                }`
+              : `Scheduled for: ${
+                  interview.scheduledAt?.toLocaleDateString() || "Not specified"
+                }`}
           </div>
         </CardHeader>
 
-        <CardContent className="pt-6">
+        <CardContent className="p-6 space-y-8">
           <div className="space-y-6">
             <div className="space-y-2">
-              <h3 className="text-lg font-medium flex items-center gap-2 text-indigo-700">
+              <h3 className="text-lg font-medium text-primary inline-flex items-center gap-2">
                 <Users className="h-5 w-5" />
-                Available Candidates ({applications.length})
+                Candidates ({applications.length})
               </h3>
-              <Separator className="bg-indigo-100" />
+              <Separator />
             </div>
 
-            <div className="bg-white rounded-md p-1">
+            <div className="bg-background rounded-md">
               <Applicants
                 applications={applications}
                 interviewSessions={interviewSessions}

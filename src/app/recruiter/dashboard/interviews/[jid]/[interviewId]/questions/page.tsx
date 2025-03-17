@@ -8,7 +8,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { MessageSquare, HelpCircle } from "lucide-react";
+import { MessageSquare, HelpCircle, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 const Page = async ({
   params,
@@ -38,36 +40,45 @@ const Page = async ({
       </div>
     );
   }
-  
+
   // Ensure questions is an array and calculate the correct length
-  const questionCount = Array.isArray(interview.questions) ? interview.questions.length : 0;
+  const questionCount = Array.isArray(interview.questions)
+    ? interview.questions.length
+    : 0;
 
   return (
-    <div className="container mx-auto px-4 py-10">
-      <Card className="border shadow-lg animate-fadeIn">
-        <CardHeader className="space-y-1 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-lg">
-          <div className="flex items-center gap-2">
-            <MessageSquare className="h-6 w-6 text-indigo-600" />
-            <CardTitle className="text-2xl font-bold text-gray-800">
-              Interview Questions
-            </CardTitle>
-          </div>
-          <CardDescription className="text-gray-600">
+    <div className="space-y-6 p-6 md:p-10">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" asChild>
+            <Link href={`/recruiter/dashboard/postings/${jid}`}>
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
+          </Button>
+          <h1 className="text-2xl font-semibold">Interview Questions</h1>
+        </div>
+        <MessageSquare className="h-6 w-6 text-muted-foreground" />
+      </div>
+
+      <Card className="bg-background shadow-xl border-muted">
+        <CardHeader className="border-b bg-muted/10 p-6">
+          <CardTitle>Question Management</CardTitle>
+          <CardDescription>
             Add or generate questions for "{interview.title}" interview
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="pt-6">
+        <CardContent className="p-6 space-y-8">
           <div className="space-y-6">
             <div className="space-y-2">
-              <h3 className="text-lg font-medium flex items-center gap-2 text-indigo-700">
+              <h3 className="text-lg font-medium text-primary inline-flex items-center gap-2">
                 <HelpCircle className="h-5 w-5" />
                 Questions ({questionCount})
               </h3>
-              <Separator className="bg-indigo-100" />
+              <Separator />
             </div>
 
-            <div className="bg-white rounded-md p-1">
+            <div className="bg-background rounded-md">
               <Questions
                 questionProps={interview?.questions || []}
                 interviewId={interviewId}

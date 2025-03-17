@@ -177,7 +177,10 @@ const ApplicationDetailsPage = async ({
                       {application.job.location}
                     </p>
                   </div>
+                </div>
 
+                {/* Right column - Additional details */}
+                <div className="space-y-4">
                   {application.job.salary && (
                     <div className="border rounded-lg p-3">
                       <h3 className="text-sm font-medium text-muted-foreground mb-1">
@@ -188,10 +191,6 @@ const ApplicationDetailsPage = async ({
                       </p>
                     </div>
                   )}
-                </div>
-
-                {/* Right column - Additional details */}
-                <div className="space-y-4">
                   {application.job.perks && (
                     <div className="border rounded-lg p-3">
                       <h3 className="text-sm font-medium text-muted-foreground mb-1">
@@ -203,7 +202,7 @@ const ApplicationDetailsPage = async ({
 
                   <div className="border rounded-lg p-3">
                     <h3 className="text-sm font-medium text-muted-foreground mb-1">
-                      Created On
+                      Posted On
                     </h3>
                     <p className="text-foreground">
                       {new Date(application.job.createdAt).toLocaleDateString()}
@@ -211,18 +210,6 @@ const ApplicationDetailsPage = async ({
                   </div>
                 </div>
               </div>
-
-              {/* Job Description - Full width */}
-              {application.job.description && (
-                <div className="border rounded-lg p-3">
-                  <h3 className="text-sm font-medium text-muted-foreground mb-1">
-                    Description
-                  </h3>
-                  <p className="text-foreground whitespace-pre-wrap">
-                    {application.job.description}
-                  </p>
-                </div>
-              )}
 
               <div className="flex justify-end">
                 <Button asChild variant="outline">

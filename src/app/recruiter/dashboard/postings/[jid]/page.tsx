@@ -2,7 +2,14 @@ import { Button } from "@/components/ui/button";
 import prisma from "@/lib/prisma";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { ArrowLeft, Edit, Calendar, Trash2, Users } from "lucide-react";
+import {
+  ArrowLeft,
+  Edit,
+  Calendar,
+  Trash2,
+  Users,
+  FileText,
+} from "lucide-react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { TiEye } from "react-icons/ti";
 import { revalidatePath } from "next/cache";
@@ -191,12 +198,19 @@ const JobDetailsPage = async ({
                               <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-200 border-purple-200">
                                 AI Interview
                               </Badge>
-                            ) : (
+                            ) : interview.conductOffline ? (
                               <Badge
                                 variant="outline"
                                 className="bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200"
                               >
-                                Manual Interview
+                                Offline Interview
+                              </Badge>
+                            ) : (
+                              <Badge
+                                variant="outline"
+                                className="bg-green-50 text-green-700 hover:bg-green-100 border-green-200"
+                              >
+                                Video Interview
                               </Badge>
                             )}
 
@@ -227,7 +241,7 @@ const JobDetailsPage = async ({
                             className="gap-1"
                           >
                             <Link
-                              href={`/recruiter/dashboard/interviews/${job.id}/${interview.interviewId}`}
+                              href={`/recruiter/dashboard/interviews/reports/${interview.interviewId}`}
                             >
                               <TiEye className="h-4 w-4" />
                               View
@@ -241,7 +255,7 @@ const JobDetailsPage = async ({
                             asChild
                           >
                             <Link
-                              href={`/recruiter/dashboard/interviews/${job.id}/${interview.interviewId}/edit`}
+                              href={`/recruiter/dashboard/interviews/${job.id}/${interview.interviewId}/questions`}
                             >
                               <Edit className="h-3.5 w-3.5" />
                               Edit

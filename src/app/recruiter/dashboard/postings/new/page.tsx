@@ -24,8 +24,8 @@ import { Separator } from "@/components/ui/separator";
 const NewJobPostingPage = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [experience, setExperience] = useState("Fresher");
-  const [location, setLocation] = useState("Remote");
+  const [experience, setExperience] = useState("");
+  const [location, setLocation] = useState("");
   const [salary, setSalary] = useState("");
   const [perks, setPerks] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);

@@ -257,7 +257,7 @@ const Applicants = ({
       <div className="pt-6 flex justify-end">
         <Button
           onClick={handleConfirmInterviews}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium gap-2"
+          className="text-white font-medium gap-2"
           size="lg"
           disabled={isSubmitting}
         >
