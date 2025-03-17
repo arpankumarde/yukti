@@ -9,7 +9,14 @@ import { Mic, StopCircle, Save } from "lucide-react";
 import { toast } from "sonner";
 import { saveAnswer } from "@/actions/interview";
 import { InterviewQA } from "@prisma/client";
-import { useUser } from "@clerk/nextjs";
+// Remove Clerk import
+// import { useUser } from "@clerk/nextjs";
+import { getCookie } from "cookies-next";
+
+// Define AuthCookie interface based on your app's cookie structure
+interface AuthCookie {
+  applicantId: string;
+}
 
 // Helper function to call OpenAI for feedback
 async function getAIFeedback(question: string, userAnswer: string) {
@@ -86,13 +93,33 @@ export default function RecordAnswerSection({
   controlsOnly = false
 }: RecordAnswerSectionProps) {
   const [userAnswer, setUserAnswer] = useState("");
-  const { user } = useUser();
+  // Replace Clerk's useUser with cookie-based auth
+  // const { user } = useUser();
+  const [applicant, setApplicant] = useState<AuthCookie | null>(null);
+  
   const [loading, setLoading] = useState(false);
   const [hasPermission, setHasPermission] = useState(false);
   const [hasRecorded, setHasRecorded] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const timerRef = React.useRef<any>(null);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Get applicant data from cookie
+  useEffect(() => {
+    const cookieValue = getCookie('ykapptoken');
+    if (cookieValue) {
+      try {
+        const userData = JSON.parse(cookieValue as string) as AuthCookie;
+        setApplicant(userData);
+      } catch (error) {
+        console.error("Error parsing auth cookie:", error);
+        toast.error("Authentication error. Please log in again.");
+      }
+    } else {
+      console.error("Auth cookie not found");
+      toast.error("Please log in to continue");
+    }
+  }, []);
 
   const {
     error,
@@ -193,6 +220,12 @@ export default function RecordAnswerSection({
   const handleSaveAnswer = async () => {
     setIsSaving(true);
     try {
+      if (!applicant) {
+        toast.error("Authentication error. Please log in again.");
+        setIsSaving(false);
+        return;
+      }
+      
       if (!userAnswer.trim()) {
         toast.error("Please provide an answer before submitting");
         setIsSaving(false);

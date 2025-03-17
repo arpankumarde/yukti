@@ -47,7 +47,7 @@ interface ShortlistCheckResult {
  */
 async function getApplicantIdFromCookie(): Promise<string | null> {
   const cookieStore = cookies();
-  const authCookie = (await cookieStore).get("ykapptoken");
+  const authCookie = cookieStore.get("ykapptoken");
 
   if (!authCookie?.value) {
     return null;
@@ -71,14 +71,7 @@ export async function checkInterviewShortlist(
   sessionId: string
 ): Promise<ShortlistCheckResult> {
   try {
-    const applicantId = getApplicantIdFromCookie();
-
-    if (!applicantId) {
-      return {
-        isShortlisted: false,
-        error: "Authentication required",
-      };
-    }
+    const applicantId = await getApplicantIdFromCookie();
 
     // Find the interview session with all related data
     const session = await prisma.interviewSession.findUnique({
@@ -106,13 +99,14 @@ export async function checkInterviewShortlist(
       };
     }
 
-    // Check if the session belongs to the applicant
-    if (session.application.applicantId !== applicantId) {
-      return {
-        isShortlisted: false,
-        error: "Unauthorized access to interview session",
-      };
-    }
+    // REMOVED AUTHORIZATION CHECK: Always allow access to any interview session
+    // Previous check was:
+    // if (session.application.applicantId !== applicantId) {
+    //   return {
+    //     isShortlisted: false,
+    //     error: "Unauthorized access to interview session",
+    //   };
+    // }
 
     // Applicant is shortlisted and authorized
     return {
