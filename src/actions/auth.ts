@@ -2,21 +2,41 @@
 
 import prisma from "@/lib/prisma";
 import bcrypt from "bcrypt";
+import { verifyTurnstileToken } from "@/lib/turnstile"; // Add this import
 
 export async function createHR(payload: {
   name: string;
   email: string;
   password: string;
+  turnstileToken?: string;
 }) {
-  const { name, email, password } = payload;
+  const { name, email, password, turnstileToken } = payload;
+
+  // Validate turnstile token if provided
+  if (turnstileToken) {
+    const isValid = await verifyTurnstileToken(turnstileToken);
+    if (!isValid) {
+      return { error: "Invalid CAPTCHA verification" };
+    }
+  }
 
   if (!name || !email || !password) {
     return { error: "Missing required fields" };
   }
 
-  const hashedPassword = await bcrypt.hash(payload?.password, 10);
-
   try {
+    const existingRecruiter = await prisma.recruiter.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    if (existingRecruiter) {
+      return { error: "Email already in use" };
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const recruiter = await prisma.recruiter.create({
       data: {
         name,
@@ -25,15 +45,28 @@ export async function createHR(payload: {
       },
     });
 
-    return { recruiter };
+    // Remove password from response
+    const { password: _, ...recruiterWithoutPassword } = recruiter;
+
+    return { recruiter: recruiterWithoutPassword };
   } catch (error) {
     console.error(error);
     return { error: "Something went wrong" };
   }
 }
 
-export async function loginHR(payload: { email: string; password: string }) {
-  const { email, password } = payload;
+export async function loginHR(payload: { 
+  email: string; 
+  password: string;
+  turnstileToken: string;
+}) {
+  const { email, password, turnstileToken } = payload;
+
+  // Validate turnstile token
+  const isValid = await verifyTurnstileToken(turnstileToken);
+  if (!isValid) {
+    return { error: "Invalid CAPTCHA verification" };
+  }
 
   if (!email || !password) {
     return { error: "Missing required fields" };
@@ -56,7 +89,10 @@ export async function loginHR(payload: { email: string; password: string }) {
       return { error: "Invalid credentials" };
     }
 
-    return { recruiter };
+    // Remove password from response
+    const { password: _, ...recruiterWithoutPassword } = recruiter;
+    
+    return { recruiter: recruiterWithoutPassword };
   } catch (error) {
     console.error(error);
     return { error: "Something went wrong" };
@@ -68,16 +104,35 @@ export async function createApplicant(payload: {
   email: string;
   phone: string;
   password: string;
+  turnstileToken?: string;
 }) {
-  const { name, email, phone, password } = payload;
+  const { name, email, phone, password, turnstileToken } = payload;
+
+  // Validate turnstile token if provided
+  if (turnstileToken) {
+    const isValid = await verifyTurnstileToken(turnstileToken);
+    if (!isValid) {
+      return { error: "Invalid CAPTCHA verification" };
+    }
+  }
 
   if (!name || !email || !phone || !password) {
     return { error: "Missing required fields" };
   }
 
-  const hashedPassword = await bcrypt.hash(payload?.password, 10);
-
   try {
+    const existingApplicant = await prisma.applicant.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    if (existingApplicant) {
+      return { error: "Email already in use" };
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const applicant = await prisma.applicant.create({
       data: {
         name,
@@ -87,7 +142,10 @@ export async function createApplicant(payload: {
       },
     });
 
-    return { applicant };
+    // Remove password from response
+    const { password: _, ...applicantWithoutPassword } = applicant;
+    
+    return { applicant: applicantWithoutPassword };
   } catch (error) {
     console.error(error);
     return { error: "Something went wrong" };
@@ -97,8 +155,15 @@ export async function createApplicant(payload: {
 export async function loginApplicant(payload: {
   email: string;
   password: string;
+  turnstileToken: string;
 }) {
-  const { email, password } = payload;
+  const { email, password, turnstileToken } = payload;
+
+  // Validate turnstile token
+  const isValid = await verifyTurnstileToken(turnstileToken);
+  if (!isValid) {
+    return { error: "Invalid CAPTCHA verification" };
+  }
 
   if (!email || !password) {
     return { error: "Missing required fields" };
@@ -121,7 +186,10 @@ export async function loginApplicant(payload: {
       return { error: "Invalid credentials" };
     }
 
-    return { applicant };
+    // Remove password from response
+    const { password: _, ...applicantWithoutPassword } = applicant;
+    
+    return { applicant: applicantWithoutPassword };
   } catch (error) {
     console.error(error);
     return { error: "Something went wrong" };

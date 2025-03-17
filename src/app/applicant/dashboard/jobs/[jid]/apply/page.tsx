@@ -10,6 +10,7 @@ import { toast } from "sonner"
 import { getCookie } from "cookies-next"
 import { Input } from "@/components/ui/input"
 import { Upload, FileText, Eye } from "lucide-react"
+import { Turnstile } from "@/components/ui/turnstile" // Import Turnstile component
 
 interface AnalysisResult {
   score: string
@@ -28,6 +29,7 @@ const ApplyJobPage = ({ params }: { params: Promise<{ jid: string }> }) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [analysisResults, setAnalysisResults] = useState<AnalysisResult | null>(null)
   const router = useRouter()
+  const [turnstileToken, setTurnstileToken] = useState<string>("") // Add state for turnstile token
 
   const analyzeResume = async (text: string) => {
     try {
@@ -190,6 +192,12 @@ const ApplyJobPage = ({ params }: { params: Promise<{ jid: string }> }) => {
       return;
     }
 
+    // Check if turnstile token exists
+    if (!turnstileToken) {
+      toast.error("Please complete the CAPTCHA verification");
+      return;
+    }
+
     const applicantCookie = getCookie("ykapptoken");
     const applicant = applicantCookie ? JSON.parse(applicantCookie as string) : null;
 
@@ -245,6 +253,7 @@ const ApplyJobPage = ({ params }: { params: Promise<{ jid: string }> }) => {
           strength: strength,
           weakness: weakness,
           keywords: keywords,
+          turnstileToken: turnstileToken, // Include turnstile token in the request
         }),
       });
 
@@ -371,12 +380,23 @@ const ApplyJobPage = ({ params }: { params: Promise<{ jid: string }> }) => {
                     </p>
                   </div>
                 </div>
+
+                {/* Add Turnstile CAPTCHA component */}
+                <div className="grid gap-2">
+                  <Label>CAPTCHA Verification</Label>
+                  <div className="flex justify-center">
+                    <Turnstile
+                      siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"}
+                      onVerify={(token) => setTurnstileToken(token)}
+                    />
+                  </div>
+                </div>
               </div>
 
               <Button
                 type="submit"
                 className="w-full"
-                disabled={!resume || isUploading || isAnalyzing}
+                disabled={!resume || isUploading || isAnalyzing || !turnstileToken}
               >
                 Submit Application
               </Button>

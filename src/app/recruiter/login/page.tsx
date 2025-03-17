@@ -5,18 +5,22 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Turnstile } from "@/components/ui/turnstile"; // Add this import
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { setCookie } from "cookies-next";
 import { toast } from "sonner";
+import { useState } from "react"; // Add this import
 
 const Page = () => {
   const router = useRouter();
+  const [turnstileToken, setTurnstileToken] = useState<string>(""); // Add this state
 
   interface Payload {
     email: string;
     password: string;
+    turnstileToken: string; // Add this field
   }
 
   return (
@@ -30,16 +34,23 @@ const Page = () => {
                 action={async (e) => {
                   const formData = Object.fromEntries(e.entries());
 
+                  // Check if turnstile token exists
+                  if (!turnstileToken) {
+                    toast.error("Please complete the captcha");
+                    return;
+                  }
+
                   const payload: Payload = {
                     email: formData["email"] as string,
                     password: formData["password"] as string,
+                    turnstileToken: turnstileToken, // Add token to payload
                   };
 
                   const { recruiter, error } = await loginHR(payload);
 
                   if (error) {
                     console.error("err: ", error);
-                    toast.error("Invalid credentials");
+                    toast.error(error);
                     return;
                   } else {
                     setCookie("ykrecauth", recruiter, {
@@ -81,7 +92,18 @@ const Page = () => {
                       required
                     />
                   </div>
-                  <Button type="submit" className="w-full">
+
+                  {/* Add Turnstile component */}
+                  <Turnstile
+                    siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"}
+                    onVerify={(token) => setTurnstileToken(token)}
+                  />
+                  
+                  <Button 
+                    type="submit" 
+                    className="w-full"
+                    disabled={!turnstileToken}
+                  >
                     Login
                   </Button>
 
@@ -103,15 +125,11 @@ const Page = () => {
                   className="absolute inset-0 w-full my-auto object-cover dark:brightness-[0.2] dark:grayscale"
                   width={800}
                   height={800}
+                  priority
                 />
               </div>
             </CardContent>
           </Card>
-          <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary">
-            By clicking continue, you agree to our{" "}
-            <Link href="/">Terms of Service</Link> and{" "}
-            <Link href="/">Privacy Policy</Link>.
-          </div>
         </div>
       </div>
     </div>
