@@ -135,15 +135,15 @@ const Page = async ({
                         {session.attempted ? (
                           <Badge
                             variant="success"
-                            className="flex items-center gap-1"
+                            className="flex items-center gap-1 bg-green-100 text-green-800"
                           >
                             <CheckCircle2 className="h-3 w-3" />
                             Completed
                           </Badge>
                         ) : (
                           <Badge
-                            variant="secondary"
-                            className="flex items-center gap-1"
+                            variant="destructive"
+                            className="flex items-center gap-1 bg-amber-100 text-amber-800"
                           >
                             <XCircle className="h-3 w-3" />
                             Not Attempted
