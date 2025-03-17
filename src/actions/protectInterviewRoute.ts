@@ -46,8 +46,8 @@ interface ShortlistCheckResult {
  * @returns The applicant ID or null if not authenticated
  */
 async function getApplicantIdFromCookie(): Promise<string | null> {
-  const cookieStore = cookies();
-  const authCookie = cookieStore.get("ykapptoken");
+  const cookieStore = await cookies();
+  const authCookie = await cookieStore.get("ykapptoken");
 
   if (!authCookie?.value) {
     return null;
@@ -72,6 +72,14 @@ export async function checkInterviewShortlist(
 ): Promise<ShortlistCheckResult> {
   try {
     const applicantId = await getApplicantIdFromCookie();
+    
+    // Check if user is authenticated
+    if (!applicantId) {
+      return {
+        isShortlisted: false,
+        error: "Authentication required. Please log in."
+      };
+    }
 
     // Find the interview session with all related data
     const session = await prisma.interviewSession.findUnique({
@@ -99,14 +107,13 @@ export async function checkInterviewShortlist(
       };
     }
 
-    // REMOVED AUTHORIZATION CHECK: Always allow access to any interview session
-    // Previous check was:
-    // if (session.application.applicantId !== applicantId) {
-    //   return {
-    //     isShortlisted: false,
-    //     error: "Unauthorized access to interview session",
-    //   };
-    // }
+    // Check if the current user is the one shortlisted for this interview
+    if (session.application.applicantId !== applicantId) {
+      return {
+        isShortlisted: false,
+        error: "You are not authorized to access this interview session",
+      };
+    }
 
     // Applicant is shortlisted and authorized
     return {
@@ -132,11 +139,10 @@ export async function protectInterviewRoute(
 ): Promise<InterviewSessionWithRelations> {
   const { isShortlisted, session, error } = await checkInterviewShortlist(sessionId);
   
-  if (!isShortlisted) {
+  if (!isShortlisted || !session) {
     // Redirect to dashboard with error message
     redirect(`/applicant/dashboard?error=${encodeURIComponent(error || "unauthorized-interview-access")}`);
   }
   
-  // TypeScript will ensure we only get here if session exists
-  return session as InterviewSessionWithRelations;
+  return session;
 }

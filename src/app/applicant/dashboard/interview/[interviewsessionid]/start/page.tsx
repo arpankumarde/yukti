@@ -25,6 +25,7 @@ export default function InterviewPage({ params }: { params: { interviewsessionid
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(59 * 60); // 59 minutes in seconds
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const sessionId = params.interviewsessionid;
   const webcamRef = useRef(null);
@@ -57,16 +58,24 @@ export default function InterviewPage({ params }: { params: { interviewsessionid
   useEffect(() => {
     async function fetchInterviewData() {
       try {
-        // Use protectInterviewRoute instead of getInterviewSession
+        setLoading(true);
+        // Use protectInterviewRoute to verify authorization
         const session = await protectInterviewRoute(sessionId);
+        
+        // Check if interview has already been attempted
+        if (session.attempted && !session.interview.conductWithAI) {
+          toast.error("You have already completed this interview");
+          router.push(`/applicant/dashboard/interview/${sessionId}/feedback`);
+          return;
+        }
         
         setInterviewData(session);
         setQuestions(session.interview.questions);
-        setLoading(false);
       } catch (error) {
         console.error("Error fetching interview data:", error);
-        toast.error("Failed to load interview session");
-        router.push('/applicant/dashboard');
+        setError("You are not authorized to access this interview or it doesn't exist.");
+      } finally {
+        setLoading(false);
       }
     }
     
@@ -108,6 +117,20 @@ export default function InterviewPage({ params }: { params: { interviewsessionid
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
         <p className="ml-2 font-medium">Loading interview...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col justify-center items-center min-h-screen">
+        <div className="text-red-500 text-xl mb-4">{error}</div>
+        <Button 
+          variant="outline" 
+          onClick={() => router.push('/applicant/dashboard/interviews')}
+        >
+          Return to Interviews
+        </Button>
       </div>
     );
   }

@@ -25,8 +25,7 @@ interface InterviewSession {
   };
   application: {
     applicant: {
-      firstName: string;
-      lastName: string;
+      name: string;
     };
   };
 }
@@ -46,7 +45,7 @@ export default function InterviewPage() {
         const sessionId = params.interviewsessionid as string;
         if (!sessionId) return;
 
-        // Use protectInterviewRoute instead of getInterviewSession
+        // Use server action to verify the user is shortlisted for this interview
         const session = await protectInterviewRoute(sessionId);
         
         setInterviewSession(session);
@@ -56,7 +55,7 @@ export default function InterviewPage() {
         }
       } catch (err) {
         console.error("Error fetching interview details:", err);
-        setError("Error loading interview. Please try again later.");
+        setError("You are not authorized to access this interview or it doesn't exist.");
       } finally {
         setLoading(false);
       }
@@ -88,6 +87,13 @@ export default function InterviewPage() {
     return <div className="flex justify-center items-center min-h-screen flex-col">
       <XCircle className="h-12 w-12 text-red-500 mb-2" />
       <p className="text-red-500 text-lg">{error}</p>
+      <Button 
+        variant="outline" 
+        className="mt-4" 
+        onClick={() => router.push('/applicant/dashboard/interviews')}
+      >
+        Return to Interviews
+      </Button>
     </div>;
   }
 
@@ -148,29 +154,29 @@ export default function InterviewPage() {
             <CardContent className="text-yellow-700">
               <ul className="space-y-2 list-disc list-inside text-sm">
                 <li>Find a quiet place with good lighting for the interview</li>
-                <li>Make sure your camera and microphone are working properly</li>
-                <li>Your answers will be recorded and evaluated afterward</li>
-                <li>Speak clearly and maintain eye contact with the camera</li>
-                <li>Ensure you have a stable internet connection</li>
+                <li>Ensure your webcam and microphone are working properly</li>
+                <li>Make sure you have a stable internet connection</li>
+                <li>Dress professionally as you would for an in-person interview</li>
+                <li>Have a copy of your resume nearby for reference</li>
+                <li>Maintain eye contact with the camera during the interview</li>
               </ul>
             </CardContent>
           </Card>
         </div>
         
-        {/* Right side - Camera and controls */}
-        <div className="flex flex-col space-y-6">
-          <Card className="shadow-sm">
+        {/* Right side - Camera check */}
+        <div className="space-y-6">
+          <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-xl">Camera Preview</CardTitle>
-              <CardDescription>Check how you appear on camera</CardDescription>
+              <CardTitle className="text-xl">Camera & Microphone Check</CardTitle>
+              <CardDescription>Verify your devices are working properly</CardDescription>
             </CardHeader>
-            <CardContent className="flex flex-col items-center">
+            <CardContent className="space-y-4">
+              {/* Camera preview */}
               {webCamEnabled ? (
-                <div className="relative w-full">
+                <div className="relative">
                   <Webcam
-                    onUserMedia={() => setWebCamEnabled(true)}
-                    onUserMediaError={() => setWebCamEnabled(false)}
-                    mirrored={true}
+                    audio={false}
                     className="rounded-lg border shadow-inner w-full"
                     style={{
                       height: 300,
