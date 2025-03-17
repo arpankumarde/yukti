@@ -316,9 +316,11 @@ export default function ResumeAnalyzer() {
 
                   <Separator />
                   
-                  <CardContent className="pt-6">
-                    <div className="prose max-w-none dark:prose-invert">
-                      <ReactMarkdown>{analysis}</ReactMarkdown>
+                                   <CardContent className="pt-6">
+                    <div className="prose max-w-none dark:prose-invert overflow-hidden">
+                      <div className="break-words whitespace-normal overflow-wrap-anywhere">
+                        <ReactMarkdown>{analysis}</ReactMarkdown>
+                      </div>
                     </div>
                   </CardContent>
                   
