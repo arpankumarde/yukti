@@ -1,7 +1,9 @@
-import { Briefcase, Building2 } from "lucide-react";
+import { Briefcase, Building2, MapPin, Coins, Gift } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import prisma from "@/lib/prisma";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default async function Jobs({ searchQuery }: { searchQuery?: string }) {
   const searchTerms =
@@ -24,7 +26,7 @@ export default async function Jobs({ searchQuery }: { searchQuery?: string }) {
   });
 
   return (
-    <div className="min-h-screen bg-secondary/20 p-8">
+    <div className="min-h-screen bg-secondary/10 p-8">
       <div className="max-w-6xl mx-auto">
         {/* Header Section */}
         <div className="text-center mb-12">
@@ -37,39 +39,6 @@ export default async function Jobs({ searchQuery }: { searchQuery?: string }) {
             positions
           </p>
         </div>
-
-        {/* Search Form - Temporarily commented out */}
-        {/*
-        <form action="" className="mb-8">
-          <div className="relative max-w-2xl mx-auto">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-muted-foreground" />
-            </div>
-            <input
-              type="text"
-              name="q"
-              defaultValue={searchQuery}
-              className={cn(
-                "block w-full pl-10 pr-3 py-3 rounded-lg transition-all duration-200",
-                "bg-background/80 backdrop-blur-sm",
-                "border border-input",
-                "focus:ring-2 focus:ring-ring focus:border-transparent"
-              )}
-              placeholder="Search positions by title or description..."
-            />
-            <button
-              type="submit"
-              className={cn(
-                "absolute inset-y-1 right-1 px-4 rounded-md transition-colors duration-200",
-                "bg-primary text-primary-foreground",
-                "hover:bg-primary/90"
-              )}
-            >
-              Search
-            </button>
-          </div>
-        </form>
-        */}
 
         {jobs.length > 0 ? (
           <>
@@ -86,72 +55,93 @@ export default async function Jobs({ searchQuery }: { searchQuery?: string }) {
             {/* Jobs Grid */}
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {jobs.map((job) => (
-                <div
-                  key={job.id}
-                  className={cn(
-                    "bg-background rounded-xl overflow-hidden transition-all duration-200",
-                    "border border-border",
-                    "shadow-sm hover:shadow-md hover:border-border",
-                    "group flex flex-col h-full" // Added flex styling for fixed card height
-                  )}
+                <Card 
+                  key={job.id} 
+                  className="transition-all duration-200 hover:shadow-md overflow-hidden border-border group h-full flex flex-col"
                 >
-                  <div className="p-6 flex-grow">
-                    <h3 className="text-xl font-semibold text-foreground mb-2 group-hover:text-primary transition-colors duration-200">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-xl font-semibold group-hover:text-primary transition-colors duration-200">
                       {job.title}
-                    </h3>
-                    <p className="text-muted-foreground mb-4 line-clamp-2">
-                      Experience: {job.experience || "Not specified"}
-                    </p>
-                    <div className="flex items-center gap-2 text-muted-foreground">
+                    </CardTitle>
+                    <CardDescription className="flex items-center gap-2">
                       <Building2 className="w-4 h-4" />
-                      <span className="text-sm">
-                        {job.recruiter
-                          ? job.recruiter.name
-                          : "Company not specified"}
-                      </span>
+                      {job.recruiter ? job.recruiter.name : "Company not specified"}
+                    </CardDescription>
+                  </CardHeader>
+                  
+                  <CardContent className="flex-grow">
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">{job.location}</span>
+                      </div>
+                      
+                      <div className="flex flex-wrap gap-2">
+                        <Badge variant="outline" className="bg-primary/5">
+                          {job.experience || "Not specified"}
+                        </Badge>
+                        
+                        {job.salary && (
+                          <Badge variant="secondary" className="flex items-center gap-1">
+                            <Coins className="w-3 h-3" />
+                            {job.salary}
+                          </Badge>
+                        )}
+                        
+                        {job.perks && (
+                          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-100">
+                            <Gift className="w-3 h-3 mr-1" />
+                            Perks Included
+                          </Badge>
+                        )}
+                      </div>
                     </div>
-                  </div>
-
-                  <div className="px-6 py-4 bg-muted border-t border-border">
+                  </CardContent>
+                  
+                  <CardFooter className="bg-muted/20 border-t pt-4">
                     <Link
                       href={`/applicant/dashboard/jobs/${job.id}`}
-                      className={cn(
-                        "block w-full py-2 px-4 rounded-lg transition-colors duration-200 font-medium text-sm text-center",
-                        "bg-primary/10 hover:bg-primary/20 text-primary"
-                      )}
+                      className="w-full"
                     >
-                      View Details
+                      <div className="bg-primary/10 hover:bg-primary/20 text-primary py-2 rounded-md text-center font-medium transition-colors">
+                        View Details
+                      </div>
                     </Link>
-                  </div>
-                </div>
+                  </CardFooter>
+                </Card>
               ))}
             </div>
           </>
         ) : (
-          <div className="text-center py-12 bg-background rounded-xl shadow-sm border border-border">
-            <Briefcase className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-foreground mb-2">
-              {searchTerms.length > 0
-                ? `No positions found matching "${searchQuery}"`
-                : "No positions available"}
-            </h3>
-            <p className="text-muted-foreground">
-              {searchTerms.length > 0
-                ? "Try adjusting your search terms or browse all available positions"
-                : "Check back later for new opportunities"}
-            </p>
-            {searchTerms.length > 0 && (
-              <Link
-                href="/"
-                className={cn(
-                  "mt-4 inline-block px-4 py-2 rounded-lg transition-colors duration-200 font-medium text-sm",
-                  "bg-primary/10 hover:bg-primary/20 text-primary"
-                )}
-              >
-                View all positions
-              </Link>
-            )}
-          </div>
+          <Card className="text-center py-12 border border-border">
+            <CardContent className="pt-6">
+              <div className="flex justify-center mb-4">
+                <div className="p-4 bg-muted rounded-full">
+                  <Briefcase className="w-12 h-12 text-muted-foreground" />
+                </div>
+              </div>
+              <h3 className="text-xl font-medium text-foreground mb-2">
+                {searchTerms.length > 0
+                  ? `No positions found matching "${searchQuery}"`
+                  : "No positions available"}
+              </h3>
+              <p className="text-muted-foreground max-w-md mx-auto">
+                {searchTerms.length > 0
+                  ? "Try adjusting your search terms or browse all available positions"
+                  : "Check back later for new opportunities"}
+              </p>
+              {searchTerms.length > 0 && (
+                <div className="mt-6">
+                  <Link
+                    href="/"
+                    className="px-4 py-2 rounded-md transition-colors duration-200 font-medium bg-primary/10 hover:bg-primary/20 text-primary"
+                  >
+                    View all positions
+                  </Link>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         )}
       </div>
     </div>

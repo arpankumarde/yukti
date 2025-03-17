@@ -20,7 +20,7 @@ import { MdDashboard } from "react-icons/md";
 import {
   FaBriefcase,
   FaClipboardCheck,
-  FaRobot,
+  FaUserTie,
   FaLanguage,
   FaFileAlt,
   FaUser,
@@ -82,23 +82,13 @@ export function ApplicantSidebar({
                   className="py-6 text-lg duration-200 transition-colors"
                   asChild
                 >
-                  <Link href="/applicant/dashboard/ai-assessment">
-                    <FaRobot className="!size-5" />
-                    <span>AI Assessment</span>
+                  <Link href="/applicant/dashboard/interviews">
+                    <FaUserTie className="!size-5" />
+                    <span>Interviews</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  className="py-6 text-lg duration-200 transition-colors"
-                  asChild
-                >
-                  <Link href="/applicant/dashboard/english-proficiency-test">
-                    <FaLanguage className="!size-5" />
-                    <span>English Proficiency Test</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+       
               <SidebarMenuItem>
                 <SidebarMenuButton
                   className="py-6 text-lg duration-200 transition-colors"
