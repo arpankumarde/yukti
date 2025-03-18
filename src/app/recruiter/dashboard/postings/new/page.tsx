@@ -36,7 +36,7 @@ const NewJobPostingPage = () => {
     setIsSubmitting(true);
 
     try {
-      const recruiterCookie = getCookie("ykrecauth");
+      const recruiterCookie = getCookie("ykrectoken");
       const recruiter = recruiterCookie
         ? JSON.parse(recruiterCookie as string)
         : null;

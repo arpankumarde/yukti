@@ -44,7 +44,7 @@ const Page = () => {
                     toast.error("Invalid credentials");
                     return;
                   } else {
-                    setCookie("ykrecauth", recruiter, {
+                    setCookie("ykrectoken", recruiter, {
                       maxAge: 60 * 60 * 24 * 7,
                     });
 

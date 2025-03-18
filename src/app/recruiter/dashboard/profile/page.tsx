@@ -16,7 +16,7 @@ interface AuthCookie {
 export default async function ProfilePage() {
   // Get the current user information from cookies
   const cookieStore = await cookies();
-  const authCookie = cookieStore.get("ykrecauth");
+  const authCookie = cookieStore.get("ykrectoken");
   
   if (!authCookie) {
     notFound();

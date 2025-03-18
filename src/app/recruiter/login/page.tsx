@@ -53,7 +53,7 @@ const Page = () => {
                     toast.error(error);
                     return;
                   } else {
-                    setCookie("ykrecauth", recruiter, {
+                    setCookie("ykrectoken", recruiter, {
                       maxAge: 60 * 60 * 24 * 7,
                     });
 
@@ -95,12 +95,15 @@ const Page = () => {
 
                   {/* Add Turnstile component */}
                   <Turnstile
-                    siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"}
+                    siteKey={
+                      process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ||
+                      "1x00000000000000000000AA"
+                    }
                     onVerify={(token) => setTurnstileToken(token)}
                   />
-                  
-                  <Button 
-                    type="submit" 
+
+                  <Button
+                    type="submit"
                     className="w-full"
                     disabled={!turnstileToken}
                   >
@@ -122,7 +125,7 @@ const Page = () => {
                 <Image
                   src="/logo-square.png"
                   alt="Image"
-                  className="absolute inset-0 w-full my-auto object-cover dark:brightness-[0.2] dark:grayscale"
+                  className="absolute inset-0 w-full my-auto object-cover dark:brightness-[0.2] dark:grayscale h-full"
                   width={800}
                   height={800}
                   priority

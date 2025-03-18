@@ -40,7 +40,7 @@ export default function EditProfilePage() {
   useEffect(() => {
     const loadProfile = () => {
       try {
-        const cookieValue = getCookie("ykrecauth");
+        const cookieValue = getCookie("ykrectoken");
         if (cookieValue) {
           const userData = JSON.parse(cookieValue as string);
           setRecruiter(userData);
@@ -90,7 +90,7 @@ export default function EditProfilePage() {
         ...recruiter,
         name,
       };
-      setCookie("ykrecauth", JSON.stringify(updatedRecruiter));
+      setCookie("ykrectoken", JSON.stringify(updatedRecruiter));
 
       toast.success("Profile updated successfully");
       router.push("/recruiter/dashboard/profile");
