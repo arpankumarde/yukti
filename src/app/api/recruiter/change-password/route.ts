@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 
 export async function POST(req: NextRequest) {
   try {
@@ -51,7 +51,10 @@ export async function POST(req: NextRequest) {
       data: { password: hashedPassword },
     });
 
-    return NextResponse.json({ success: true, message: "Password updated successfully" });
+    return NextResponse.json({
+      success: true,
+      message: "Password updated successfully",
+    });
   } catch (error) {
     console.error("Error updating password:", error);
     return NextResponse.json(

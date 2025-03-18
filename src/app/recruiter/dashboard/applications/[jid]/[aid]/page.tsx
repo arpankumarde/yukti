@@ -59,11 +59,70 @@ const ApplicationDetailsPage = async ({
   }
 
   const renderScoreBox = (score: number | null) => {
-    // ... existing score box rendering code ...
+    if (score === null) {
+      return (
+        <div className="flex items-center gap-2">
+          <div className="relative w-full h-6 bg-gray-100 rounded-md overflow-hidden">
+            <div
+              className="absolute top-0 left-0 h-full bg-gray-200"
+              style={{ width: "0%" }}
+            />
+          </div>
+          <span className="text-sm font-medium text-gray-500">Not scored</span>
+        </div>
+      );
+    }
+
+    let bgColor = "bg-gray-200";
+    let textColor = "text-gray-500";
+
+    if (score <= 20) {
+      bgColor = "bg-red-500";
+      textColor = "text-red-500";
+    } else if (score <= 40) {
+      bgColor = "bg-orange-500";
+      textColor = "text-orange-500";
+    } else if (score <= 60) {
+      bgColor = "bg-yellow-500";
+      textColor = "text-yellow-600";
+    } else if (score <= 80) {
+      bgColor = "bg-lime-500";
+      textColor = "text-lime-600";
+    } else {
+      bgColor = "bg-green-500";
+      textColor = "text-green-600";
+    }
+
+    return (
+      <div className="flex items-center gap-2">
+        <div className="relative w-full h-6 bg-gray-100 rounded-md overflow-hidden">
+          <div
+            className={`absolute top-0 left-0 h-full ${bgColor} transition-all duration-300`}
+            style={{ width: `${score}%` }}
+          />
+        </div>
+        <span className={`text-sm font-medium ${textColor}`}>{score}%</span>
+      </div>
+    );
   };
 
   const getStatusColor = (status: string | null) => {
-    // ... existing status color code ...
+    if (!status) return "bg-gray-100 text-gray-500";
+
+    switch (status.toLowerCase()) {
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "under review":
+        return "bg-blue-100 text-blue-800";
+      case "shortlisted":
+        return "bg-lime-100 text-lime-800";
+      case "selected":
+        return "bg-green-100 text-green-800";
+      case "rejected":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-500";
+    }
   };
 
   return (
