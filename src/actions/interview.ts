@@ -24,11 +24,11 @@ export async function getInterviewSession(sessionId: string) {
         },
       },
     });
-    
+
     if (!session) {
       return { error: "Interview session not found" };
     }
-    
+
     return { session };
   } catch (error) {
     console.error("Error fetching interview session:", error);
@@ -45,8 +45,8 @@ export async function startInterview(sessionId: string) {
       where: { interviewSessionId: sessionId },
       data: { attempted: true },
     });
-    
-    revalidatePath(`/dashboard/interview/${sessionId}`);
+
+    revalidatePath(`/applicant/dashboard/interview/${sessionId}`);
     return { success: true, session };
   } catch (error) {
     console.error("Error starting interview:", error);
@@ -64,7 +64,7 @@ export async function saveAnswer({
   userAnswer,
   correctAnswer,
   feedback,
-  rating
+  rating,
 }: {
   sessionId: string;
   questionId: string;
@@ -80,11 +80,11 @@ export async function saveAnswer({
       where: { interviewSessionId: sessionId },
       select: { transcript: true },
     });
-    
+
     if (!session) {
       return { error: "Session not found" };
     }
-    
+
     // Add new answer to transcript
     const newTranscript = [
       ...session.transcript,
@@ -98,17 +98,17 @@ export async function saveAnswer({
         timestamp: new Date().toISOString(),
       },
     ];
-    
+
     // Update transcript in database
     await prisma.interviewSession.update({
       where: { interviewSessionId: sessionId },
-      data: { 
+      data: {
         transcript: newTranscript,
         rating: rating, // We can update the overall rating here too
         feedback: feedback,
       },
     });
-    
+
     return { success: true };
   } catch (error) {
     console.error("Error saving answer:", error);
@@ -126,36 +126,39 @@ export async function completeInterview(sessionId: string) {
       where: { interviewSessionId: sessionId },
       select: { transcript: true },
     });
-    
+
     if (!session?.transcript?.length) {
       return { error: "No answers found in session" };
     }
-    
+
     // Calculate average rating from all answers
     const ratings = session.transcript.map((entry: any) => entry.rating || 0);
     const averageRating = Math.round(
-      ratings.reduce((sum: number, rating: number) => sum + rating, 0) / ratings.length
+      ratings.reduce((sum: number, rating: number) => sum + rating, 0) /
+        ratings.length
     );
-    
+
     // Generate comprehensive feedback
-    const feedbackEntries = session.transcript.map((entry: any) => entry.feedback);
+    const feedbackEntries = session.transcript.map(
+      (entry: any) => entry.feedback
+    );
     const overallFeedback = `Overall performance rating: ${averageRating}/10. 
     Summary: You completed ${session.transcript.length} interview questions with varying levels of effectiveness.
     Key strengths and areas for improvement are reflected in the individual question feedback.`;
-    
+
     // Update session with final rating and feedback
     const updatedSession = await prisma.interviewSession.update({
       where: { interviewSessionId: sessionId },
-      data: { 
+      data: {
         attempted: true,
         rating: averageRating,
-        feedback: overallFeedback
+        feedback: overallFeedback,
       },
     });
-    
+
     revalidatePath(`/applicant/dashboard/interview/${sessionId}`);
     revalidatePath(`/applicant/dashboard/interview/${sessionId}/feedback`);
-    
+
     return { success: true, session: updatedSession };
   } catch (error) {
     console.error("Error completing interview:", error);

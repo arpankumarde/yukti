@@ -90,7 +90,7 @@ export default function InterviewPage() {
       <Button 
         variant="outline" 
         className="mt-4" 
-        onClick={() => router.push('/applicant/dashboard/interviews')}
+        onClick={() => router.push('/applicant/dashboard/interview')}
       >
         Return to Interviews
       </Button>

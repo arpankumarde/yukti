@@ -21,7 +21,6 @@ import {
   FaBriefcase,
   FaClipboardCheck,
   FaUserTie,
-  FaLanguage,
   FaFileAlt,
   FaUser,
 } from "react-icons/fa";
@@ -82,13 +81,13 @@ export function ApplicantSidebar({
                   className="py-6 text-lg duration-200 transition-colors"
                   asChild
                 >
-                  <Link href="/applicant/dashboard/interviews">
+                  <Link href="/applicant/dashboard/interview">
                     <FaUserTie className="!size-5" />
                     <span>Interviews</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-       
+
               <SidebarMenuItem>
                 <SidebarMenuButton
                   className="py-6 text-lg duration-200 transition-colors"

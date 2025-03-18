@@ -127,7 +127,7 @@ export default function InterviewPage({ params }: { params: { interviewsessionid
         <div className="text-red-500 text-xl mb-4">{error}</div>
         <Button 
           variant="outline" 
-          onClick={() => router.push('/applicant/dashboard/interviews')}
+          onClick={() => router.push('/applicant/dashboard/interview')}
         >
           Return to Interviews
         </Button>
