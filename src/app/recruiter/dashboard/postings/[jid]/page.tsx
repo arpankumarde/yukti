@@ -25,7 +25,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Separator } from "@/components/ui/separator";
 
 const JobDetailsPage = async ({
   params,

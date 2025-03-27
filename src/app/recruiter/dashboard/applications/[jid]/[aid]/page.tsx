@@ -10,13 +10,10 @@ import {
   FileText,
   User,
   Briefcase,
-  Calendar,
   CheckCircle2,
-  Star,
   ThumbsUp,
   ThumbsDown,
   Tag,
-  MessageSquare,
   ExternalLink,
 } from "lucide-react";
 import Link from "next/link";

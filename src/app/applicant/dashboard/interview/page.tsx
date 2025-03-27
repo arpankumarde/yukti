@@ -84,7 +84,7 @@ export default async function InterviewsPage() {
   }
 
   // Separate interviews into upcoming, past, and attempted
-  const now = new Date();
+  // const now = new Date();
   
   // Get attempted interviews separately
   const attemptedInterviews = interviewSessions.filter(session => 

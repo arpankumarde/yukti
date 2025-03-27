@@ -1,4 +1,4 @@
-import { Home, User, Briefcase, FileText } from "lucide-react";
+import { Home, User, Briefcase } from "lucide-react";
 import { NavBar } from "@/components/ui/tubelight-navbar";
 
 const Navbar = () => {

@@ -1,5 +1,4 @@
 import prisma from "@/lib/prisma";
-import { Application } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import NextLink from "next/link";
 import { cn } from "@/lib/utils";

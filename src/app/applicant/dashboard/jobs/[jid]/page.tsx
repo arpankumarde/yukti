@@ -1,4 +1,12 @@
-import { Briefcase, Building2, CalendarDays, MapPin, Coins, Gift, Clock, AlertCircle } from "lucide-react";
+import {
+  Briefcase,
+  Building2,
+  MapPin,
+  Coins,
+  Gift,
+  Clock,
+  AlertCircle,
+} from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
@@ -6,7 +14,14 @@ import { cookies } from "next/headers";
 import prisma from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
@@ -34,28 +49,28 @@ export default async function JobDetails({ params }: PageProps) {
 
   // Get the current user information from cookies
   const cookieStore = cookies();
-  const authCookie = (await cookieStore).get('ykapptoken');
-  
+  const authCookie = (await cookieStore).get("ykapptoken");
+
   let hasApplied = false;
   let applicantId: string | null = null;
-  
+
   // Check if the user is logged in and get applicantId
   if (authCookie && authCookie.value) {
     try {
       const userData = JSON.parse(authCookie.value);
       applicantId = userData.applicantId;
-      
+
       // Check if the user has already applied for this job
       if (applicantId) {
         const existingApplication = await prisma.application.findUnique({
           where: {
             applicantId_jobId: {
               applicantId,
-              jobId: jid
-            }
-          }
+              jobId: jid,
+            },
+          },
         });
-        
+
         hasApplied = !!existingApplication;
       }
     } catch (error) {
@@ -76,8 +91,8 @@ export default async function JobDetails({ params }: PageProps) {
           type: true,
           conductWithAI: true,
           conductOffline: true,
-        }
-      }
+        },
+      },
     },
   });
 
@@ -106,7 +121,9 @@ export default async function JobDetails({ params }: PageProps) {
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4" />
-                <span>Posted {new Date(job.createdAt).toLocaleDateString()}</span>
+                <span>
+                  Posted {new Date(job.createdAt).toLocaleDateString()}
+                </span>
               </div>
             </div>
           </CardHeader>
@@ -115,25 +132,36 @@ export default async function JobDetails({ params }: PageProps) {
             {/* Key Details */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-muted/30 p-4 rounded-lg">
-                <h3 className="text-sm font-medium text-muted-foreground mb-2">Experience</h3>
-                <p className="text-foreground font-medium">{job.experience || "Not specified"}</p>
+                <h3 className="text-sm font-medium text-muted-foreground mb-2">
+                  Experience
+                </h3>
+                <p className="text-foreground font-medium">
+                  {job.experience || "Not specified"}
+                </p>
               </div>
-              
+
               {job.salary && (
                 <div className="bg-muted/30 p-4 rounded-lg">
-                  <h3 className="text-sm font-medium text-muted-foreground mb-2">Salary</h3>
+                  <h3 className="text-sm font-medium text-muted-foreground mb-2">
+                    Salary
+                  </h3>
                   <p className="text-foreground font-medium flex items-center gap-2">
                     <Coins className="h-4 w-4 text-primary" />
                     {job.salary}
                   </p>
                 </div>
               )}
-              
+
               {job.perks && (
                 <div className="bg-muted/30 p-4 rounded-lg">
-                  <h3 className="text-sm font-medium text-muted-foreground mb-2">Perks</h3>
-                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-100">
-                    <Gift className="h-3 w-3 mr-1" /> 
+                  <h3 className="text-sm font-medium text-muted-foreground mb-2">
+                    Perks
+                  </h3>
+                  <Badge
+                    variant="outline"
+                    className="bg-green-50 text-green-700 border-green-100"
+                  >
+                    <Gift className="h-3 w-3 mr-1" />
                     Perks Included
                   </Badge>
                 </div>
@@ -144,7 +172,9 @@ export default async function JobDetails({ params }: PageProps) {
 
             {/* Job Description */}
             <div>
-              <h2 className="text-xl font-semibold text-foreground mb-3">Job Description</h2>
+              <h2 className="text-xl font-semibold text-foreground mb-3">
+                Job Description
+              </h2>
               <div className="text-muted-foreground whitespace-pre-wrap prose prose-sm max-w-none">
                 {job.description || "No detailed description provided."}
               </div>
@@ -154,27 +184,38 @@ export default async function JobDetails({ params }: PageProps) {
               <>
                 <Separator />
                 <div>
-                  <h2 className="text-xl font-semibold text-foreground mb-3">Perks & Benefits</h2>
-                  <div className="text-muted-foreground">
-                    {job.perks}
-                  </div>
+                  <h2 className="text-xl font-semibold text-foreground mb-3">
+                    Perks & Benefits
+                  </h2>
+                  <div className="text-muted-foreground">{job.perks}</div>
                 </div>
               </>
             )}
-            
+
             {job.interviews && job.interviews.length > 0 && (
               <>
                 <Separator />
                 <div>
-                  <h2 className="text-xl font-semibold text-foreground mb-3">Interview Process</h2>
+                  <h2 className="text-xl font-semibold text-foreground mb-3">
+                    Interview Process
+                  </h2>
                   <div className="space-y-2">
                     {job.interviews.map((interview, index) => (
-                      <div key={interview.interviewId} className="flex items-center gap-2">
+                      <div
+                        key={interview.interviewId}
+                        className="flex items-center gap-2"
+                      >
                         <Badge variant="outline" className="bg-primary/5">
                           Stage {index + 1}
                         </Badge>
-                        <span className="text-muted-foreground">{interview.title}</span>
-                        <Badge variant={interview.type === "CODE" ? "secondary" : "default"}>
+                        <span className="text-muted-foreground">
+                          {interview.title}
+                        </span>
+                        <Badge
+                          variant={
+                            interview.type === "CODE" ? "secondary" : "default"
+                          }
+                        >
                           {interview.type === "CODE" ? "Coding" : "Non-Coding"}
                         </Badge>
                       </div>
@@ -191,19 +232,23 @@ export default async function JobDetails({ params }: PageProps) {
                 <Alert className="bg-amber-50 border-amber-200">
                   <AlertCircle className="h-4 w-4 text-amber-600" />
                   <AlertDescription className="text-amber-600">
-                    You have already applied for this job. Track your application status at{" "}
-                    <Link href="/applicant/dashboard/applied-jobs" className="font-medium underline underline-offset-2">
+                    You have already applied for this job. Track your
+                    application status at{" "}
+                    <Link
+                      href="/applicant/dashboard/applied-jobs"
+                      className="font-medium underline underline-offset-2"
+                    >
                       Applied Jobs
                     </Link>
                     .
                   </AlertDescription>
                 </Alert>
               )}
-              
+
               <div className="w-full flex flex-col sm:flex-row items-center gap-4">
                 {hasApplied ? (
-                  <Button 
-                    className="w-full sm:w-auto opacity-60 cursor-not-allowed" 
+                  <Button
+                    className="w-full sm:w-auto opacity-60 cursor-not-allowed"
                     disabled={true}
                   >
                     Already Applied
@@ -215,11 +260,9 @@ export default async function JobDetails({ params }: PageProps) {
                     </Link>
                   </Button>
                 )}
-                
+
                 <Button variant="outline" className="w-full sm:w-auto" asChild>
-                  <Link href="/applicant/dashboard/jobs">
-                    Back to Jobs
-                  </Link>
+                  <Link href="/applicant/dashboard/jobs">Back to Jobs</Link>
                 </Button>
               </div>
             </div>
