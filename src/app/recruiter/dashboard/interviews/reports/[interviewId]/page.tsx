@@ -17,7 +17,6 @@ import {
   Users,
   CheckCircle2,
   XCircle,
-  ExternalLink,
 } from "lucide-react";
 
 const Page = async ({
@@ -72,7 +71,7 @@ const Page = async ({
                 Interview Reports
               </CardTitle>
               <CardDescription className="text-gray-600">
-                Review applicants' performance for {interview?.title}
+                Review applicants{`'`} performance for {interview?.title}
               </CardDescription>
             </div>
             <Badge

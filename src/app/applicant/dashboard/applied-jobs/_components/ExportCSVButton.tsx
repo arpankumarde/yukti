@@ -23,22 +23,23 @@ const ExportCSVButton = ({
 }: {
   applications: ApplicationWithJob[];
 }) => {
-  const data: any[] = [];
-  data.push([
-    "Job Title",
-    "Application ID",
-    "Status", 
-    "Score",
-    "Comments",
-    "Applied On",
-  ]);
+  const data = [
+    [
+      "Job Title",
+      "Application ID",
+      "Status",
+      "Score",
+      "Comments",
+      "Applied On",
+    ],
+  ];
 
   applications.forEach((application) => {
     data.push([
       application.job.title,
       application.applicationId,
       application.status || "PENDING",
-      application.score || "N/A",
+      application.score?.toString() || "N/A",
       application.comments || "No comments",
       new Date(application.createdAt).toLocaleDateString("en-US"),
     ]);

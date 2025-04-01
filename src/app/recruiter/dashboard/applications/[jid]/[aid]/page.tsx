@@ -43,7 +43,8 @@ const ApplicationDetailsPage = async ({
           Application not found
         </h1>
         <p className="text-gray-600 mt-2">
-          The application you're looking for doesn't exist or has been removed.
+          The application you{`'`}re looking for does not exist or has been
+          removed.
         </p>
         <Button asChild className="mt-6">
           <NextLink href={`/recruiter/dashboard/applications/${jid}`}>

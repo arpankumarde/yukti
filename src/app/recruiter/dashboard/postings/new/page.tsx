@@ -66,6 +66,7 @@ const NewJobPostingPage = () => {
         router.push(`/recruiter/dashboard/postings/${job?.id}`);
       }
     } catch (error) {
+      console.error("Error creating job posting:", error);
       toast.error("Something went wrong");
     } finally {
       setIsSubmitting(false);

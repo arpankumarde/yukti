@@ -103,7 +103,7 @@ export async function saveAnswer({
     await prisma.interviewSession.update({
       where: { interviewSessionId: sessionId },
       data: {
-        transcript: newTranscript,
+        transcript: newTranscript as object[],
         rating: rating, // We can update the overall rating here too
         feedback: feedback,
       },
@@ -139,9 +139,9 @@ export async function completeInterview(sessionId: string) {
     );
 
     // Generate comprehensive feedback
-    const feedbackEntries = session.transcript.map(
-      (entry: any) => entry.feedback
-    );
+    // const feedbackEntries = session.transcript.map(
+    //   (entry: any) => entry.feedback
+    // );
     const overallFeedback = `Overall performance rating: ${averageRating}/10. 
     Summary: You completed ${session.transcript.length} interview questions with varying levels of effectiveness.
     Key strengths and areas for improvement are reflected in the individual question feedback.`;

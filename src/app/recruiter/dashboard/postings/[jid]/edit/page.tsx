@@ -41,6 +41,7 @@ const EditJobPostingPage = () => {
           setPerks(job.perks || "");
         }
       } catch (error) {
+        console.log(error);
         toast.error("Failed to load job details");
       } finally {
         setIsLoading(false);
@@ -73,6 +74,7 @@ const EditJobPostingPage = () => {
         router.push(`/recruiter/dashboard/postings/${job?.id}`);
       }
     } catch (error) {
+      console.error("Error updating job posting: ", error);
       toast.error("Something went wrong");
     }
   };

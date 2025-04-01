@@ -24,6 +24,7 @@ import {
   FaFileAlt,
   FaUser,
 } from "react-icons/fa";
+import Image from "next/image";
 
 export function ApplicantSidebar({
   ...props
@@ -35,7 +36,7 @@ export function ApplicantSidebar({
       <SidebarHeader>
         {/* Logo/Header */}
         <div className="p-4">
-          <img src="/logo.png" alt="Logo" />
+          <Image src="/logo.png" alt="Logo" width={400} height={400} />
         </div>
       </SidebarHeader>
 

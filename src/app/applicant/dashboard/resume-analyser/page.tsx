@@ -158,7 +158,7 @@ export default function ResumeAnalyzer() {
     }
   };
 
-  const handleFileUpload = (response: any) => {
+  const handleFileUpload = (response: string) => {
     setIsUploading(true);
     try {
       const fileResponse = JSON.parse(response);
@@ -176,6 +176,8 @@ export default function ResumeAnalyzer() {
     } finally {
       setIsUploading(false);
     }
+
+    return 1;
   };
 
   const startAnalysis = () => {
@@ -243,7 +245,6 @@ export default function ResumeAnalyzer() {
                           revert: null,
                         }}
                         acceptedFileTypes={["application/pdf"]}
-                        labelFileTypeNotAllowed="Please upload a PDF file"
                         maxFiles={1}
                       />
                     </div>

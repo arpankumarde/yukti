@@ -4,7 +4,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -15,7 +14,6 @@ import {
   User,
   Mail,
   Calendar,
-  CheckCircle2,
   XCircle,
   MessageSquare,
   FileText,

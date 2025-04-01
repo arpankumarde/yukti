@@ -1,7 +1,3 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   AlertDialog,
@@ -16,24 +12,23 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
-import { 
-  Briefcase, 
-  Calendar, 
-  Building2, 
-  MapPin, 
-  FileText, 
-  ExternalLink, 
-  Clock, 
+import {
+  Briefcase,
+  Calendar,
+  Building2,
+  MapPin,
+  FileText,
+  ExternalLink,
+  Clock,
   AlertCircle,
   ArrowLeft,
   CheckCircle,
   XCircle,
   Hourglass,
-  ListChecks,
   DollarSign,
   Gift,
-  GraduationCap
+  GraduationCap,
+  MessageSquare,
 } from "lucide-react";
 import {
   Card,
@@ -44,61 +39,33 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import prisma from "@/lib/prisma";
+import { ReactNode } from "react";
+import { withdrawApplication } from "@/actions/application";
 
-export default function ApplicationDetailPage({ params }) {
-  const { applicationId } = params;
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const [application, setApplication] = useState(null);
+const Page = async ({
+  params,
+}: {
+  params: Promise<{ applicationId: string }>;
+}) => {
+  const { applicationId } = await params;
 
-  // Fetch application details
-  useEffect(() => {
-    async function fetchApplication() {
-      try {
-        const response = await fetch(`/api/applied/fetch?applicationId=${applicationId}`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch application details");
-        }
-        const data = await response.json();
-        setApplication(data);
-      } catch (error) {
-        console.error("Error fetching application:", error);
-        toast.error("Failed to load application details");
-      }
-    }
-    
-    fetchApplication();
-  }, [applicationId]);
-
-  // Handle withdraw application
-  const handleWithdraw = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch(`/api/applied/withdraw`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+  const application = await prisma.application.findUnique({
+    where: {
+      applicationId: applicationId,
+    },
+    include: {
+      job: {
+        include: {
+          company: {
+            select: {
+              name: true,
+            },
+          },
         },
-        body: JSON.stringify({ applicationId }),
-      });
-      
-      if (!response.ok) {
-        throw new Error("Failed to withdraw application");
-      }
-      
-      toast.success("Application withdrawn successfully");
-      // Refresh the current page to show updated status
-      router.refresh();
-      
-      // Option to navigate back or stay on page with updated status
-      setApplication(prev => ({...prev, status: "WITHDRAWN"}));
-    } catch (error) {
-      console.error("Error withdrawing application:", error);
-      toast.error("Failed to withdraw application");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      },
+    },
+  });
 
   if (!application) {
     return (
@@ -109,7 +76,9 @@ export default function ApplicationDetailPage({ params }) {
               <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center mb-6 animate-pulse">
                 <Clock className="h-10 w-10 text-primary" />
               </div>
-              <h3 className="text-2xl font-medium mb-3">Loading Application Details</h3>
+              <h3 className="text-2xl font-medium mb-3">
+                Loading Application Details
+              </h3>
               <p className="text-muted-foreground max-w-md">
                 Please wait while we fetch your application information...
               </p>
@@ -121,48 +90,66 @@ export default function ApplicationDetailPage({ params }) {
   }
 
   // Define status icon and color
-  const getStatusDetails = (status) => {
-    switch(status) {
-      case 'ACCEPTED':
-        return { 
-          icon: <CheckCircle className="h-4 w-4 mr-2" />, 
-          variant: "default",
+  const getStatusDetails = (
+    status: string
+  ): {
+    icon: ReactNode;
+    variant: "default" | "destructive" | "outline";
+    bgColor: string;
+    textColor: string;
+  } => {
+    switch (status) {
+      case "ONBOARDED":
+        return {
+          icon: <CheckCircle className="h-4 w-4 mr-2" />,
+          variant: "outline",
           bgColor: "bg-green-100 dark:bg-green-900/30",
-          textColor: "text-green-700 dark:text-green-400"
+          textColor: "text-green-700 dark:text-green-400",
         };
-      case 'REJECTED':
-        return { 
-          icon: <XCircle className="h-4 w-4 mr-2" />, 
+      case "ACCEPTED":
+        return {
+          icon: <CheckCircle className="h-4 w-4 mr-2" />,
+          variant: "outline",
+          bgColor: "bg-green-100 dark:bg-green-900/30",
+          textColor: "text-green-700 dark:text-green-400",
+        };
+      case "REJECTED":
+        return {
+          icon: <XCircle className="h-4 w-4 mr-2" />,
           variant: "destructive",
           bgColor: "bg-red-100 dark:bg-red-900/30",
-          textColor: "text-red-700 dark:text-red-400"
+          textColor: "text-red-700 dark:text-red-400",
         };
-      case 'WITHDRAWN':
-        return { 
-          icon: <AlertCircle className="h-4 w-4 mr-2" />, 
+      case "WITHDRAWN":
+        return {
+          icon: <AlertCircle className="h-4 w-4 mr-2" />,
           variant: "outline",
           bgColor: "bg-gray-100 dark:bg-gray-800",
-          textColor: "text-gray-700 dark:text-gray-400"
+          textColor: "text-gray-700 dark:text-gray-400",
         };
       default:
-        return { 
-          icon: <Hourglass className="h-4 w-4 mr-2 animate-pulse" />, 
+        return {
+          icon: <Hourglass className="h-4 w-4 mr-2 animate-pulse" />,
           variant: "outline",
           bgColor: "bg-yellow-100 dark:bg-yellow-900/30",
-          textColor: "text-yellow-700 dark:text-yellow-400"
+          textColor: "text-yellow-700 dark:text-yellow-400",
         };
     }
   };
 
-  const statusDetails = getStatusDetails(application.status);
+  const statusDetails = getStatusDetails(application?.status ?? "PENDING");
 
   return (
     <div className="container mx-auto py-10 px-4">
       <div className="max-w-5xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div className="space-y-1">
-            <h1 className="text-3xl font-bold text-foreground">Application Details</h1>
-            <p className="text-muted-foreground">Review your submitted application details and status</p>
+            <h1 className="text-3xl font-bold text-foreground">
+              Application Details
+            </h1>
+            <p className="text-muted-foreground">
+              Review your submitted application details and status
+            </p>
           </div>
           <Button variant="outline" size="sm" asChild className="gap-2 h-9">
             <Link href="/applicant/dashboard/applied-jobs">
@@ -179,11 +166,14 @@ export default function ApplicationDetailPage({ params }) {
               <CardHeader className="bg-muted/10 border-b p-6">
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                   <div>
-                    <CardTitle className="text-2xl font-bold">{application.job.title}</CardTitle>
+                    <CardTitle className="text-2xl font-bold">
+                      {application.job.title}
+                    </CardTitle>
                     <CardDescription className="mt-2 flex flex-wrap gap-3">
                       <span className="inline-flex items-center text-foreground/70">
                         <Building2 className="mr-1.5 h-4 w-4 text-primary/70" />
-                        {application.job.recruiter?.name || "Company not specified"}
+                        {application.job.company?.name ||
+                          "Company not specified"}
                       </span>
                       <span className="inline-flex items-center text-foreground/70">
                         <MapPin className="mr-1.5 h-4 w-4 text-primary/70" />
@@ -195,8 +185,8 @@ export default function ApplicationDetailPage({ params }) {
                       </span>
                     </CardDescription>
                   </div>
-                  
-                  <Badge 
+
+                  <Badge
                     variant={statusDetails.variant}
                     className={cn(
                       "h-7 px-3 py-1 text-sm font-medium rounded-md flex items-center",
@@ -205,7 +195,7 @@ export default function ApplicationDetailPage({ params }) {
                     )}
                   >
                     {statusDetails.icon}
-                    {application.status || 'PENDING'}
+                    {application.status || "PENDING"}
                   </Badge>
                 </div>
               </CardHeader>
@@ -218,24 +208,29 @@ export default function ApplicationDetailPage({ params }) {
                       <Calendar className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <h3 className="text-sm font-medium text-muted-foreground">Applied on</h3>
+                      <h3 className="text-sm font-medium text-muted-foreground">
+                        Applied on
+                      </h3>
                       <p className="font-medium">
-                        {new Date(application.createdAt).toLocaleDateString(undefined, {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
-                        })}
+                        {new Date(application.createdAt).toLocaleDateString(
+                          undefined,
+                          {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          }
+                        )}
                       </p>
                     </div>
                   </div>
-                  
+
                   {/* Job Details Section */}
                   <div className="bg-muted/10 rounded-lg p-5 border border-border/40">
                     <h3 className="font-medium flex items-center gap-2 mb-4">
                       <Briefcase className="h-4 w-4 text-primary" />
                       Job Details
                     </h3>
-                    
+
                     <div className="grid gap-4 sm:grid-cols-2">
                       {/* Experience */}
                       <div className="flex items-start gap-3">
@@ -243,34 +238,46 @@ export default function ApplicationDetailPage({ params }) {
                           <GraduationCap className="h-4 w-4 text-primary" />
                         </div>
                         <div>
-                          <p className="text-sm text-muted-foreground">Experience</p>
-                          <p className="font-medium">{application.job.experience || "Not specified"}</p>
+                          <p className="text-sm text-muted-foreground">
+                            Experience
+                          </p>
+                          <p className="font-medium">
+                            {application.job.experience || "Not specified"}
+                          </p>
                         </div>
                       </div>
-                      
+
                       {/* Salary */}
                       <div className="flex items-start gap-3">
                         <div className="mt-0.5 bg-primary/10 p-1.5 rounded-md">
                           <DollarSign className="h-4 w-4 text-primary" />
                         </div>
                         <div>
-                          <p className="text-sm text-muted-foreground">Salary</p>
-                          <p className="font-medium">{application.job.salary || "Not disclosed"}</p>
+                          <p className="text-sm text-muted-foreground">
+                            Salary
+                          </p>
+                          <p className="font-medium">
+                            {application.job.salary || "Not disclosed"}
+                          </p>
                         </div>
                       </div>
-                      
+
                       {/* Location */}
                       <div className="flex items-start gap-3">
                         <div className="mt-0.5 bg-primary/10 p-1.5 rounded-md">
                           <MapPin className="h-4 w-4 text-primary" />
                         </div>
                         <div>
-                          <p className="text-sm text-muted-foreground">Location</p>
-                          <p className="font-medium">{application.job.location || "Remote"}</p>
+                          <p className="text-sm text-muted-foreground">
+                            Location
+                          </p>
+                          <p className="font-medium">
+                            {application.job.location || "Remote"}
+                          </p>
                         </div>
                       </div>
                     </div>
-                    
+
                     {/* Perks */}
                     {application.job.perks && (
                       <div className="mt-5 pt-5 border-t border-border/30">
@@ -279,7 +286,9 @@ export default function ApplicationDetailPage({ params }) {
                             <Gift className="h-4 w-4 text-primary" />
                           </div>
                           <div>
-                            <p className="text-sm text-muted-foreground mb-2">Perks & Benefits</p>
+                            <p className="text-sm text-muted-foreground mb-2">
+                              Perks & Benefits
+                            </p>
                             <p className="text-sm">{application.job.perks}</p>
                           </div>
                         </div>
@@ -287,7 +296,7 @@ export default function ApplicationDetailPage({ params }) {
                     )}
                   </div>
                 </div>
-                
+
                 {application.comments && (
                   <div className="bg-muted/10 rounded-lg p-4 border border-border/60">
                     <h3 className="font-medium flex items-center gap-2 mb-3">
@@ -295,7 +304,7 @@ export default function ApplicationDetailPage({ params }) {
                       Recruiter Feedback
                     </h3>
                     <div className="bg-background p-3 rounded-md text-sm">
-                      "{application.comments}"
+                      {`"${application.comments}"`}
                     </div>
                   </div>
                 )}
@@ -304,54 +313,62 @@ export default function ApplicationDetailPage({ params }) {
                   <h3 className="text-lg font-semibold">Job Description</h3>
                   <div className="prose prose-sm max-w-none prose-p:text-muted-foreground prose-headings:text-foreground">
                     {application.job.description ? (
-                      <div className="whitespace-pre-wrap">{application.job.description}</div>
+                      <div className="whitespace-pre-wrap">
+                        {application.job.description}
+                      </div>
                     ) : (
-                      <div className="text-muted-foreground italic">No description provided for this position.</div>
+                      <div className="text-muted-foreground italic">
+                        No description provided for this position.
+                      </div>
                     )}
                   </div>
                 </div>
               </CardContent>
-              
+
               <CardFooter className="bg-muted/5 p-6 border-t">
                 {application.status !== "WITHDRAWN" && (
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="destructive" disabled={isLoading} className="gap-2">
-                        {isLoading ? (
-                          <>
-                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                            Processing...
-                          </>
-                        ) : (
-                          <>
-                            <XCircle className="h-4 w-4" />
-                            Withdraw Application
-                          </>
-                        )}
+                      <Button variant="destructive" className="gap-2">
+                        <XCircle className="h-4 w-4" />
+                        Withdraw Application
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogTitle>
+                          Are you absolutely sure?
+                        </AlertDialogTitle>
                         <AlertDialogDescription>
-                          This action cannot be undone. This will permanently withdraw your application
-                          from the recruitment process.
+                          This action cannot be undone. This will permanently
+                          withdraw your application from the recruitment
+                          process.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleWithdraw}>
-                          Yes, withdraw application
-                        </AlertDialogAction>
+                        <form
+                          action={async () => {
+                            "use server";
+                            withdrawApplication(applicationId);
+                          }}
+                        >
+                          <AlertDialogAction type="submit">
+                            Yes, withdraw application
+                          </AlertDialogAction>
+                        </form>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
                 )}
-                
+
                 {application.status === "WITHDRAWN" && (
                   <div className="flex items-center gap-3 p-4 bg-muted/20 rounded-md text-muted-foreground border border-border w-full">
                     <AlertCircle className="h-5 w-5 text-muted-foreground" />
-                    <span className="font-medium">This application has been withdrawn and is no longer active.</span>
+                    <span className="font-medium">
+                      This application has been withdrawn and is no longer
+                      active.
+                    </span>
                   </div>
                 )}
               </CardFooter>
@@ -363,14 +380,16 @@ export default function ApplicationDetailPage({ params }) {
             <Card className="overflow-hidden border border-border/40 shadow-md">
               <CardHeader className="bg-muted/10 border-b">
                 <CardTitle className="text-lg">Your Documents</CardTitle>
-                <CardDescription>Attached files for this application</CardDescription>
+                <CardDescription>
+                  Attached files for this application
+                </CardDescription>
               </CardHeader>
-              
+
               <CardContent className="p-6 space-y-4">
                 {application.resume ? (
-                  <a 
-                    href={application.resume} 
-                    target="_blank" 
+                  <a
+                    href={application.resume}
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center p-4 bg-primary/5 rounded-md hover:bg-primary/10 transition-colors group"
                   >
@@ -379,7 +398,9 @@ export default function ApplicationDetailPage({ params }) {
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="text-sm font-medium truncate">Resume</h4>
-                      <p className="text-xs text-muted-foreground">View your submitted resume</p>
+                      <p className="text-xs text-muted-foreground">
+                        View your submitted resume
+                      </p>
                     </div>
                     <ExternalLink className="ml-2 h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                   </a>
@@ -391,11 +412,11 @@ export default function ApplicationDetailPage({ params }) {
                     </div>
                   </div>
                 )}
-                
+
                 {application.cover_letter ? (
-                  <a 
-                    href={application.cover_letter} 
-                    target="_blank" 
+                  <a
+                    href={application.cover_letter}
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center p-4 bg-primary/5 rounded-md hover:bg-primary/10 transition-colors group"
                   >
@@ -403,8 +424,12 @@ export default function ApplicationDetailPage({ params }) {
                       <FileText className="h-5 w-5 text-primary" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-medium truncate">Cover Letter</h4>
-                      <p className="text-xs text-muted-foreground">View your submitted cover letter</p>
+                      <h4 className="text-sm font-medium truncate">
+                        Cover Letter
+                      </h4>
+                      <p className="text-xs text-muted-foreground">
+                        View your submitted cover letter
+                      </p>
                     </div>
                     <ExternalLink className="ml-2 h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                   </a>
@@ -418,13 +443,15 @@ export default function ApplicationDetailPage({ params }) {
                 )}
               </CardContent>
             </Card>
-            
+
             <Card className="overflow-hidden border border-border/40 shadow-md">
               <CardHeader className="bg-muted/10 border-b">
                 <CardTitle className="text-lg">Application Timeline</CardTitle>
-                <CardDescription>Track your application progress</CardDescription>
+                <CardDescription>
+                  Track your application progress
+                </CardDescription>
               </CardHeader>
-              
+
               <CardContent className="p-6">
                 <div className="space-y-4">
                   <div className="flex gap-3">
@@ -441,13 +468,17 @@ export default function ApplicationDetailPage({ params }) {
                       </time>
                     </div>
                   </div>
-                  
+
                   <div className="flex gap-3">
                     <div className="flex flex-col items-center">
-                      <div className={cn(
-                        "h-7 w-7 rounded-full border flex items-center justify-center",
-                        application.status ? "bg-primary" : "bg-muted border-border"
-                      )}>
+                      <div
+                        className={cn(
+                          "h-7 w-7 rounded-full border flex items-center justify-center",
+                          application.status
+                            ? "bg-primary"
+                            : "bg-muted border-border"
+                        )}
+                      >
                         {application.status ? (
                           <CheckCircle className="h-4 w-4 text-primary-foreground" />
                         ) : (
@@ -456,16 +487,18 @@ export default function ApplicationDetailPage({ params }) {
                       </div>
                     </div>
                     <div>
-                      <p className={cn(
-                        "font-medium",
-                        !application.status && "text-muted-foreground"
-                      )}>
+                      <p
+                        className={cn(
+                          "font-medium",
+                          !application.status && "text-muted-foreground"
+                        )}
+                      >
                         Status Updated
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        {application.status ? 
-                          `Updated to ${application.status}` : 
-                          "Waiting for review"}
+                        {application.status
+                          ? `Updated to ${application.status}`
+                          : "Waiting for review"}
                       </p>
                     </div>
                   </div>
@@ -477,4 +510,6 @@ export default function ApplicationDetailPage({ params }) {
       </div>
     </div>
   );
-}
+};
+
+export default Page;

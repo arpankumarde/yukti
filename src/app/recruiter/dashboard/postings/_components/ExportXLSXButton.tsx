@@ -6,25 +6,25 @@ import { RiFileExcel2Fill } from "react-icons/ri";
 import xlsx from "xlsx";
 
 const ExportXLSXButton = ({ jobs }: { jobs: Job[] }) => {
-  const data: any[] = [];
-
-  data.push([
-    "id",
-    "title",
-    "description",
-    "location",
-    "perks",
-    "salary",
-    "experience",
-    "createdAt",
-    "updatedAt",
-  ]);
+  const data = [
+    [
+      "id",
+      "title",
+      "description",
+      "location",
+      "perks",
+      "salary",
+      "experience",
+      "createdAt",
+      "updatedAt",
+    ],
+  ];
 
   jobs.forEach((job) => {
     data.push([
       job.id.toString(),
       job.title,
-      job.description,
+      job.description ?? "",
       job.location,
       job.perks ?? "",
       job.salary ?? "",

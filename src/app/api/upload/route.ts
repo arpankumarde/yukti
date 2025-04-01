@@ -31,18 +31,18 @@ export async function POST(req: NextRequest) {
       await fs.writeFile(tempFilePath, fileBuffer);
 
       // Create a new Promise for parsing
-      const pdfParser = new (PDFParser as any)(null, 1);
+      const pdfParser = new PDFParser(null, true);
 
       // Create a promise to handle the parsing
       const parsingPromise = new Promise((resolve, reject) => {
         console.log("In the promise");
-        pdfParser.on("pdfParser_dataError", (errData: any) => {
+        pdfParser.on("pdfParser_dataError", (errData) => {
           console.error(errData.parserError);
           reject(errData.parserError); // Reject the promise on error
         });
 
         pdfParser.on("pdfParser_dataReady", () => {
-          parsedText = (pdfParser as any).getRawTextContent();
+          parsedText = pdfParser.getRawTextContent();
           console.log("Parsed Text:", parsedText);
           resolve(parsedText); // Resolve the promise with parsed text
         });

@@ -9,8 +9,6 @@ import { Mic, StopCircle, Save } from "lucide-react";
 import { toast } from "sonner";
 import { saveAnswer } from "@/actions/interview";
 import { InterviewQA } from "@prisma/client";
-// Remove Clerk import
-// import { useUser } from "@clerk/nextjs";
 import { getCookie } from "cookies-next";
 
 // Define AuthCookie interface based on your app's cookie structure
@@ -45,9 +43,9 @@ Provide strictly formatted JSON:
       },
       body: JSON.stringify({ prompt: feedbackPrompt }),
     });
-    
+
     const data = await response.json();
-    
+
     // Parse the JSON response
     if (data.result) {
       let jsonResult;
@@ -59,13 +57,16 @@ Provide strictly formatted JSON:
         console.error("Failed to parse AI feedback:", error);
         return { rating: 5, feedback: "Unable to generate detailed feedback" };
       }
-      
+
       return jsonResult;
     }
     return { rating: 5, feedback: "Unable to generate detailed feedback" };
   } catch (error) {
     console.error("Error getting AI feedback:", error);
-    return { rating: 5, feedback: "Unable to generate feedback due to an error" };
+    return {
+      rating: 5,
+      feedback: "Unable to generate feedback due to an error",
+    };
   }
 }
 
@@ -74,7 +75,7 @@ interface RecordAnswerSectionProps {
   activeQuestionIndex: number;
   interviewData: any;
   sessionId: string;
-  webcamRef?: any;
+  webcamRef?: React.RefObject<Webcam>;
   setWebcamRef?: (ref: any) => void;
   showWebcam?: boolean;
   webcamOnly?: boolean;
@@ -84,29 +85,25 @@ interface RecordAnswerSectionProps {
 export default function RecordAnswerSection({
   questions,
   activeQuestionIndex,
-  interviewData,
   sessionId,
-  webcamRef,
   setWebcamRef,
   showWebcam = true,
   webcamOnly = false,
-  controlsOnly = false
+  controlsOnly = false,
 }: RecordAnswerSectionProps) {
   const [userAnswer, setUserAnswer] = useState("");
-  // Replace Clerk's useUser with cookie-based auth
-  // const { user } = useUser();
   const [applicant, setApplicant] = useState<AuthCookie | null>(null);
-  
-  const [loading, setLoading] = useState(false);
-  const [hasPermission, setHasPermission] = useState(false);
-  const [hasRecorded, setHasRecorded] = useState(false);
+
+  // const [loading, setLoading] = useState(false);
+  // const [hasPermission, setHasPermission] = useState(false);
+  // const [hasRecorded, setHasRecorded] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
-  const timerRef = React.useRef<any>(null);
+  const timerRef = React.useRef<NodeJS.Timeout | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
   // Get applicant data from cookie
   useEffect(() => {
-    const cookieValue = getCookie('ykapptoken');
+    const cookieValue = getCookie("ykapptoken");
     if (cookieValue) {
       try {
         const userData = JSON.parse(cookieValue as string) as AuthCookie;
@@ -123,7 +120,6 @@ export default function RecordAnswerSection({
 
   const {
     error,
-    interimResult,
     isRecording,
     results,
     startSpeechToText,
@@ -178,7 +174,7 @@ export default function RecordAnswerSection({
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       stream.getTracks().forEach((track) => track.stop());
-      setHasPermission(true);
+      // setHasPermission(true);
       return true;
     } catch (error) {
       console.error("Microphone permission error:", error);
@@ -190,7 +186,7 @@ export default function RecordAnswerSection({
   const handleStartRecording = async () => {
     const permissionGranted = await requestMicrophonePermission();
     if (permissionGranted) {
-      setHasRecorded(true);
+      // setHasRecorded(true);
       setRecordingTime(0);
       if (timerRef.current) {
         clearInterval(timerRef.current);
@@ -198,7 +194,7 @@ export default function RecordAnswerSection({
       await startSpeechToText();
       // Start timer
       timerRef.current = setInterval(() => {
-        setRecordingTime(prevTime => prevTime + 1);
+        setRecordingTime((prevTime) => prevTime + 1);
       }, 1000);
     }
   };
@@ -214,7 +210,9 @@ export default function RecordAnswerSection({
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+    return `${mins.toString().padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}`;
   };
 
   const handleSaveAnswer = async () => {
@@ -225,21 +223,21 @@ export default function RecordAnswerSection({
         setIsSaving(false);
         return;
       }
-      
+
       if (!userAnswer.trim()) {
         toast.error("Please provide an answer before submitting");
         setIsSaving(false);
         return;
       }
-      
+
       const currentQuestion = questions[activeQuestionIndex];
-      
+
       // Get AI feedback on the answer
       const aiResponse = await getAIFeedback(
         currentQuestion.question,
         userAnswer
       );
-      
+
       // Save the answer to the database
       const { success, error } = await saveAnswer({
         sessionId,
@@ -250,7 +248,7 @@ export default function RecordAnswerSection({
         feedback: aiResponse.feedback,
         rating: aiResponse.rating,
       });
-      
+
       if (success) {
         toast.success("Answer recorded successfully");
         setUserAnswer("");
@@ -260,9 +258,7 @@ export default function RecordAnswerSection({
       }
     } catch (error) {
       console.error("Error in saving answer:", error);
-      toast.error(
-        "Failed to save answer: " + (error.message || "Unknown error occurred")
-      );
+      toast.error("Failed to save answer: " + "Unknown error occurred");
     } finally {
       setIsSaving(false);
     }
@@ -279,7 +275,7 @@ export default function RecordAnswerSection({
           videoConstraints={{
             width: 720,
             height: 405,
-            facingMode: "user"
+            facingMode: "user",
           }}
           className="w-full h-auto rounded-md shadow-md"
         />
@@ -301,16 +297,18 @@ export default function RecordAnswerSection({
             disabled={isRecording}
           />
         </div>
-        
+
         <div className="flex justify-between items-center">
           <div className="text-center font-mono font-bold text-lg">
             {isRecording ? (
-              <span className="text-red-600 animate-pulse">{formatTime(recordingTime)}</span>
+              <span className="text-red-600 animate-pulse">
+                {formatTime(recordingTime)}
+              </span>
             ) : (
               <span className="text-gray-700">{formatTime(recordingTime)}</span>
             )}
           </div>
-          
+
           <div className="flex gap-2">
             <Button
               disabled={isSaving}
@@ -328,11 +326,16 @@ export default function RecordAnswerSection({
                 </span>
               )}
             </Button>
-            
+
             <Button
               type="button"
               onClick={handleSaveAnswer}
-              disabled={recordingTime > 0 || isRecording || isSaving || !userAnswer.trim()}
+              disabled={
+                recordingTime > 0 ||
+                isRecording ||
+                isSaving ||
+                !userAnswer.trim()
+              }
               className="my-2"
             >
               <span className="flex gap-2 items-center">
@@ -359,7 +362,7 @@ export default function RecordAnswerSection({
               videoConstraints={{
                 width: 720,
                 height: 405,
-                facingMode: "user"
+                facingMode: "user",
               }}
               className="w-full h-auto rounded-md shadow-md"
             />
@@ -373,7 +376,7 @@ export default function RecordAnswerSection({
           </div>
         )}
       </div>
-      
+
       <div className="w-full space-y-4">
         <textarea
           value={userAnswer}
@@ -382,15 +385,17 @@ export default function RecordAnswerSection({
           placeholder="Your answer will appear here as you speak..."
           disabled={isRecording}
         />
-        
+
         <div className="text-center font-mono font-bold text-lg">
           {isRecording ? (
-            <span className="text-red-600 animate-pulse">{formatTime(recordingTime)}</span>
+            <span className="text-red-600 animate-pulse">
+              {formatTime(recordingTime)}
+            </span>
           ) : (
             <span className="text-gray-700">{formatTime(recordingTime)}</span>
           )}
         </div>
-        
+
         <div className="flex justify-between">
           <Button
             disabled={isSaving}
@@ -408,11 +413,13 @@ export default function RecordAnswerSection({
               </span>
             )}
           </Button>
-          
+
           <Button
             type="button"
             onClick={handleSaveAnswer}
-            disabled={recordingTime > 0 || isRecording || isSaving || !userAnswer.trim()}
+            disabled={
+              recordingTime > 0 || isRecording || isSaving || !userAnswer.trim()
+            }
             className="my-2"
           >
             {isSaving ? "Saving..." : "Save Answer"}

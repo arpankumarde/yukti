@@ -2,14 +2,7 @@ import { Button } from "@/components/ui/button";
 import prisma from "@/lib/prisma";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import {
-  ArrowLeft,
-  Edit,
-  Calendar,
-  Trash2,
-  Users,
-  FileText,
-} from "lucide-react";
+import { ArrowLeft, Edit, Calendar, Trash2, Users } from "lucide-react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { TiEye } from "react-icons/ti";
 import { revalidatePath } from "next/cache";
@@ -97,7 +90,7 @@ const JobDetailsPage = async ({
               <ArrowLeft className="h-5 w-5" />
             </Link>
           </Button>
-          <h1 className="text-3xl font-bold text-primary bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold text-primary bg-gradient-to-r from-primary to-primary/70 bg-clip-text">
             Job Details
           </h1>
         </div>

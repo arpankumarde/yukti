@@ -4,59 +4,8 @@ import prisma from "@/lib/prisma";
 import bcrypt from "bcrypt";
 import { verifyTurnstileToken } from "@/lib/turnstile"; // Add this import
 
-export async function createHR(payload: {
-  name: string;
+export async function loginHR(payload: {
   email: string;
-  password: string;
-  turnstileToken?: string;
-}) {
-  const { name, email, password, turnstileToken } = payload;
-
-  // Validate turnstile token if provided
-  if (turnstileToken) {
-    const isValid = await verifyTurnstileToken(turnstileToken);
-    if (!isValid) {
-      return { error: "Invalid CAPTCHA verification" };
-    }
-  }
-
-  if (!name || !email || !password) {
-    return { error: "Missing required fields" };
-  }
-
-  try {
-    const existingRecruiter = await prisma.recruiter.findUnique({
-      where: {
-        email,
-      },
-    });
-
-    if (existingRecruiter) {
-      return { error: "Email already in use" };
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const recruiter = await prisma.recruiter.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-      },
-    });
-
-    // Remove password from response
-    const { password: _, ...recruiterWithoutPassword } = recruiter;
-
-    return { recruiter: recruiterWithoutPassword };
-  } catch (error) {
-    console.error(error);
-    return { error: "Something went wrong" };
-  }
-}
-
-export async function loginHR(payload: { 
-  email: string; 
   password: string;
   turnstileToken: string;
 }) {
@@ -90,8 +39,8 @@ export async function loginHR(payload: {
     }
 
     // Remove password from response
-    const { password: _, ...recruiterWithoutPassword } = recruiter;
-    
+    const recruiterWithoutPassword = { ...recruiter, password: undefined };
+
     return { recruiter: recruiterWithoutPassword };
   } catch (error) {
     console.error(error);
@@ -143,8 +92,8 @@ export async function createApplicant(payload: {
     });
 
     // Remove password from response
-    const { password: _, ...applicantWithoutPassword } = applicant;
-    
+    const applicantWithoutPassword = { ...applicant, password: undefined };
+
     return { applicant: applicantWithoutPassword };
   } catch (error) {
     console.error(error);
@@ -187,8 +136,8 @@ export async function loginApplicant(payload: {
     }
 
     // Remove password from response
-    const { password: _, ...applicantWithoutPassword } = applicant;
-    
+    const applicantWithoutPassword = { ...applicant, password: undefined };
+
     return { applicant: applicantWithoutPassword };
   } catch (error) {
     console.error(error);

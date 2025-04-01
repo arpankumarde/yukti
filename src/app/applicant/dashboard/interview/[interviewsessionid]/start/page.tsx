@@ -287,8 +287,8 @@ export default function InterviewPage() {
               />
             </div>
             <p className="text-sm text-muted-foreground mt-2 text-center">
-              Please ensure you're in a well-lit, quiet environment for the best
-              interview experience.
+              Please ensure you{"`"}re in a well-lit, quiet environment for the
+              best interview experience.
             </p>
           </div>
         </div>

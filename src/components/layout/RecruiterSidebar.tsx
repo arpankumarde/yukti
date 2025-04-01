@@ -20,6 +20,7 @@ import { MdSpaceDashboard } from "react-icons/md";
 import { Button } from "../ui/button";
 import { deleteCookie } from "cookies-next";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export function RecruiterSidebar({
   ...props
@@ -31,7 +32,7 @@ export function RecruiterSidebar({
       <SidebarHeader>
         {/* Logo/Header */}
         <div className="p-4">
-          <img src="/logo.png" alt="Logo" />
+          <Image src="/logo.png" alt="Logo" width={400} height={400} />
         </div>
       </SidebarHeader>
 

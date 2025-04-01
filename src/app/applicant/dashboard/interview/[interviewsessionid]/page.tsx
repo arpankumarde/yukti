@@ -24,10 +24,10 @@ interface InterviewSession {
     title: string;
     job: {
       title: string;
-      description: string;
+      description: string | null;
       experience: string;
     };
-    questions: any[];
+    questions: object[];
   };
   application: {
     applicant: {
@@ -56,6 +56,7 @@ export default function InterviewPage() {
         const session = await protectInterviewRoute(sessionId);
 
         setInterviewSession(session);
+
         // Update document title with interview title
         if (session?.interview?.title) {
           document.title = session.interview.title;
@@ -179,14 +180,14 @@ export default function InterviewPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-yellow-50 border border-yellow-200 shadow-sm">
+          <Card className="bg-primary/10 shadow-primary shadow-sm">
             <CardHeader className="pb-3">
-              <CardTitle className="flex items-center text-yellow-700 text-lg">
+              <CardTitle className="flex items-center text-primary text-lg">
                 <Lightbulb className="mr-2 h-5 w-5" />
                 Important Instructions
               </CardTitle>
             </CardHeader>
-            <CardContent className="text-yellow-700">
+            <CardContent className="text-primary">
               <ul className="space-y-2 list-disc list-inside text-sm">
                 <li>Find a quiet place with good lighting for the interview</li>
                 <li>Ensure your webcam and microphone are working properly</li>
@@ -267,20 +268,20 @@ export default function InterviewPage() {
           </Card>
 
           <div className="flex justify-end">
-            <Link
-              href={`/applicant/dashboard/interview/${params.interviewsessionid}/start`}
+            <Button
+              className="py-2.5 px-6 rounded-lg transition-colors font-medium bg-primary hover:bg-primary/90 text-white"
+              disabled={
+                interviewSession.attempted || !webCamEnabled || !micEnabled
+              }
             >
-              <Button
-                className="py-2.5 px-6 rounded-lg transition-colors font-medium bg-primary hover:bg-primary/90 text-white"
-                disabled={
-                  interviewSession.attempted || !webCamEnabled || !micEnabled
-                }
+              <Link
+                href={`/applicant/dashboard/interview/${params.interviewsessionid}/start`}
               >
                 {interviewSession.attempted
                   ? "Review Interview"
                   : "Start Interview"}
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
 
           {(!webCamEnabled || !micEnabled) && (

@@ -48,7 +48,7 @@ const Questions = ({
   interviewTitle: string;
 }) => {
   const router = useRouter();
-  let [questions, setQuestions] = useState<InterviewQA[]>(questionProps);
+  const [questions, setQuestions] = useState<InterviewQA[]>(questionProps);
   const [open, setOpen] = useState(false);
   const [open2, setOpen2] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);

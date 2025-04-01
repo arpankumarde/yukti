@@ -39,7 +39,7 @@ export default function FeedbackPage() {
       try {
         if (!sessionId) return;
 
-        const { session, error } = await getInterviewSession(sessionId);
+        const { error } = await getInterviewSession(sessionId);
 
         if (error) {
           throw new Error(error);
@@ -120,7 +120,7 @@ export default function FeedbackPage() {
             <div className="p-6 rounded-lg bg-slate-50 border border-slate-100">
               <p className="text-slate-700 text-center">
                 Your responses have been recorded and will be evaluated by the
-                recruiter. You'll receive feedback on your performance soon.
+                recruiter. You{`'`}ll receive feedback on your performance soon.
               </p>
             </div>
 

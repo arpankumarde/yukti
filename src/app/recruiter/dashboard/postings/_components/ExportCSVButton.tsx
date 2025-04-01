@@ -6,27 +6,23 @@ import CsvDownloader from "react-csv-downloader";
 import { FaFileCsv } from "react-icons/fa6";
 
 const ExportCSVButton = ({ jobs }: { jobs: Job[] }) => {
-  const data: any[] = [];
-
-  data.push([
-    "id",
-    "title",
-    "description",
-    "location",
-    "perks",
-    "salary",
-    "experience",
-    "createdAt",
-    "updatedAt",
-  ]);
+  const data = [
+    [
+      "id",
+      "title",
+      "location",
+      "salary",
+      "experience",
+      "createdAt",
+      "updatedAt",
+    ],
+  ];
 
   jobs.forEach((job) => {
     data.push([
       job.id.toString(),
       job.title,
-      job.description,
       job.location,
-      job.perks ?? "",
       job.salary ?? "",
       job.experience ?? "",
       new Date(job.createdAt).toLocaleDateString("en-US"),

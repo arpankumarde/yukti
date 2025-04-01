@@ -170,7 +170,7 @@ const Page = async () => {
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>{" "}
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
                           <form
                             action={async () => {
                               "use server";

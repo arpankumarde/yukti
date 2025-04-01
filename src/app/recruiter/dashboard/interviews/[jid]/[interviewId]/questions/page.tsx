@@ -64,7 +64,7 @@ const Page = async ({
         <CardHeader className="border-b bg-muted/10 p-6">
           <CardTitle>Question Management</CardTitle>
           <CardDescription>
-            Add or generate questions for "{interview.title}" interview
+            Add or generate questions for {`"${interview.title}`} interview
           </CardDescription>
         </CardHeader>
 

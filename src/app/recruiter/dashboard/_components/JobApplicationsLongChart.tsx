@@ -116,7 +116,7 @@ const chartConfig = {
   },
   desktop: {
     label: "Applications",
-    color: "hsl(var(--chart-1))",
+    color: "hsl(var(--primary))",
   },
   mobile: {
     label: "Impressions",
