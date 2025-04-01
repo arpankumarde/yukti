@@ -21,6 +21,7 @@ import {
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import Markdown from "react-markdown";
 
 type ExtendedSessions = { application: Application } & InterviewSession;
 type ExtendedApplication = { applicant: Applicant } & Application;
@@ -191,7 +192,7 @@ const Applicants = ({
                     </button>
                     {openStrengths[application.applicationId] && (
                       <div className="mt-1 ml-2 pl-2 border-l-2 border-green-200 text-sm text-green-600">
-                        {application.strength}
+                        <Markdown>{application.strength}</Markdown>
                       </div>
                     )}
                   </div>
@@ -215,7 +216,7 @@ const Applicants = ({
                     </button>
                     {openWeaknesses[application.applicationId] && (
                       <div className="mt-1 ml-2 pl-2 border-l-2 border-amber-200 text-sm text-amber-600">
-                        {application.weakness}
+                        <Markdown>{application.weakness}</Markdown>
                       </div>
                     )}
                   </div>
