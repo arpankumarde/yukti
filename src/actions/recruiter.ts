@@ -11,12 +11,13 @@ export async function createJob(payload: {
   location: string;
   perks?: string;
   salary?: string;
-  recruiterId: string;
+  companyId: string;
   experience: string;
 }) {
-  const { title, description, experience, recruiterId, location, perks, salary } = payload;
+  const { title, description, experience, companyId, location, perks, salary } =
+    payload;
 
-  if (!title || !description || !experience || !recruiterId || !location) {
+  if (!title || !description || !experience || !companyId || !location) {
     return { error: "Missing required fields" };
   }
 
@@ -26,7 +27,7 @@ export async function createJob(payload: {
         title,
         description,
         experience,
-        recruiterId,
+        companyId,
         location,
         perks,
         salary,
@@ -139,4 +140,3 @@ export async function createInterview(payload: {
     return { error: "Something went wrong" };
   }
 }
-

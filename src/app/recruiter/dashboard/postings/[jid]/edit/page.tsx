@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,7 +13,7 @@ import Link from "next/link";
 import { ArrowLeft, Building2, MapPin, Coins, Briefcase } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
-const EditJobPostingPage = ({ params }: { params: { jid: string } }) => {
+const EditJobPostingPage = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [experience, setExperience] = useState("");
@@ -22,6 +22,7 @@ const EditJobPostingPage = ({ params }: { params: { jid: string } }) => {
   const [perks, setPerks] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const params = useParams<{ jid: string }>();
 
   useEffect(() => {
     const fetchJob = async () => {
@@ -69,7 +70,7 @@ const EditJobPostingPage = ({ params }: { params: { jid: string } }) => {
         toast.error("Failed to update job posting");
       } else {
         toast.success("Job posting updated successfully");
-        router.push("/recruiter/dashboard/postings");
+        router.push(`/recruiter/dashboard/postings/${job?.id}`);
       }
     } catch (error) {
       toast.error("Something went wrong");

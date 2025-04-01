@@ -83,7 +83,7 @@ export default async function JobDetails({ params }: PageProps) {
       id: jid,
     },
     include: {
-      recruiter: true,
+      company: true,
       interviews: {
         select: {
           interviewId: true,
@@ -113,7 +113,7 @@ export default async function JobDetails({ params }: PageProps) {
             <div className="flex flex-wrap items-center gap-4 text-muted-foreground mt-2">
               <div className="flex items-center gap-2">
                 <Building2 className="w-4 h-4" />
-                <span>{job.recruiter?.name || "Company not specified"}</span>
+                <span>{job.company?.name || "Company not specified"}</span>
               </div>
               <div className="flex items-center gap-2">
                 <MapPin className="w-4 h-4" />

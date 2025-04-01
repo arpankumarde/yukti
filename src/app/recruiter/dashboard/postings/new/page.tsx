@@ -53,7 +53,7 @@ const NewJobPostingPage = () => {
         location,
         salary,
         perks,
-        recruiterId: recruiter.recruiterId,
+        companyId: recruiter.companyId,
       };
 
       const { job, error } = await createJob(payload);
@@ -63,7 +63,7 @@ const NewJobPostingPage = () => {
         toast.error("Failed to create job posting");
       } else {
         toast.success("Job posting created successfully");
-        router.push("/recruiter/dashboard/postings");
+        router.push(`/recruiter/dashboard/postings/${job?.id}`);
       }
     } catch (error) {
       toast.error("Something went wrong");

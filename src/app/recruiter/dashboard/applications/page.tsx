@@ -20,6 +20,11 @@ const Page = async () => {
       applicant: true,
       job: true,
     },
+    where: {
+      job: {
+        companyId: user?.companyId,
+      },
+    },
   });
 
   return (

@@ -34,7 +34,7 @@ const Page = async () => {
 
   const jobs = await prisma.job.findMany({
     where: {
-      recruiterId: user?.recruiterId,
+      companyId: user?.companyId,
     },
     include: {
       _count: {

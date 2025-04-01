@@ -5,17 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Turnstile } from "@/components/ui/turnstile"; // Add this import
+import { Turnstile } from "@/components/ui/turnstile";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { setCookie } from "cookies-next";
 import { toast } from "sonner";
-import { useState } from "react"; // Add this import
+import { useState } from "react";
 
 const Page = () => {
   const router = useRouter();
-  const [turnstileToken, setTurnstileToken] = useState<string>(""); // Add this state
+  const [turnstileToken, setTurnstileToken] = useState<string>("");
 
   interface Payload {
     email: string;
@@ -43,7 +43,7 @@ const Page = () => {
                   const payload: Payload = {
                     email: formData["email"] as string,
                     password: formData["password"] as string,
-                    turnstileToken: turnstileToken, // Add token to payload
+                    turnstileToken: turnstileToken,
                   };
 
                   const { recruiter, error } = await loginHR(payload);
@@ -109,16 +109,6 @@ const Page = () => {
                   >
                     Login
                   </Button>
-
-                  <div className="text-center text-sm">
-                    Don&apos;t have an account?{" "}
-                    <Link
-                      href="/recruiter/register"
-                      className="underline underline-offset-4"
-                    >
-                      Register
-                    </Link>
-                  </div>
                 </div>
               </form>
               <div className="relative hidden bg-white md:block">

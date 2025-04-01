@@ -35,7 +35,7 @@ const JobDetailsPage = async ({
   const job = await prisma.job.findUnique({
     where: { id: jid },
     include: {
-      recruiter: true,
+      company: true,
       interviews: {
         include: {
           _count: {
@@ -70,7 +70,7 @@ const JobDetailsPage = async ({
       value: job._count.applications,
       hasViewButton: true,
     },
-    { label: "Recruiter", value: job.recruiter.name },
+    { label: "Recruiter", value: job.company.name },
     {
       label: "Created At",
       value: new Date(job.createdAt).toLocaleString(),

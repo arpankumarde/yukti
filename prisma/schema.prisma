@@ -7,9 +7,21 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum InterviewType {
-  CODE
-  NOCODE
+model Company {
+  companyId   String      @id @default(cuid())
+  name        String
+  email       String      @unique
+  phone       String
+  password    String
+  description String?
+  logo        String?
+  slug        String      @unique @default(cuid())
+  website     String?
+  address     String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  recruiters  Recruiter[]
+  jobs        Job[]
 }
 
 model Recruiter {
@@ -17,9 +29,10 @@ model Recruiter {
   name        String
   email       String   @unique
   password    String
+  companyId   String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  jobs        Job[]
+  company     Company  @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
 }
 
 model Applicant {
@@ -40,13 +53,13 @@ model Job {
   location     String        @default("Remote")
   perks        String?
   salary       String?
-  recruiterId  String
+  companyId    String
   experience   String        @default("Fresher")
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   applications Application[]
-  recruiter    Recruiter     @relation(fields: [recruiterId], references: [recruiterId], onDelete: Cascade)
   interviews   Interview[]
+  company      Company       @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
 }
 
 model Application {
@@ -111,4 +124,9 @@ model InterviewSession {
   application        Application @relation(fields: [applicationId], references: [applicationId], onDelete: Cascade)
 
   @@unique([interviewId, applicationId])
+}
+
+enum InterviewType {
+  CODE
+  NOCODE
 }

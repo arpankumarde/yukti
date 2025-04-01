@@ -40,13 +40,9 @@ export default async function ProfilePage() {
         recruiterId: true,
         name: true,
         email: true,
+        company: true,
         createdAt: true,
         updatedAt: true,
-        _count: {
-          select: {
-            jobs: true,
-          },
-        },
       },
     });
 
@@ -119,11 +115,11 @@ export default async function ProfilePage() {
 
                   <div>
                     <h3 className="text-sm font-medium text-muted-foreground mb-1">
-                      Job Postings
+                      Company Name
                     </h3>
                     <div className="flex items-center gap-2">
                       <Briefcase className="h-4 w-4 text-primary" />
-                      <p className="font-medium">{recruiter._count.jobs}</p>
+                      <p className="font-medium">{recruiter.company.name}</p>
                     </div>
                   </div>
 

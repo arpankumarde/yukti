@@ -141,7 +141,8 @@ export default function EditProfilePage() {
       setPasswordNew("");
       setPasswordConfirm("");
     } catch (error) {
-      toast.error(error.message || "Failed to update password");
+      console.log("Error updating password:", error);
+      toast.error("Failed to update password");
     } finally {
       setLoading(false);
     }

@@ -52,7 +52,7 @@ export default async function Jobs({ searchQuery }: { searchQuery?: string }) {
             ]),
           }
         : undefined,
-    include: { recruiter: true },
+    include: { company: true },
   });
 
   // Fetch applications for the logged-in user
@@ -111,9 +111,7 @@ export default async function Jobs({ searchQuery }: { searchQuery?: string }) {
                     </CardTitle>
                     <CardDescription className="flex items-center gap-2">
                       <Building2 className="w-4 h-4" />
-                      {job.recruiter
-                        ? job.recruiter.name
-                        : "Company not specified"}
+                      {job.company.name}
                     </CardDescription>
                   </CardHeader>
 
@@ -194,9 +192,7 @@ export default async function Jobs({ searchQuery }: { searchQuery?: string }) {
                   </CardTitle>
                   <CardDescription className="flex items-center gap-2">
                     <Building2 className="w-4 h-4" />
-                    {job.recruiter
-                      ? job.recruiter.name
-                      : "Company not specified"}
+                    {job.company.name}
                   </CardDescription>
                 </CardHeader>
 
