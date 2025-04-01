@@ -2,7 +2,14 @@ import { Button } from "@/components/ui/button";
 import prisma from "@/lib/prisma";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { ArrowLeft, Edit, Calendar, Trash2, Users } from "lucide-react";
+import {
+  ArrowLeft,
+  Edit,
+  Calendar,
+  Trash2,
+  Users,
+  Briefcase,
+} from "lucide-react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { TiEye } from "react-icons/ti";
 import { revalidatePath } from "next/cache";
@@ -18,6 +25,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { deleteInterview } from "@/actions/interview";
 
 const JobDetailsPage = async ({
   params,
@@ -345,35 +353,3 @@ const JobDetailsPage = async ({
 };
 
 export default JobDetailsPage;
-
-// Add the missing icon
-const Briefcase = ({ className }: { className?: string }) => {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
-      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
-    </svg>
-  );
-};
-
-export async function deleteInterview(interviewId: string) {
-  try {
-    await prisma.interview.delete({
-      where: { interviewId },
-    });
-
-    return { success: true };
-  } catch (error) {
-    console.error(error);
-    return { error: "Failed to delete interview" };
-  }
-}

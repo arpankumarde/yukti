@@ -165,3 +165,16 @@ export async function completeInterview(sessionId: string) {
     return { error: "Failed to complete interview" };
   }
 }
+
+export async function deleteInterview(interviewId: string) {
+  try {
+    await prisma.interview.delete({
+      where: { interviewId },
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error(error);
+    return { error: "Failed to delete interview" };
+  }
+}

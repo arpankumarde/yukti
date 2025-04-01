@@ -77,7 +77,7 @@ export default async function AppliedJobsPage() {
   };
 
   // Helper function to get status badge details
-  const getStatusDetails = (status) => {
+  const getStatusDetails = (status: string) => {
     switch (status) {
       case "ACCEPTED":
         return {
