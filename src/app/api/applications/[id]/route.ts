@@ -3,7 +3,16 @@ import prisma from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
   try {
-    const { jobId, applicantId, status, resume, score, strength, weakness, coverLetter } = await req.json();
+    const {
+      jobId,
+      applicantId,
+      status,
+      resume,
+      score,
+      strength,
+      weakness,
+      coverLetter,
+    } = await req.json();
 
     const application = await prisma.application.create({
       data: {
@@ -11,7 +20,7 @@ export async function POST(req: NextRequest) {
         applicantId,
         status,
         resume,
-        score: score ? String(score) : null,
+        score: Number(score) ?? null,
         strength: strength ? String(strength) : null,
         weakness: weakness ? String(weakness) : null,
         cover_letter: coverLetter ? String(coverLetter) : null,
@@ -33,9 +42,9 @@ export async function PATCH(req: NextRequest) {
     const { id, score, strength, weakness } = await req.json();
 
     const updatedApplication = await prisma.application.update({
-      where: { id },
+      where: { applicationId: id },
       data: {
-        score: score ? String(score) : null,
+        score: Number(score) ?? null,
         strength: strength ? String(strength) : null,
         weakness: weakness ? String(weakness) : null,
       },

@@ -5,7 +5,14 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getCookie, setCookie } from "cookies-next";
 import { toast } from "sonner";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -21,7 +28,10 @@ interface Applicant {
 }
 
 // Server action to update applicant profile
-async function updateApplicantProfile(applicantId: string, data: { name: string; phone: string; }) {
+async function updateApplicantProfile(
+  applicantId: string,
+  data: { name: string; phone: string }
+) {
   try {
     const response = await fetch("/api/applicant/profile", {
       method: "PATCH",
@@ -40,9 +50,9 @@ async function updateApplicantProfile(applicantId: string, data: { name: string;
     }
 
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error updating profile:", error);
-    return { success: false, error: error.message };
+    return { success: false, error: error };
   }
 }
 
@@ -105,11 +115,11 @@ export default function EditProfilePage() {
           phone,
         };
         setCookie("ykapptoken", JSON.stringify(updatedApplicant));
-        
+
         toast.success("Profile updated successfully");
         router.push("/applicant/dashboard/profile");
       } else {
-        setError(result.error || "Failed to update profile");
+        setError(result.error ?? "Failed to update profile");
       }
     } catch (error) {
       console.error("Error updating profile:", error);
@@ -130,7 +140,9 @@ export default function EditProfilePage() {
       <div className="container mx-auto py-10 px-4">
         <div className="max-w-4xl mx-auto flex items-center justify-center min-h-[300px]">
           <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
-          <span className="ml-3 text-muted-foreground">Loading profile information...</span>
+          <span className="ml-3 text-muted-foreground">
+            Loading profile information...
+          </span>
         </div>
       </div>
     );
@@ -169,7 +181,9 @@ export default function EditProfilePage() {
               <CardContent className="p-6 space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="name" className="text-sm font-medium">Full Name</Label>
+                    <Label htmlFor="name" className="text-sm font-medium">
+                      Full Name
+                    </Label>
                     <Input
                       id="name"
                       name="name"
@@ -181,7 +195,9 @@ export default function EditProfilePage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-sm font-medium">Email Address</Label>
+                    <Label htmlFor="email" className="text-sm font-medium">
+                      Email Address
+                    </Label>
                     <Input
                       id="email"
                       name="email"
@@ -189,11 +205,15 @@ export default function EditProfilePage() {
                       disabled
                       className="h-11 bg-muted/30 cursor-not-allowed"
                     />
-                    <p className="text-xs text-muted-foreground">Email address cannot be changed</p>
+                    <p className="text-xs text-muted-foreground">
+                      Email address cannot be changed
+                    </p>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="phone" className="text-sm font-medium">Phone Number</Label>
+                    <Label htmlFor="phone" className="text-sm font-medium">
+                      Phone Number
+                    </Label>
                     <Input
                       id="phone"
                       name="phone"
@@ -238,7 +258,12 @@ export default function EditProfilePage() {
               <CardContent className="p-6 space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="current-password" className="text-sm font-medium">Current Password</Label>
+                    <Label
+                      htmlFor="current-password"
+                      className="text-sm font-medium"
+                    >
+                      Current Password
+                    </Label>
                     <Input
                       id="current-password"
                       name="current-password"
@@ -251,7 +276,12 @@ export default function EditProfilePage() {
 
                   <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <Label htmlFor="new-password" className="text-sm font-medium">New Password</Label>
+                      <Label
+                        htmlFor="new-password"
+                        className="text-sm font-medium"
+                      >
+                        New Password
+                      </Label>
                       <Input
                         id="new-password"
                         name="new-password"
@@ -262,7 +292,12 @@ export default function EditProfilePage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="confirm-password" className="text-sm font-medium">Confirm New Password</Label>
+                      <Label
+                        htmlFor="confirm-password"
+                        className="text-sm font-medium"
+                      >
+                        Confirm New Password
+                      </Label>
                       <Input
                         id="confirm-password"
                         name="confirm-password"
@@ -275,9 +310,9 @@ export default function EditProfilePage() {
                   </div>
                 </div>
               </CardContent>
-              
+
               <Separator />
-              
+
               <CardFooter className="p-6 flex justify-end bg-muted/5">
                 <Button type="submit" variant="outline" className="gap-2">
                   Update Password

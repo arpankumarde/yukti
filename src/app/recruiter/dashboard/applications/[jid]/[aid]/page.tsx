@@ -1,6 +1,4 @@
-import React from "react";
 import prisma from "@/lib/prisma";
-import NextLink from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -47,10 +45,10 @@ const ApplicationDetailsPage = async ({
           removed.
         </p>
         <Button asChild className="mt-6">
-          <NextLink href={`/recruiter/dashboard/applications/${jid}`}>
+          <Link href={`/recruiter/dashboard/applications/${jid}`}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Applications
-          </NextLink>
+          </Link>
         </Button>
       </div>
     );
@@ -173,22 +171,22 @@ const ApplicationDetailsPage = async ({
             </div>
             {application.resume && (
               <div className="pt-4">
-                <NextLink target="_blank" href={application.resume}>
+                <Link target="_blank" href={application.resume}>
                   <Button className="w-full">
                     <FileText className="h-4 w-4 mr-2" />
                     View Resume
                   </Button>
-                </NextLink>
+                </Link>
               </div>
             )}
             {application.cover_letter && (
               <div className="pt-2">
-                <NextLink target="_blank" href={application.cover_letter}>
+                <Link target="_blank" href={application.cover_letter}>
                   <Button variant="outline" className="w-full">
                     <FileText className="h-4 w-4 mr-2" />
                     View Cover Letter
                   </Button>
-                </NextLink>
+                </Link>
               </div>
             )}
           </CardContent>
@@ -271,12 +269,12 @@ const ApplicationDetailsPage = async ({
 
               <div className="flex justify-end">
                 <Button asChild variant="outline">
-                  <NextLink
+                  <Link
                     href={`/recruiter/dashboard/postings/${application.job.id}`}
                   >
                     <ExternalLink className="h-4 w-4 mr-2" />
                     View Complete Job Posting
-                  </NextLink>
+                  </Link>
                 </Button>
               </div>
             </div>

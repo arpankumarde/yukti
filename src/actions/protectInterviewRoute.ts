@@ -3,13 +3,13 @@
 import { cookies } from "next/headers";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import { 
-  InterviewSession, 
-  Application, 
-  Applicant, 
-  Interview, 
-  InterviewQA, 
-  Job 
+import {
+  InterviewSession,
+  Application,
+  Applicant,
+  Interview,
+  InterviewQA,
+  Job,
 } from "@prisma/client";
 
 /**
@@ -22,7 +22,7 @@ interface AuthCookie {
 /**
  * Extended InterviewSession with all related entities
  */
-interface InterviewSessionWithRelations extends InterviewSession {
+export interface InterviewSessionWithRelations extends InterviewSession {
   interview: Interview & {
     job: Job;
     questions: InterviewQA[];
@@ -72,12 +72,12 @@ export async function checkInterviewShortlist(
 ): Promise<ShortlistCheckResult> {
   try {
     const applicantId = await getApplicantIdFromCookie();
-    
+
     // Check if user is authenticated
     if (!applicantId) {
       return {
         isShortlisted: false,
-        error: "Authentication required. Please log in."
+        error: "Authentication required. Please log in.",
       };
     }
 
@@ -137,12 +137,18 @@ export async function checkInterviewShortlist(
 export async function protectInterviewRoute(
   sessionId: string
 ): Promise<InterviewSessionWithRelations> {
-  const { isShortlisted, session, error } = await checkInterviewShortlist(sessionId);
-  
+  const { isShortlisted, session, error } = await checkInterviewShortlist(
+    sessionId
+  );
+
   if (!isShortlisted || !session) {
     // Redirect to dashboard with error message
-    redirect(`/applicant/dashboard?error=${encodeURIComponent(error || "unauthorized-interview-access")}`);
+    redirect(
+      `/applicant/dashboard?error=${encodeURIComponent(
+        error || "unauthorized-interview-access"
+      )}`
+    );
   }
-  
+
   return session;
 }

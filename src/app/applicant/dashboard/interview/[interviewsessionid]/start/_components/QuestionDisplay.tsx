@@ -2,6 +2,7 @@
 
 import { Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface QuestionDisplayProps {
   question: string;
@@ -19,7 +20,7 @@ export default function QuestionDisplay({
       );
       window.speechSynthesis.speak(speech);
     } else {
-      alert("Sorry, your browser does not support text to speech");
+      toast.error("Sorry, your browser does not support text to speech");
     }
   };
 
@@ -38,7 +39,7 @@ export default function QuestionDisplay({
         </Button>
       </div>
       <p className="text-gray-700 text-lg">
-        {question || "No question available"}
+        {question ?? "No question available"}
       </p>
     </div>
   );

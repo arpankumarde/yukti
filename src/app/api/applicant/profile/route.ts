@@ -7,7 +7,10 @@ export async function PATCH(req: NextRequest) {
     const { applicantId, name, phone } = body;
 
     if (!applicantId) {
-      return NextResponse.json({ error: "Applicant ID is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Applicant ID is required" },
+        { status: 400 }
+      );
     }
 
     // Update applicant in database
@@ -23,15 +26,18 @@ export async function PATCH(req: NextRequest) {
         name: true,
         email: true,
         phone: true,
-      }
+      },
     });
 
-    return NextResponse.json({ 
-      success: true, 
-      applicant: updatedApplicant 
+    return NextResponse.json({
+      success: true,
+      applicant: updatedApplicant,
     });
   } catch (error) {
     console.error("Error updating applicant profile:", error);
-    return NextResponse.json({ error: "Failed to update profile" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to update profile" },
+      { status: 500 }
+    );
   }
 }

@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { saveAnswer } from "@/actions/interview";
 import { InterviewQA } from "@prisma/client";
 import { getCookie } from "cookies-next";
+import { Textarea } from "@/components/ui/textarea";
 
 // Define AuthCookie interface based on your app's cookie structure
 interface AuthCookie {
@@ -75,7 +76,7 @@ interface RecordAnswerSectionProps {
   activeQuestionIndex: number;
   interviewData: any;
   sessionId: string;
-  webcamRef?: React.RefObject<Webcam>;
+  webcamRef?: React.RefObject<Webcam | null>;
   setWebcamRef?: (ref: any) => void;
   showWebcam?: boolean;
   webcamOnly?: boolean;
@@ -144,7 +145,7 @@ export default function RecordAnswerSection({
   useEffect(() => {
     if (error) {
       console.error("Speech to text error:", error);
-      toast.error("Error recording speech: " + error.message);
+      toast.error("Error recording speech: " + error);
       stopSpeechToText();
     }
   }, [error, stopSpeechToText]);
@@ -153,7 +154,11 @@ export default function RecordAnswerSection({
     if (results?.length > 0) {
       results.forEach((result) => {
         setUserAnswer((prevAns) => {
-          const newAnswer = prevAns + result.transcript;
+          const newAnswer =
+            prevAns +
+            (typeof result === "object" && "transcript" in result
+              ? result.transcript
+              : "");
           return newAnswer;
         });
       });
@@ -276,6 +281,8 @@ export default function RecordAnswerSection({
             width: 720,
             height: 405,
             facingMode: "user",
+            noiseSuppression: true,
+            echoCancellation: true,
           }}
           className="w-full h-auto rounded-md shadow-md"
         />
@@ -289,12 +296,12 @@ export default function RecordAnswerSection({
       <div className="w-full">
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">Your Answer</label>
-          <textarea
+          <Textarea
             value={userAnswer}
             onChange={(e) => setUserAnswer(e.target.value)}
             className="w-full p-3 border rounded-lg h-24 focus:ring-2 focus:ring-primary/50 focus:border-primary"
             placeholder="Your answer will appear here as you speak..."
-            disabled={isRecording}
+            readOnly
           />
         </div>
 
@@ -378,7 +385,7 @@ export default function RecordAnswerSection({
       </div>
 
       <div className="w-full space-y-4">
-        <textarea
+        <Textarea
           value={userAnswer}
           onChange={(e) => setUserAnswer(e.target.value)}
           className="w-full p-3 border rounded-lg h-24"

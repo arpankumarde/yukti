@@ -53,6 +53,9 @@ const Page = async ({
     },
   });
 
+  const transcriptEntries: TranscriptEntry[] =
+    (interviewSession?.transcript as unknown as TranscriptEntry[]) || [];
+
   if (!interviewSession) {
     return (
       <div className="container mx-auto px-4 py-10">
@@ -89,7 +92,7 @@ const Page = async ({
               </CardDescription>
             </div>
             <Badge
-              variant={interviewSession.attempted ? "success" : "secondary"}
+              variant={interviewSession.attempted ? "default" : "secondary"}
               className="text-sm px-2 py-1"
             >
               {interviewSession.attempted ? "Completed" : "Not Attempted"}
@@ -213,8 +216,7 @@ const Page = async ({
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
-          {interviewSession.transcript &&
-          interviewSession.transcript.length > 0 ? (
+          {transcriptEntries.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-100">
@@ -240,40 +242,38 @@ const Page = async ({
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {interviewSession.transcript.map(
-                    (entry: TranscriptEntry, index) => (
-                      <tr key={index} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
-                          {entry?.question}
-                        </td>
-                        <td className="px-6 py-4 whitespace-pre-wrap text-sm text-gray-600">
-                          {entry.userAnswer}
-                        </td>
-                        <td className="px-6 py-4 whitespace-pre-wrap text-sm text-gray-600">
-                          {entry.correctAnswer}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm">
-                          <Badge
-                            variant={
-                              entry.rating > 7
-                                ? "success"
-                                : entry.rating > 4
-                                ? "warning"
-                                : "destructive"
-                            }
-                          >
-                            {entry.rating}/10
-                          </Badge>
-                        </td>
-                        <td className="px-6 py-4 whitespace-pre-wrap text-sm text-gray-600">
-                          {entry.feedback}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {new Date(entry.timestamp).toLocaleString()}
-                        </td>
-                      </tr>
-                    )
-                  )}
+                  {transcriptEntries.map((entry, index) => (
+                    <tr key={index} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
+                        {entry?.question}
+                      </td>
+                      <td className="px-6 py-4 whitespace-pre-wrap text-sm text-gray-600">
+                        {entry.userAnswer}
+                      </td>
+                      <td className="px-6 py-4 whitespace-pre-wrap text-sm text-gray-600">
+                        {entry.correctAnswer}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <Badge
+                          variant={
+                            entry.rating > 7
+                              ? "default"
+                              : entry.rating > 4
+                              ? "outline"
+                              : "destructive"
+                          }
+                        >
+                          {entry.rating}/10
+                        </Badge>
+                      </td>
+                      <td className="px-6 py-4 whitespace-pre-wrap text-sm text-gray-600">
+                        {entry.feedback}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {new Date(entry.timestamp).toLocaleString()}
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>

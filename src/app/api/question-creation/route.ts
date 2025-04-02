@@ -27,10 +27,18 @@ export async function POST(request: NextRequest) {
     // Parse the response
     let questionsJson;
     try {
-      questionsJson = JSON.parse(result);
+      if (result) {
+        questionsJson = JSON.parse(result);
+      } else {
+        throw new Error("Result is null");
+      }
     } catch {
       // If direct parsing fails, try cleaning the response
-      questionsJson = JSON.parse(result.replace(/```json|```/g, "").trim());
+      if (result) {
+        questionsJson = JSON.parse(result.replace(/```json|```/g, "").trim());
+      } else {
+        throw new Error("Result is null");
+      }
     }
 
     // Return the parsed JSON

@@ -5,22 +5,34 @@ import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { completeInterview } from "@/actions/interview";
-import { CircleCheckBig, Loader2, Clock } from "lucide-react";
+import {
+  CircleCheckBig,
+  Loader2,
+  Clock,
+  ChevronRight,
+  ChevronLeft,
+} from "lucide-react";
 import QuestionDisplay from "./_components/QuestionDisplay";
 import InterviewProgress from "./_components/InterviewProgress";
 import { Badge } from "@/components/ui/badge";
 import dynamic from "next/dynamic";
-import { protectInterviewRoute } from "@/actions/protectInterviewRoute";
+import {
+  InterviewSessionWithRelations,
+  protectInterviewRoute,
+} from "@/actions/protectInterviewRoute";
+import Webcam from "react-webcam";
+import { InterviewQA } from "@prisma/client";
 
-// Fix for "navigator is not defined" error - Import with SSR disabled
+// Import with SSR disabled
 const RecordAnswerSection = dynamic(
   () => import("./_components/RecordAnswerSection"),
   { ssr: false }
 );
 
 export default function InterviewPage() {
-  const [interviewData, setInterviewData] = useState<any>(null);
-  const [questions, setQuestions] = useState<any[]>([]);
+  const [interviewData, setInterviewData] =
+    useState<InterviewSessionWithRelations | null>(null);
+  const [questions, setQuestions] = useState<InterviewQA[]>([]);
   const [activeQuestionIndex, setActiveQuestionIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -29,8 +41,8 @@ export default function InterviewPage() {
   const router = useRouter();
   const params = useParams<{ interviewsessionid: string }>();
   const sessionId = params.interviewsessionid;
-  const webcamRef = useRef(null);
-  const setWebcamRef = (ref: any) => {
+  const webcamRef = useRef<Webcam | null>(null);
+  const setWebcamRef = (ref: Webcam | null) => {
     webcamRef.current = ref;
   };
 
@@ -209,20 +221,7 @@ export default function InterviewPage() {
                 disabled={activeQuestionIndex === 0}
                 className="flex items-center"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="mr-2 h-4 w-4"
-                >
-                  <path d="m15 18-6-6 6-6"></path>
-                </svg>
+                <ChevronLeft />
                 Previous
               </Button>
 
@@ -232,20 +231,7 @@ export default function InterviewPage() {
                   className="flex items-center"
                 >
                   Next
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="ml-2 h-4 w-4"
-                  >
-                    <path d="m9 18 6-6-6-6"></path>
-                  </svg>
+                  <ChevronRight />
                 </Button>
               ) : (
                 <Button

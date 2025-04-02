@@ -279,7 +279,15 @@ export default async function InterviewsPage() {
   );
 }
 
-function InterviewCard({ session, isExpired, showAttemptedButton }) {
+function InterviewCard({
+  session,
+  isExpired,
+  showAttemptedButton,
+}: {
+  session: any;
+  isExpired: boolean;
+  showAttemptedButton: boolean;
+}) {
   const interview = session.interview;
   const job = interview.job;
 

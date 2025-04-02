@@ -132,10 +132,7 @@ const Page = async ({
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {session.attempted ? (
-                          <Badge
-                            variant="success"
-                            className="flex items-center gap-1 bg-green-100 text-green-800"
-                          >
+                          <Badge className="flex items-center gap-1 bg-green-100 text-green-800">
                             <CheckCircle2 className="h-3 w-3" />
                             Completed
                           </Badge>

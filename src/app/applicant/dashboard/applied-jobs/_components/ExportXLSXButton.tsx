@@ -56,7 +56,7 @@ const ExportXLSXButton = ({
   return (
     <>
       {applications && applications.length > 0 && (
-        <Button variant={"outline"} onClick={handleExport}>
+        <Button variant="outline" onClick={handleExport}>
           <RiFileExcel2Fill size={24} className="text-green-800 mr-2" />
           Export XLSX
         </Button>

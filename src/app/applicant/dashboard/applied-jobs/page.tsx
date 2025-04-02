@@ -12,8 +12,6 @@ import {
   Clock,
   AlertCircle,
   ChevronRight,
-  Download,
-  FileSpreadsheet,
   Filter,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -58,7 +56,11 @@ export default async function AppliedJobsPage() {
       comments: true,
       createdAt: true,
       status: true,
-      job: true,
+      job: {
+        include: {
+          company: { select: { name: true } },
+        },
+      },
     },
     orderBy: {
       createdAt: "desc",
@@ -128,19 +130,8 @@ export default async function AppliedJobsPage() {
 
           {/* Export Buttons */}
           <div className="flex gap-3 self-start md:self-auto">
-            <ExportXLSXButton applications={applications}>
-              <Button variant="outline" size="sm" className="gap-2">
-                <FileSpreadsheet className="h-4 w-4" />
-                Export to Excel
-              </Button>
-            </ExportXLSXButton>
-
-            <ExportCSVButton applications={applications}>
-              <Button variant="outline" size="sm" className="gap-2">
-                <Download className="h-4 w-4" />
-                Export to CSV
-              </Button>
-            </ExportCSVButton>
+            <ExportXLSXButton applications={applications} />
+            <ExportCSVButton applications={applications} />
           </div>
         </div>
 
@@ -210,7 +201,7 @@ export default async function AppliedJobsPage() {
         {/* Applications Grid */}
         <div className="grid gap-6">
           {applications.map((app) => {
-            const statusDetails = getStatusDetails(app.status);
+            const statusDetails = getStatusDetails(app?.status ?? "");
             const formattedDate = new Date(app.createdAt).toLocaleDateString(
               undefined,
               {
@@ -234,7 +225,7 @@ export default async function AppliedJobsPage() {
                       <CardDescription className="flex flex-wrap mt-3 gap-3">
                         <div className="flex items-center text-sm text-muted-foreground">
                           <Building2 className="w-3.5 h-3.5 mr-1.5 text-muted-foreground/70" />
-                          {app.job.recruiter?.name || "Company not specified"}
+                          {app.job.company?.name || "Company not specified"}
                         </div>
 
                         <div className="flex items-center text-sm text-muted-foreground">

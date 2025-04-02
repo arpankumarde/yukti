@@ -8,13 +8,32 @@ interface TurnstileProps {
   onVerify: (token: string) => void;
 }
 
+interface TurnstileInstance {
+  render: (
+    container: HTMLElement,
+    options: {
+      sitekey: string;
+      callback: (token: string) => void;
+      "refresh-expired": string;
+      [key: string]: any;
+    }
+  ) => string;
+  remove: (widgetId: string) => void;
+}
+
+declare global {
+  interface Window {
+    turnstile?: TurnstileInstance;
+  }
+}
+
 export function Turnstile({ siteKey, onVerify }: TurnstileProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetId = useRef<string | null>(null);
   const [scriptLoaded, setScriptLoaded] = useState(false);
   const hasRendered = useRef(false);
   const onVerifyRef = useRef(onVerify);
-  
+
   // Update onVerifyRef when onVerify changes
   useEffect(() => {
     onVerifyRef.current = onVerify;
@@ -25,13 +44,13 @@ export function Turnstile({ siteKey, onVerify }: TurnstileProps) {
     if (window.turnstile) {
       setScriptLoaded(true);
     }
-    
+
     const handleTurnstileLoad = () => {
       setScriptLoaded(true);
     };
-    
+
     document.addEventListener("turnstile-loaded", handleTurnstileLoad);
-    
+
     return () => {
       document.removeEventListener("turnstile-loaded", handleTurnstileLoad);
     };
@@ -40,11 +59,11 @@ export function Turnstile({ siteKey, onVerify }: TurnstileProps) {
   // Handle widget rendering separately
   useEffect(() => {
     if (!scriptLoaded || !containerRef.current || hasRendered.current) return;
-    
+
     const renderWidget = () => {
       try {
         // Only render if we haven't already
-        if (!widgetId.current) {
+        if (!widgetId.current && window.turnstile) {
           widgetId.current = window.turnstile.render(containerRef.current!, {
             sitekey: siteKey,
             callback: (token: string) => {
@@ -60,7 +79,7 @@ export function Turnstile({ siteKey, onVerify }: TurnstileProps) {
     };
 
     renderWidget();
-    
+
     return () => {
       try {
         if (widgetId.current && window.turnstile) {
