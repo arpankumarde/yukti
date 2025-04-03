@@ -44,7 +44,7 @@ export default async function InterviewsPage() {
           </CardHeader>
           <CardFooter className="flex justify-center pb-6">
             <Button asChild className="shadow-sm">
-              <Link href="/auth/login">Sign In</Link>
+              <Link href="/applicant/login">Sign In</Link>
             </Button>
           </CardFooter>
         </Card>

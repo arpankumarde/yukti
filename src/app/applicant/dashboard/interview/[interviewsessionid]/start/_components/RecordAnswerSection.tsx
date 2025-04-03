@@ -2,9 +2,8 @@
 
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Webcam from "react-webcam";
-import useSpeechToText from "react-hook-speech-to-text";
 import { Mic, StopCircle, Save } from "lucide-react";
 import { toast } from "sonner";
 import { saveAnswer } from "@/actions/interview";
@@ -94,13 +93,14 @@ export default function RecordAnswerSection({
 }: RecordAnswerSectionProps) {
   const [userAnswer, setUserAnswer] = useState("");
   const [applicant, setApplicant] = useState<AuthCookie | null>(null);
-
-  // const [loading, setLoading] = useState(false);
-  // const [hasPermission, setHasPermission] = useState(false);
-  // const [hasRecorded, setHasRecorded] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
-  const timerRef = React.useRef<NodeJS.Timeout | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Get applicant data from cookie
   useEffect(() => {
@@ -119,84 +119,49 @@ export default function RecordAnswerSection({
     }
   }, []);
 
-  const {
-    error,
-    isRecording,
-    results,
-    startSpeechToText,
-    stopSpeechToText,
-    setResults,
-  } = useSpeechToText({
-    continuous: true,
-    useLegacyResults: false,
-  });
-
-  useEffect(() => {
-    if (
-      !("webkitSpeechRecognition" in window) &&
-      !("SpeechRecognition" in window)
-    ) {
-      toast.error(
-        "Speech recognition is not supported in this browser. Please use Chrome."
-      );
-    }
-  }, []);
-
-  useEffect(() => {
-    if (error) {
-      console.error("Speech to text error:", error);
-      toast.error("Error recording speech: " + error);
-      stopSpeechToText();
-    }
-  }, [error, stopSpeechToText]);
-
-  useEffect(() => {
-    if (results?.length > 0) {
-      results.forEach((result) => {
-        setUserAnswer((prevAns) => {
-          const newAnswer =
-            prevAns +
-            (typeof result === "object" && "transcript" in result
-              ? result.transcript
-              : "");
-          return newAnswer;
-        });
-      });
-    }
-  }, [results]);
-
   useEffect(() => {
     // Reset recording time and answer when changing questions
     setRecordingTime(0);
     setUserAnswer("");
-    setResults([]);
     if (timerRef.current) {
       clearInterval(timerRef.current);
     }
-  }, [activeQuestionIndex, setResults]);
+  }, [activeQuestionIndex]);
 
   const requestMicrophonePermission = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      stream.getTracks().forEach((track) => track.stop());
-      // setHasPermission(true);
-      return true;
+      return { success: true, stream };
     } catch (error) {
       console.error("Microphone permission error:", error);
       toast.error("Please allow microphone access to record your answer");
-      return false;
+      return { success: false, stream: null };
     }
   };
 
   const handleStartRecording = async () => {
-    const permissionGranted = await requestMicrophonePermission();
-    if (permissionGranted) {
-      // setHasRecorded(true);
+    const { success, stream } = await requestMicrophonePermission();
+    
+    if (success && stream) {
+      // Reset previous recording data
+      audioChunksRef.current = [];
       setRecordingTime(0);
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-      await startSpeechToText();
+      setIsRecording(true);
+      
+      // Create media recorder
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      
+      // Set up data handling
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+      
+      // Start recording
+      mediaRecorder.start(1000);
+      
       // Start timer
       timerRef.current = setInterval(() => {
         setRecordingTime((prevTime) => prevTime + 1);
@@ -204,12 +169,76 @@ export default function RecordAnswerSection({
     }
   };
 
-  const handleStopRecording = () => {
-    stopSpeechToText();
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
+  const handleStopRecording = async () => {
+    if (mediaRecorderRef.current && isRecording) {
+      setIsProcessing(true);
+      
+      // Stop the media recorder
+      mediaRecorderRef.current.stop();
+      
+      // Wait for the last data to be processed
+      mediaRecorderRef.current.onstop = async () => {
+        try {
+          // Create a blob from the audio chunks
+          const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+          
+          // Transcribe the audio using our API
+          await transcribeAudio(audioBlob);
+        } catch (error) {
+          console.error("Error processing audio:", error);
+          toast.error("Failed to process audio recording");
+        } finally {
+          setIsProcessing(false);
+        }
+      };
+      
+      // Stop the timer
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+      
+      // Stop and release the media stream
+      if (mediaRecorderRef.current.stream) {
+        mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+      }
+      
+      setIsRecording(false);
+      setRecordingTime(0);
     }
-    setRecordingTime(0);
+  };
+
+  const transcribeAudio = async (audioBlob: Blob) => {
+    try {
+      // Create form data to send to our API
+      const formData = new FormData();
+      formData.append("file", audioBlob, "recording.webm");
+      
+      // Optionally add language if available
+      // formData.append("language", "en");
+      
+      // Send the audio to our Whisper API endpoint
+      const response = await fetch("/api/ai/transcribe", {
+        method: "POST",
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to transcribe audio");
+      }
+      
+      const data = await response.json();
+      
+      if (data.success && data.text) {
+        setUserAnswer(prev => prev + " " + data.text.trim());
+        toast.success("Audio transcribed successfully");
+      } else {
+        toast.error("Failed to transcribe audio: Empty response");
+      }
+    } catch (error: any) {
+      console.error("Transcription error:", error);
+      toast.error(`Transcription error: ${error.message || "Unknown error"}`);
+    }
   };
 
   const formatTime = (seconds: number) => {
@@ -257,7 +286,6 @@ export default function RecordAnswerSection({
       if (success) {
         toast.success("Answer recorded successfully");
         setUserAnswer("");
-        setResults([]);
       } else {
         toast.error(error || "Failed to save answer");
       }
@@ -301,7 +329,6 @@ export default function RecordAnswerSection({
             onChange={(e) => setUserAnswer(e.target.value)}
             className="w-full p-3 border rounded-lg h-24 focus:ring-2 focus:ring-primary/50 focus:border-primary"
             placeholder="Your answer will appear here as you speak..."
-            readOnly
           />
         </div>
 
@@ -318,7 +345,7 @@ export default function RecordAnswerSection({
 
           <div className="flex gap-2">
             <Button
-              disabled={isSaving}
+              disabled={isSaving || isProcessing}
               variant={isRecording ? "destructive" : "outline"}
               onClick={isRecording ? handleStopRecording : handleStartRecording}
               className="my-2"
@@ -326,6 +353,10 @@ export default function RecordAnswerSection({
               {isRecording ? (
                 <span className="flex gap-2 items-center">
                   <StopCircle className="h-4 w-4" /> Stop Recording
+                </span>
+              ) : isProcessing ? (
+                <span className="flex gap-2 items-center">
+                  Processing...
                 </span>
               ) : (
                 <span className="text-primary flex gap-2 items-center">
@@ -338,10 +369,7 @@ export default function RecordAnswerSection({
               type="button"
               onClick={handleSaveAnswer}
               disabled={
-                recordingTime > 0 ||
-                isRecording ||
-                isSaving ||
-                !userAnswer.trim()
+                isRecording || isSaving || isProcessing || !userAnswer.trim()
               }
               className="my-2"
             >
@@ -390,7 +418,7 @@ export default function RecordAnswerSection({
           onChange={(e) => setUserAnswer(e.target.value)}
           className="w-full p-3 border rounded-lg h-24"
           placeholder="Your answer will appear here as you speak..."
-          disabled={isRecording}
+          disabled={isRecording || isProcessing}
         />
 
         <div className="text-center font-mono font-bold text-lg">
@@ -405,7 +433,7 @@ export default function RecordAnswerSection({
 
         <div className="flex justify-between">
           <Button
-            disabled={isSaving}
+            disabled={isSaving || isProcessing}
             variant={isRecording ? "destructive" : "outline"}
             onClick={isRecording ? handleStopRecording : handleStartRecording}
             className="my-2"
@@ -414,6 +442,8 @@ export default function RecordAnswerSection({
               <span className="flex gap-2 items-center">
                 <StopCircle className="h-4 w-4" /> Stop Recording
               </span>
+            ) : isProcessing ? (
+              <span>Processing...</span>
             ) : (
               <span className="text-primary flex gap-2 items-center">
                 <Mic className="h-4 w-4" /> Record Answer
@@ -425,7 +455,7 @@ export default function RecordAnswerSection({
             type="button"
             onClick={handleSaveAnswer}
             disabled={
-              recordingTime > 0 || isRecording || isSaving || !userAnswer.trim()
+              isRecording || isSaving || isProcessing || !userAnswer.trim()
             }
             className="my-2"
           >
