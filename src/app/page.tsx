@@ -61,7 +61,7 @@ const Page = () => {
 
           <div className="flex justify-center">
             <Button asChild size="lg" className="font-medium">
-              <Link href="/register">Get Started</Link>
+              <Link href="/company/register">Get Started</Link>
             </Button>
           </div>
         </motion.div>
@@ -168,10 +168,10 @@ const Page = () => {
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Button asChild size="lg" className="font-medium">
-              <Link href="/register">Create an Account</Link>
+              <Link href="/company/register">Create an Account</Link>
             </Button>
             <Button asChild variant="outline" size="lg" className="font-medium">
-              <Link href="/login">Sign In</Link>
+              <Link href="/company/login">Sign In</Link>
             </Button>
           </div>
         </motion.div>
