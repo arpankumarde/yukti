@@ -1,13 +1,13 @@
 import prisma from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
-import NextLink from "next/link";
-import { cn } from "@/lib/utils";
+import CopyToClipboard from "@/components/block/CopyToClipboard";
+import { MdOutlineContentCopy } from "react-icons/md";
+import Link from "next/link";
 
-const ApplicationForJob = async ({
-  params,
-}: {
-  params: Promise<{ jid: string }>;
-}) => {
+export const dynamicParams = true;
+export const revalidate = 0;
+
+const Page = async ({ params }: { params: Promise<{ jid: string }> }) => {
   const { jid } = await params;
   const applications = await prisma.application.findMany({
     where: {
@@ -28,36 +28,33 @@ const ApplicationForJob = async ({
       <h1 className="text-3xl font-bold text-primary">
         Applications for Job ID: {jid}
       </h1>
-      <div className="bg-secondary/20 p-6 rounded-lg shadow-md">
+      <div className="bg-secondary/20 pb-4 rounded-lg shadow-md">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+            <thead className="bg-gray-100">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
                   #
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
                   Applicant Name
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
                   Job Title
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
                   Score
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
                   Applied At
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  ID
+                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
+                  AID
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Resume
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -84,35 +81,20 @@ const ApplicationForJob = async ({
                     {new Date(application.createdAt).toLocaleString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {application.applicationId}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    <NextLink target="_blank" href={`${application.resume}`}>
-                      <Button
-                        className={cn(
-                          "inline-block py-2 px-4 rounded-lg transition-colors duration-200",
-                          "bg-primary text-primary-foreground font-medium",
-                          "hover:bg-primary/90"
-                        )}
-                      >
-                        View
+                    <CopyToClipboard text={application.applicationId}>
+                      <Button variant="outline">
+                        <MdOutlineContentCopy />
                       </Button>
-                    </NextLink>
+                    </CopyToClipboard>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    <NextLink
-                      href={`/recruiter/dashboard/applications/${jid}/${application.applicationId}`}
-                    >
-                      <Button
-                        className={cn(
-                          "inline-block py-2 px-4 rounded-lg transition-colors duration-200",
-                          "bg-primary text-primary-foreground font-medium",
-                          "hover:bg-primary/90"
-                        )}
+                    <Button asChild>
+                      <Link
+                        href={`/recruiter/dashboard/applications/${jid}/${application.applicationId}`}
                       >
                         Details
-                      </Button>
-                    </NextLink>
+                      </Link>
+                    </Button>
                   </td>
                 </tr>
               ))}
@@ -124,4 +106,4 @@ const ApplicationForJob = async ({
   );
 };
 
-export default ApplicationForJob;
+export default Page;
