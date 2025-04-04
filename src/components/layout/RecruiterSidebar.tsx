@@ -21,6 +21,7 @@ import { Button } from "../ui/button";
 import { deleteCookie } from "cookies-next";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { ChevronDown } from "lucide-react";
 
 export function RecruiterSidebar({
   ...props
@@ -30,10 +31,26 @@ export function RecruiterSidebar({
   return (
     <Sidebar {...props}>
       <SidebarHeader>
-        {/* Logo/Header */}
-        <div className="p-4">
-          <Image src="/logo.png" alt="Logo" width={400} height={400} />
-        </div>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" asChild>
+              <Link href="/recuiter/dashboard">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
+                  <Image
+                    src="/logo.png"
+                    alt="Yukti Logo"
+                    width={60}
+                    height={60}
+                  />
+                </div>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-semibold">Recruiter</span>
+                  <span className="truncate text-xs">Yukti AI</span>
+                </div>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarHeader>
 
       <SidebarContent>
@@ -102,6 +119,7 @@ export function RecruiterSidebar({
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
               <Button
+                variant={"destructive"}
                 onClick={() => {
                   deleteCookie("ykrectoken");
                   router.push("/recruiter/login");

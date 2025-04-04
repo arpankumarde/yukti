@@ -34,10 +34,26 @@ export function ApplicantSidebar({
   return (
     <Sidebar {...props}>
       <SidebarHeader>
-        {/* Logo/Header */}
-        <div className="p-4">
-          <Image src="/logo.png" alt="Logo" width={400} height={400} />
-        </div>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" asChild>
+              <Link href="/applicant/dashboard">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
+                  <Image
+                    src="/logo.png"
+                    alt="Yukti Logo"
+                    width={60}
+                    height={60}
+                  />
+                </div>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-semibold">Applicant</span>
+                  <span className="truncate text-xs">Yukti AI</span>
+                </div>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarHeader>
 
       <SidebarContent>
@@ -118,6 +134,7 @@ export function ApplicantSidebar({
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
               <Button
+                variant={"destructive"}
                 onClick={() => {
                   deleteCookie("ykapptoken");
                   router.push("/applicant/login");
