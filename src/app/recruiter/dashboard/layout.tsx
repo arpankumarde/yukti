@@ -1,5 +1,9 @@
 import { RecruiterSidebar } from "@/components/layout/RecruiterSidebar";
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import {
+  SidebarProvider,
+  SidebarInset,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 
 export default function RootLayout({
   children,
@@ -10,6 +14,9 @@ export default function RootLayout({
     <SidebarProvider>
       <RecruiterSidebar collapsible="icon" />
       <SidebarInset>
+        <div className="border-b p-4">
+          <SidebarTrigger />
+        </div>
         <div>{children}</div>
       </SidebarInset>
     </SidebarProvider>
