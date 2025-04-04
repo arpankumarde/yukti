@@ -2,7 +2,6 @@ onlyBuiltDependencies:
   - '@prisma/client'
   - '@prisma/engines'
   - bcrypt
-  - canvas
   - core-js
   - esbuild
   - prisma
