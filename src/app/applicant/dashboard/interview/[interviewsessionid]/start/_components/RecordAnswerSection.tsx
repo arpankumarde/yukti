@@ -50,7 +50,7 @@ Provide strictly formatted JSON:
     if (data.result) {
       let jsonResult;
       try {
-        // Clean the response if needed
+       
         const cleanedResponse = data.result.replace(/```json|```/g, "").trim();
         jsonResult = JSON.parse(cleanedResponse);
       } catch (error) {
@@ -147,6 +147,7 @@ export default function RecordAnswerSection({
       audioChunksRef.current = [];
       setRecordingTime(0);
       setIsRecording(true);
+      setUserAnswer(""); // Clear previous answer when starting a new recording
       
       // Create media recorder
       const mediaRecorder = new MediaRecorder(stream);
