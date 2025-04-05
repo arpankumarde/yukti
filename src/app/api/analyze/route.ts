@@ -20,7 +20,7 @@ Format your response in markdown for better readability.`;
 
   return `You are an expert ATS (Applicant Tracking System) analyzer and professional resume reviewer. Analyze the following resume text and provide a detailed report covering:
 
-1. ATS Compatibility Score (0-100%)
+1. ATS Compatibility Score (0-100) dont include percentage sign and make sure its an integer.
 2. Format and Structure Analysis
 3. Key Findings
 4. Keyword Optimization
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "google/gemini-2.0-pro-exp-02-05:free",
+        model: "google/gemini-2.0-flash-001",
         messages: [
           {
             role: "user",

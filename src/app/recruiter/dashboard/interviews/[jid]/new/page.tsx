@@ -373,7 +373,7 @@ const Page = () => {
                 type="button"
                 variant="outline"
                 size="lg"
-                className="w-full"
+                className="w-[50%]"
                 onClick={() => router.back()}
               >
                 Cancel
@@ -381,7 +381,7 @@ const Page = () => {
               <Button
                 type="submit"
                 size="lg"
-                className="w-full bg-primary hover:bg-primary/90"
+                className="w-[50%] bg-primary hover:bg-primary/90"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (
