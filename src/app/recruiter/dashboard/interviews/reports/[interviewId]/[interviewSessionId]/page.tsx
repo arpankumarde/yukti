@@ -82,7 +82,7 @@ const Page = async ({
 
       <Card className="mb-8 border shadow-lg">
         <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-lg">
-          <div className="flex justify-between items-start">
+          <div className="flex justify-between items-center">
             <div>
               <CardTitle className="text-2xl font-bold text-gray-800">
                 Interview Session Report
@@ -170,10 +170,10 @@ const Page = async ({
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Card className="bg-blue-50 border border-blue-100">
-                <CardContent className="pt-4 flex items-center">
-                  <Star className="h-5 w-5 mr-2 text-amber-500" />
-                  <div>
-                    <p className="text-sm text-gray-600">Overall Rating</p>
+                <CardContent className="flex items-center gap-2">
+                  <Star size={20} className="w-6 text-amber-600" />
+                  <div className="flex-1">
+                    <p className="text-gray-800">Overall Rating</p>
                     <p className="font-medium">
                       {interviewSession.rating ? (
                         <span className="flex items-center gap-1">
@@ -188,15 +188,13 @@ const Page = async ({
               </Card>
 
               <Card className="bg-indigo-50 border border-indigo-100">
-                <CardContent className="pt-4">
-                  <div className="flex items-start">
-                    <MessageSquare className="h-5 w-5 mr-2 text-indigo-500" />
-                    <div>
-                      <p className="text-sm text-gray-600">Overall Feedback</p>
-                      <p className="font-medium text-gray-800">
-                        {interviewSession.feedback || "No feedback provided"}
-                      </p>
-                    </div>
+                <CardContent className="flex items-start gap-2">
+                  <MessageSquare size={20} className="w-6 text-indigo-700" />
+                  <div className="flex-1">
+                    <p className="text-gray-800">Overall Feedback</p>
+                    <p className="font-medium text-gray-800">
+                      {interviewSession.feedback || "No feedback provided"}
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -221,19 +219,19 @@ const Page = async ({
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-100">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-64">
                       Question
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-64">
                       User Answer
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-64">
                       Correct Answer
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Rating
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-64">
                       Feedback
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -244,13 +242,13 @@ const Page = async ({
                 <tbody className="bg-white divide-y divide-gray-200">
                   {transcriptEntries.map((entry, index) => (
                     <tr key={index} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800">
+                      <td className="px-6 py-4 text-sm text-gray-800 w-64">
                         {entry?.question}
                       </td>
-                      <td className="px-6 py-4 whitespace-pre-wrap text-sm text-gray-600">
+                      <td className="px-6 py-4 whitespace-pre-wrap text-sm text-gray-600 w-64">
                         {entry.userAnswer}
                       </td>
-                      <td className="px-6 py-4 whitespace-pre-wrap text-sm text-gray-600">
+                      <td className="px-6 py-4 whitespace-pre-wrap text-sm text-gray-600 w-64">
                         {entry.correctAnswer}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -266,7 +264,7 @@ const Page = async ({
                           {entry.rating}/10
                         </Badge>
                       </td>
-                      <td className="px-6 py-4 whitespace-pre-wrap text-sm text-gray-600">
+                      <td className="px-6 py-4 whitespace-pre-wrap text-sm text-gray-600 w-64">
                         {entry.feedback}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
