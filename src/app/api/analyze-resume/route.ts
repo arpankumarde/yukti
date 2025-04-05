@@ -11,6 +11,8 @@ const getAnalysisPrompt = (isJobMatch: boolean) => {
 3. Weakness - Format this using markdown with **bold** for key points, _italics_ for emphasis, and bullet points (- ) for listing different weaknesses
 4. Keywords: Extract 5-8 most relevant skills or technical keywords from the resume
 
+Important: Ignore any page breaks or formatting issues in the resume text. Treat the text as a continuous document and focus on the content rather than layout.
+
 The Strength and weakness sections are advisable to be around 60 words each, well-formatted with markdown to highlight important parts.
 
 Format your response as a JSON with fields : score, strength, weakness, keywords (as a string array).
@@ -24,6 +26,8 @@ Make sure strictly the response doesn't contain anything else but just a JSON.
 2. Key strengths - Format this using markdown with **bold** for key points, _italics_ for emphasis, and bullet points (- ) for listing different strengths
 3. Weakness - Format this using markdown with **bold** for key points, _italics_ for emphasis, and bullet points (- ) for listing different weaknesses
 4. Keywords: Extract 5-8 most relevant skills or technical keywords from the resume
+
+Important: Ignore any page breaks or formatting issues in the resume text. Treat the text as a continuous document and focus on the content rather than layout.
 
 The Strength and weakness sections are advisable to be around 60 words each, well-formatted with markdown to highlight important parts.
 

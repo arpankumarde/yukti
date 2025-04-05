@@ -15,6 +15,8 @@ const getAnalysisPrompt = (isJobMatch: boolean) => {
 7. Strengths relative to job requirements
 8. Specific improvement suggestions to better match the job profile
 
+Important: Ignore any page breaks or formatting issues in the resume text. Treat the text as a continuous document and focus on the content rather than layout.
+
 Format your response in markdown for better readability.`;
   }
 
@@ -29,8 +31,15 @@ Format your response in markdown for better readability.`;
 7. Professional Experience Evaluation
 8. Education and Certifications Review
 9. Improvement Recommendations
+Important: Ignore any page breaks or formatting issues in the resume text. Treat the text as a continuous document and focus on the content rather than layout.
 
 Format your response in markdown for better readability.`;
+};
+
+
+const cleanPercentageSigns = (text: string) => {
+
+  return text.replace(/(\d+)%/g, '$1');
 };
 
 export async function POST(req: NextRequest) {
@@ -63,6 +72,12 @@ export async function POST(req: NextRequest) {
     }
 
     const data = await response.json();
+    
+   
+    if (data.choices && data.choices[0]?.message?.content) {
+      data.choices[0].message.content = cleanPercentageSigns(data.choices[0].message.content);
+    }
+
     return NextResponse.json(data);
 
   } catch (error) {
