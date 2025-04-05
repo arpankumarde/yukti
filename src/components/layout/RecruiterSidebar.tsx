@@ -21,7 +21,6 @@ import { Button } from "../ui/button";
 import { deleteCookie } from "cookies-next";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { ChevronDown } from "lucide-react";
 
 export function RecruiterSidebar({
   ...props
@@ -34,7 +33,7 @@ export function RecruiterSidebar({
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link href="/recuiter/dashboard">
+              <Link href="/recruiter/dashboard">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
                   <Image
                     src="/logo.png"
