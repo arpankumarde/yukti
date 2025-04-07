@@ -218,7 +218,7 @@ export default function InterviewPage() {
             <CardContent className="space-y-4">
               {/* Camera preview */}
               {webCamEnabled ? (
-                <div className="relative">
+                <div className="relative pointer-events-none">
                   <Webcam
                     audio={false}
                     className="rounded-lg border shadow-inner w-full"
@@ -227,6 +227,7 @@ export default function InterviewPage() {
                       width: "100%",
                       objectFit: "cover",
                     }}
+                    mirrored={true}
                   />
                   <Badge className="absolute top-3 right-3 bg-black/50 text-white">
                     Camera Active
