@@ -119,7 +119,7 @@ export default function ResumeAnalyzer() {
       // Add score as a highlight
       const score = scores.atsScore || 0;
       pdf.setFillColor(240, 240, 240);
-      pdf.roundedRect(20, 30, 40, 20, 3, 3, "F");
+      pdf.roundedRect(20, 31.5, 35, 18, 3, 3, "F");
       pdf.setFontSize(14);
       pdf.setTextColor(0, 0, 0);
       pdf.text(`Score: ${score}%`, 25, 43);
@@ -147,7 +147,7 @@ export default function ResumeAnalyzer() {
         y += 7; // Move to next line (adjust spacing as needed)
       }
 
-      pdf.save("ats-analysis-report.pdf");
+      pdf.save("yukti-ai-ats-analysis-report.pdf");
       toast.success("Report downloaded successfully!");
     } catch (error) {
       console.error(
