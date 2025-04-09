@@ -1,4 +1,5 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../src/generated/client";
+import admin from "./data/admin.json";
 import company from "./data/company.json";
 import recruiter from "./data/recruiter.json";
 import applicant from "./data/applicant.json";
@@ -6,6 +7,12 @@ import applicant from "./data/applicant.json";
 const prisma = new PrismaClient();
 
 async function main() {
+  const newAdmin = await prisma.admin.upsert({
+    where: { email: admin.email },
+    update: {},
+    create: admin,
+  });
+
   const newCompany = await prisma.company.upsert({
     where: { email: company.email },
     update: {},
@@ -17,7 +24,7 @@ async function main() {
     update: {},
     create: {
       ...recruiter,
-      company: { connect: { email: company.email } },
+      Company: { connect: { email: company.email } },
     },
   });
 
@@ -27,7 +34,7 @@ async function main() {
     create: applicant,
   });
 
-  console.log({ newCompany, newRecruiter, newApplicant });
+  console.log({ newAdmin, newCompany, newRecruiter, newApplicant });
 }
 main()
   .then(async () => {
