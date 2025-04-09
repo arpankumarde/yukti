@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../src/generated/client"
 }
 
 datasource db {
@@ -7,8 +8,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Admin {
+  adminId  String @id @default(uuid()) @db.VarChar(50)
+  name     String
+  email    String @unique @db.VarChar(100)
+  password String
+}
+
 model Company {
-  companyId   String      @id @default(cuid())
+  companyId   String      @id @default(uuid()) @db.VarChar(50)
   name        String      @db.VarChar(100)
   email       String      @unique @db.VarChar(100)
   phone       String?     @db.VarChar(20)
@@ -16,93 +24,152 @@ model Company {
   description String?     @db.Text
   logo        String?
   slug        String      @unique @default(uuid())
-  website     String?
+  website     String?     @db.VarChar(200)
   address     String?
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
-  recruiters  Recruiter[]
-  jobs        Job[]
+  Recruiter   Recruiter[]
+  Job         Job[]
 
   @@index([email])
 }
 
 model Recruiter {
-  recruiterId String   @id @default(cuid())
+  recruiterId String   @id @default(uuid()) @db.VarChar(50)
   name        String
   email       String   @unique @db.VarChar(100)
   phone       String?  @db.VarChar(20)
   password    String
-  companyId   String
+  companyId   String   @db.VarChar(50)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  company     Company  @relation(fields: [companyId], references: [companyId], onDelete: Cascade, onUpdate: Cascade)
+  Company     Company  @relation(fields: [companyId], references: [companyId], onDelete: Cascade, onUpdate: Cascade)
 
-  @@index([companyId, email])
+  @@index([companyId])
+  @@index([email])
+}
+
+model Badge {
+  badgeId       String          @id @default(uuid()) @db.VarChar(50)
+  name          String
+  description   String?
+  imageUrl      String
+  skill         String
+  threshold     Float
+  difficulty    BadgeLevel      @default(BEGINNER)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  BadgeQuestion BadgeQuestion[]
+  BadgeAward    BadgeAward[]
+  JobBadge      JobBadge[]
+}
+
+model BadgeQuestion {
+  questionId    String   @id @default(uuid()) @db.VarChar(50)
+  badgeId       String   @db.VarChar(50)
+  question      String
+  options       String[]
+  correctAnswer Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  Badge         Badge    @relation(fields: [badgeId], references: [badgeId], onDelete: Cascade)
+
+  @@index([badgeId])
+}
+
+model BadgeAward {
+  awardId     String    @id @default(uuid()) @db.VarChar(50)
+  applicantId String    @db.VarChar(50)
+  badgeId     String    @db.VarChar(50)
+  awardedAt   DateTime  @default(now())
+  score       Float
+  Applicant   Applicant @relation(fields: [applicantId], references: [applicantId], onDelete: Cascade, onUpdate: Cascade)
+  Badge       Badge     @relation(fields: [badgeId], references: [badgeId], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([applicantId, badgeId])
 }
 
 model Applicant {
-  applicantId  String        @id @default(cuid())
-  name         String
-  email        String        @unique @db.VarChar(100)
-  phone        String        @db.VarChar(20)
-  password     String
-  slug         String        @unique @default(dbgenerated()) @db.Uuid
-  trustScore   Float?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  applications Application[]
-  resumes      Resume[]
+  applicantId String        @id @default(uuid()) @db.VarChar(50)
+  name        String
+  email       String        @unique @db.VarChar(100)
+  phone       String        @db.VarChar(20)
+  password    String
+  slug        String        @unique @default(uuid()) @db.VarChar(50)
+  trustScore  Float?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  BadgeAward  BadgeAward[]
+  Application Application[]
+  Resume      Resume[]
 
   @@index([email])
 }
 
 model Job {
-  id           String        @id @default(cuid())
-  title        String
-  description  String?
-  location     String        @default("Remote")
-  perks        String?
-  salary       String?
-  companyId    String
-  vacancy      Int
-  skills       String[]      @default([])
-  status       JobStatus     @default(ACTIVE)
-  experience   String        @default("Fresher")
-  jobType      String        @default("Full Time")
-  applyBy      DateTime?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  applications Application[]
-  interviews   Interview[]
-  company      Company       @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
+  id          String        @id @default(uuid()) @db.VarChar(50)
+  title       String        @db.VarChar(200)
+  description String?
+  location    String        @default("Remote")
+  perks       String?
+  salary      String?
+  companyId   String        @db.VarChar(50)
+  vacancy     Int
+  skills      String[]      @default([])
+  status      JobStatus     @default(ACTIVE)
+  experience  String        @default("Fresher")
+  jobType     String        @default("Full Time")
+  applyBy     DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  company     Company       @relation(fields: [companyId], references: [companyId], onDelete: Cascade)
+  JobBadge    JobBadge[]
+  Application Application[]
+  Interview   Interview[]
 
   @@index([companyId])
 }
 
+model JobBadge {
+  id        String   @id @default(uuid()) @db.VarChar(50)
+  jobId     String   @db.VarChar(50)
+  badgeId   String   @db.VarChar(50)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  Badge     Badge    @relation(fields: [badgeId], references: [badgeId], onDelete: Cascade)
+
+  @@unique([jobId, badgeId])
+  @@index([jobId])
+  @@index([badgeId])
+}
+
 model Application {
-  applicationId    String             @id @default(cuid())
-  applicantId      String
-  jobId            String
-  status           String?
+  applicationId    String             @id @default(uuid()) @db.VarChar(50)
+  applicantId      String             @db.VarChar(50)
+  jobId            String             @db.VarChar(50)
+  status           ApplicationStatus  @default(APPLIED)
   comments         String?
-  resume           String?
+  resumeId         String             @db.VarChar(50)
   cover_letter     String?
-  score            Int?
+  score            Int?               @db.SmallInt
   keywords         String[]           @default([])
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
   strength         String?
   weakness         String?
-  applicant        Applicant          @relation(fields: [applicantId], references: [applicantId], onDelete: Cascade)
-  job              Job                @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  Applicant        Applicant          @relation(fields: [applicantId], references: [applicantId], onDelete: Cascade)
+  Job              Job                @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  Resume           Resume?            @relation(fields: [resumeId], references: [resumeId])
   InterviewSession InterviewSession[]
 
   @@unique([applicantId, jobId])
+  @@index([resumeId])
 }
 
 model Interview {
-  interviewId      String             @id @default(cuid())
-  jobId            String
+  interviewId      String             @id @default(uuid()) @db.VarChar(50)
+  jobId            String             @db.VarChar(50)
   title            String
   type             InterviewType      @default(NOCODE)
   conductWithAI    Boolean            @default(true)
@@ -112,58 +179,84 @@ model Interview {
   location         String?
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
-  questions        InterviewQA[]
+  Job              Job                @relation(fields: [jobId], references: [id], onDelete: Cascade)
   InterviewSession InterviewSession[]
-  job              Job                @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  InterviewQA      InterviewQA[]
 
   @@index([jobId])
 }
 
 model InterviewQA {
-  interviewQAId String    @id @default(cuid())
-  interviewId   String
+  interviewQAId String    @id @default(uuid()) @db.VarChar(50)
+  interviewId   String    @db.VarChar(50)
   question      String
   answer        String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-  interview     Interview @relation(fields: [interviewId], references: [interviewId], onDelete: Cascade)
+  Interview     Interview @relation(fields: [interviewId], references: [interviewId], onDelete: Cascade)
 
   @@index([interviewId])
 }
 
 model InterviewSession {
-  interviewSessionId String      @id @default(cuid())
-  interviewId        String
-  applicationId      String
-  transcript         Json[]      @default([])
+  interviewSessionId String      @id @default(uuid()) @db.VarChar(50)
+  interviewId        String      @db.VarChar(50)
+  applicationId      String      @db.VarChar(50)
+  transcript         Json[]      @db.JsonB
   rating             Int?        @db.SmallInt
   feedback           String?
   attempted          Boolean     @default(false)
   createdAt          DateTime    @default(now())
   updatedAt          DateTime    @updatedAt
-  interview          Interview   @relation(fields: [interviewId], references: [interviewId], onDelete: Cascade)
-  application        Application @relation(fields: [applicationId], references: [applicationId], onDelete: Cascade)
+  Interview          Interview   @relation(fields: [interviewId], references: [interviewId], onDelete: Cascade)
+  Application        Application @relation(fields: [applicationId], references: [applicationId], onDelete: Cascade)
 
   @@unique([interviewId, applicationId])
 }
 
 model Resume {
-  resumeId    String    @id @default(cuid())
-  title       String
-  fileUrl     String
-  isDefault   Boolean   @default(false)
-  applicantId String
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  applicant   Applicant @relation(fields: [applicantId], references: [applicantId], onDelete: Cascade)
+  resumeId       String        @id @default(uuid()) @db.VarChar(50)
+  applicantId    String        @db.VarChar(50)
+  title          String        @default("Resume") @db.VarChar(100)
+  address        String?
+  summary        String?       @db.Text
+  education      Json[]        @db.JsonB
+  experience     Json[]        @db.JsonB
+  skills         String[]
+  languages      String[]
+  certifications Json[]        @db.JsonB
+  projects       Json[]        @db.JsonB
+  achievements   Json[]        @db.JsonB
+  publications   Json[]        @db.JsonB
+  references     Json[]        @db.JsonB
+  socialLinks    Json[]        @db.JsonB
+  isDefault      Boolean       @default(false)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  Applicant      Applicant     @relation(fields: [applicantId], references: [applicantId], onDelete: Cascade, onUpdate: Cascade)
+  Application    Application[]
 
   @@index([applicantId])
+}
+
+enum BadgeLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
 }
 
 enum JobStatus {
   ACTIVE
   CLOSED
   DRAFT
+}
+
+enum ApplicationStatus {
+  APPLIED
+  PROCESSING
+  REJECTED
+  ONBOARDED
 }
 
 enum InterviewType {
