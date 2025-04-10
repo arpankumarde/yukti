@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -228,7 +228,7 @@ const EditJobPostingPage = () => {
                 type="button"
                 variant="outline"
                 size="lg"
-                className="w-full"
+                className="w-1/2"
                 onClick={() => router.back()}
               >
                 Cancel
@@ -236,7 +236,7 @@ const EditJobPostingPage = () => {
               <Button
                 type="submit"
                 size="lg"
-                className="w-full bg-primary hover:bg-primary/90"
+                className="w-1/2"
                 disabled={isLoading}
               >
                 {isLoading ? (
