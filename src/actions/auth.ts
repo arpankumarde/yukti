@@ -2,7 +2,104 @@
 
 import prisma from "@/lib/prisma";
 import bcrypt from "bcrypt";
-import { verifyTurnstileToken } from "@/lib/turnstile"; // Add this import
+import { verifyTurnstileToken } from "@/lib/turnstile";
+
+export async function createCompany(payload: {
+  name: string;
+  email: string;
+  phone: string;
+  password: string;
+  turnstileToken?: string;
+}) {
+  const { name, email, phone, password, turnstileToken } = payload;
+
+  // Validate turnstile token if provided
+  if (turnstileToken) {
+    const isValid = await verifyTurnstileToken(turnstileToken);
+    if (!isValid) {
+      return { error: "Invalid CAPTCHA verification" };
+    }
+  }
+
+  if (!name || !email || !phone || !password) {
+    return { error: "Missing required fields" };
+  }
+
+  try {
+    const existingCompany = await prisma.company.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    if (existingCompany) {
+      return { error: "Email already in use" };
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const company = await prisma.company.create({
+      data: {
+        name,
+        email,
+        phone,
+        password: hashedPassword,
+      },
+    });
+
+    // Remove password from response
+    const companyWithoutPassword = { ...company, password: undefined };
+
+    return { company: companyWithoutPassword };
+  } catch (error) {
+    console.error(error);
+    return { error: "Something went wrong" };
+  }
+}
+
+export async function loginCompany(payload: {
+  email: string;
+  password: string;
+  turnstileToken: string;
+}) {
+  const { email, password, turnstileToken } = payload;
+
+  // Validate turnstile token
+  const isValid = await verifyTurnstileToken(turnstileToken);
+  if (!isValid) {
+    return { error: "Invalid CAPTCHA verification" };
+  }
+
+  if (!email || !password) {
+    return { error: "Missing required fields" };
+  }
+
+  try {
+    const company = await prisma.company.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    if (!company) {
+      return { error: "Invalid credentials" };
+    }
+
+    const match = await bcrypt.compare(password, company.password);
+
+    if (!match) {
+      return { error: "Invalid credentials" };
+    }
+
+    // Remove password from response
+    const companyWithoutPassword = { ...company, password: undefined };
+
+    return { company: companyWithoutPassword };
+  } catch (error) {
+    console.error(error);
+    return { error: "Something went wrong" };
+  }
+}
 
 export async function loginHR(payload: {
   email: string;
