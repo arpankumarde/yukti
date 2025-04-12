@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { InterviewType } from "@prisma/client";
+import { InterviewType, JobStatus } from "@prisma/client";
 
 export async function createJob(payload: {
   title: string;
@@ -11,11 +11,28 @@ export async function createJob(payload: {
   salary?: string;
   companyId: string;
   experience: string;
+  vacancy: number;
+  skills?: string[];
+  status?: JobStatus;
+  jobType?: string;
+  applyBy?: Date;
 }) {
-  const { title, description, experience, companyId, location, perks, salary } =
-    payload;
+  const { 
+    title, 
+    description, 
+    experience, 
+    companyId, 
+    location, 
+    perks, 
+    salary,
+    vacancy,
+    skills,
+    status,
+    jobType,
+    applyBy
+  } = payload;
 
-  if (!title || !description || !experience || !companyId || !location) {
+  if (!title || !description || !experience || !companyId || !location || vacancy === undefined) {
     return { error: "Missing required fields" };
   }
 
@@ -29,6 +46,11 @@ export async function createJob(payload: {
         location,
         perks,
         salary,
+        vacancy,
+        skills: skills || [],
+        status: status || "ACTIVE",
+        jobType: jobType || "Full Time",
+        applyBy,
       },
     });
 
@@ -44,8 +66,29 @@ export async function updateJob(payload: {
   title: string;
   description: string;
   experience: string;
+  location?: string;
+  perks?: string;
+  salary?: string;
+  vacancy?: number;
+  skills?: string[];
+  status?: JobStatus;
+  jobType?: string;
+  applyBy?: Date;
 }) {
-  const { id, title, description, experience } = payload;
+  const { 
+    id, 
+    title, 
+    description, 
+    experience,
+    location,
+    perks,
+    salary,
+    vacancy,
+    skills,
+    status,
+    jobType,
+    applyBy
+  } = payload;
 
   if (!id || !title || !description || !experience) {
     return { error: "Missing required fields" };
@@ -58,6 +101,14 @@ export async function updateJob(payload: {
         title,
         description,
         experience,
+        ...(location && { location }),
+        ...(perks && { perks }),
+        ...(salary && { salary }),
+        ...(vacancy !== undefined && { vacancy }),
+        ...(skills && { skills }),
+        ...(status && { status }),
+        ...(jobType && { jobType }),
+        ...(applyBy && { applyBy }),
       },
     });
 
