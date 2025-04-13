@@ -70,6 +70,8 @@ export function Turnstile({ siteKey, onVerify }: TurnstileProps) {
               onVerifyRef.current(token);
             },
             "refresh-expired": "auto",
+            theme: "light",
+            size: "flexible",
           });
           hasRendered.current = true;
         }
