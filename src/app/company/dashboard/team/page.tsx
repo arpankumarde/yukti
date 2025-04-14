@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Company } from "@/generated/client";
+import { Company } from "@/generated/prisma";
 import prisma from "@/lib/prisma";
 import { getCookie } from "cookies-next";
 import { cookies } from "next/headers";

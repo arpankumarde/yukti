@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Job } from "@prisma/client";
+import { Job } from "@/generated/prisma";
 import { RiFileExcel2Fill } from "react-icons/ri";
 import xlsx from "xlsx";
 

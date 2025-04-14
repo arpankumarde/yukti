@@ -1,7 +1,7 @@
 import prisma from "@/lib/prisma";
 import { getCookie } from "cookies-next";
 import { cookies } from "next/headers";
-import { Recruiter } from "@prisma/client";
+import { Recruiter } from "@/generated/prisma";
 import { Button } from "@/components/ui/button";
 import { Eye, Pencil, Plus } from "lucide-react";
 import { deleteJob } from "@/actions/recruiter";
@@ -169,7 +169,7 @@ const Page = async () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     <div className="flex flex-wrap gap-1">
                       {job.skills.map((skill, i) => (
-                      // {job.skills.slice(0, 3).map((skill, i) => (
+                        // {job.skills.slice(0, 3).map((skill, i) => (
                         <span
                           key={i}
                           className="bg-gray-100 px-2 py-1 text-xs rounded"

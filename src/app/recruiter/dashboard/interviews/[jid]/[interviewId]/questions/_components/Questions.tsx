@@ -1,6 +1,6 @@
 "use client";
 
-import { InterviewQA, Job } from "@prisma/client";
+import { InterviewQA, Job } from "@/generated/prisma";
 import {
   Sheet,
   SheetClose,

@@ -1,6 +1,6 @@
 "use client";
 
-import { InterviewQA } from "@prisma/client";
+import { InterviewQA } from "@/generated/prisma";
 import { Lightbulb, Volume2 } from "lucide-react";
 
 interface QuestionsSectionProps {

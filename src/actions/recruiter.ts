@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { InterviewType, JobStatus } from "@prisma/client";
+import { InterviewType, JobStatus } from "@/generated/prisma";
 
 export async function createJob(payload: {
   title: string;
@@ -17,22 +17,29 @@ export async function createJob(payload: {
   jobType?: string;
   applyBy?: Date;
 }) {
-  const { 
-    title, 
-    description, 
-    experience, 
-    companyId, 
-    location, 
-    perks, 
+  const {
+    title,
+    description,
+    experience,
+    companyId,
+    location,
+    perks,
     salary,
     vacancy,
     skills,
     status,
     jobType,
-    applyBy
+    applyBy,
   } = payload;
 
-  if (!title || !description || !experience || !companyId || !location || vacancy === undefined) {
+  if (
+    !title ||
+    !description ||
+    !experience ||
+    !companyId ||
+    !location ||
+    vacancy === undefined
+  ) {
     return { error: "Missing required fields" };
   }
 
@@ -75,10 +82,10 @@ export async function updateJob(payload: {
   jobType?: string;
   applyBy?: Date;
 }) {
-  const { 
-    id, 
-    title, 
-    description, 
+  const {
+    id,
+    title,
+    description,
     experience,
     location,
     perks,
@@ -87,7 +94,7 @@ export async function updateJob(payload: {
     skills,
     status,
     jobType,
-    applyBy
+    applyBy,
   } = payload;
 
   if (!id || !title || !description || !experience) {

@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Applicant, Application, Job } from "@prisma/client";
+import { Applicant, Application, Job } from "@/generated/prisma";
 import CsvDownloader from "react-csv-downloader";
 import { FaFileCsv } from "react-icons/fa6";
 
@@ -37,7 +37,6 @@ const ExportCSVButton = ({
       application.jobId,
       application.job.title,
       application.status?.toString() || "PENDING",
-      application.resume ?? "",
       application.cover_letter ?? "",
       new Date(application.createdAt).toLocaleDateString("en-US"),
       new Date(application.updatedAt).toLocaleDateString("en-US"),

@@ -7,7 +7,7 @@ import Webcam from "react-webcam";
 import { Mic, StopCircle, Save } from "lucide-react";
 import { toast } from "sonner";
 import { saveAnswer } from "@/actions/interview";
-import { InterviewQA } from "@prisma/client";
+import { InterviewQA } from "@/generated/prisma";
 import { getCookie } from "cookies-next";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -50,7 +50,6 @@ Provide strictly formatted JSON:
     if (data.result) {
       let jsonResult;
       try {
-       
         const cleanedResponse = data.result.replace(/```json|```/g, "").trim();
         jsonResult = JSON.parse(cleanedResponse);
       } catch (error) {
@@ -97,7 +96,7 @@ export default function RecordAnswerSection({
   const [isRecording, setIsRecording] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  
+
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -141,28 +140,28 @@ export default function RecordAnswerSection({
 
   const handleStartRecording = async () => {
     const { success, stream } = await requestMicrophonePermission();
-    
+
     if (success && stream) {
       // Reset previous recording data
       audioChunksRef.current = [];
       setRecordingTime(0);
       setIsRecording(true);
       setUserAnswer(""); // Clear previous answer when starting a new recording
-      
+
       // Create media recorder
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
-      
+
       // Set up data handling
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
           audioChunksRef.current.push(event.data);
         }
       };
-      
+
       // Start recording
       mediaRecorder.start(1000);
-      
+
       // Start timer
       timerRef.current = setInterval(() => {
         setRecordingTime((prevTime) => prevTime + 1);
@@ -173,16 +172,18 @@ export default function RecordAnswerSection({
   const handleStopRecording = async () => {
     if (mediaRecorderRef.current && isRecording) {
       setIsProcessing(true);
-      
+
       // Stop the media recorder
       mediaRecorderRef.current.stop();
-      
+
       // Wait for the last data to be processed
       mediaRecorderRef.current.onstop = async () => {
         try {
           // Create a blob from the audio chunks
-          const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
-          
+          const audioBlob = new Blob(audioChunksRef.current, {
+            type: "audio/webm",
+          });
+
           // Transcribe the audio using our API
           await transcribeAudio(audioBlob);
         } catch (error) {
@@ -192,17 +193,19 @@ export default function RecordAnswerSection({
           setIsProcessing(false);
         }
       };
-      
+
       // Stop the timer
       if (timerRef.current) {
         clearInterval(timerRef.current);
       }
-      
+
       // Stop and release the media stream
       if (mediaRecorderRef.current.stream) {
-        mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+        mediaRecorderRef.current.stream
+          .getTracks()
+          .forEach((track) => track.stop());
       }
-      
+
       setIsRecording(false);
       setRecordingTime(0);
     }
@@ -213,25 +216,25 @@ export default function RecordAnswerSection({
       // Create form data to send to our API
       const formData = new FormData();
       formData.append("file", audioBlob, "recording.webm");
-      
+
       // Optionally add language if available
       // formData.append("language", "en");
-      
+
       // Send the audio to our Whisper API endpoint
       const response = await fetch("/api/ai/transcribe", {
         method: "POST",
         body: formData,
       });
-      
+
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || "Failed to transcribe audio");
       }
-      
+
       const data = await response.json();
-      
+
       if (data.success && data.text) {
-        setUserAnswer(prev => prev + " " + data.text.trim());
+        setUserAnswer((prev) => prev + " " + data.text.trim());
         toast.success("Audio transcribed successfully");
       } else {
         toast.error("Failed to transcribe audio: Empty response");
@@ -356,9 +359,7 @@ export default function RecordAnswerSection({
                   <StopCircle className="h-4 w-4" /> Stop Recording
                 </span>
               ) : isProcessing ? (
-                <span className="flex gap-2 items-center">
-                  Processing...
-                </span>
+                <span className="flex gap-2 items-center">Processing...</span>
               ) : (
                 <span className="text-primary flex gap-2 items-center">
                   <Mic className="h-4 w-4" /> Record Answer

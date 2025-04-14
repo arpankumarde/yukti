@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Applicant, Application, Job } from "@prisma/client";
+import { Applicant, Application, Job } from "@/generated/prisma";
 import { RiFileExcel2Fill } from "react-icons/ri";
 import xlsx from "xlsx";
 
@@ -37,7 +37,6 @@ const ExportXLSXButton = ({
       application.jobId,
       application.job.title,
       application.status ?? "",
-      application.resume ?? "",
       application.cover_letter ?? "",
       new Date(application.createdAt).toLocaleDateString("en-US"),
       new Date(application.updatedAt).toLocaleDateString("en-US"),

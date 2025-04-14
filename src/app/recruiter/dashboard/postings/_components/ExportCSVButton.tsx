@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Job } from "@prisma/client";
+import { Job } from "@/generated/prisma";
 import CsvDownloader from "react-csv-downloader";
 import { FaFileCsv } from "react-icons/fa6";
 

@@ -10,7 +10,7 @@ import {
   Interview,
   InterviewQA,
   Job,
-} from "@prisma/client";
+} from "@/generated/prisma";
 
 /**
  * Auth cookie structure containing applicant identification

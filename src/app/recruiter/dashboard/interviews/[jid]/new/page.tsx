@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { createInterview } from "@/actions/recruiter";
-import { InterviewType } from "@prisma/client";
+import { InterviewType } from "@/generated/prisma";
 import { useParams, useRouter } from "next/navigation";
 import {
   Select,

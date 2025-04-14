@@ -21,7 +21,7 @@ import {
   protectInterviewRoute,
 } from "@/actions/protectInterviewRoute";
 import Webcam from "react-webcam";
-import { InterviewQA } from "@prisma/client";
+import { InterviewQA } from "@/generated/prisma";
 
 // Import with SSR disabled
 const RecordAnswerSection = dynamic(

@@ -1,6 +1,6 @@
 "use client";
 
-import { Applicant, Application, InterviewSession } from "@prisma/client";
+import { Applicant, Application, InterviewSession } from "@/generated/prisma";
 import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";

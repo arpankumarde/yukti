@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { MessageSquare, Edit, Check } from "lucide-react";
 import { toast } from "sonner";
 import { updateApplicationComments } from "@/actions/updateApplicationComments";
-import { Application } from "@prisma/client";
+import { Application } from "@/generated/prisma";
 
 interface ApplicationDetailsClientProps {
   application: Application;
