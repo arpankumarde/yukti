@@ -14,8 +14,8 @@ const Page = async ({ params }: { params: Promise<{ jid: string }> }) => {
       jobId: { equals: jid },
     },
     include: {
-      applicant: true,
-      job: true,
+      Applicant: true,
+      Job: true,
     },
   });
 
@@ -66,10 +66,10 @@ const Page = async ({ params }: { params: Promise<{ jid: string }> }) => {
                     {index + 1}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {application.applicant.name}
+                    {application.Applicant.name}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {application.job.title}
+                    {application.Job.title}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {application.status || "N/A"}

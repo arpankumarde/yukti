@@ -37,7 +37,7 @@ const JobDetailsPage = async ({
     where: { id: jid },
     include: {
       company: true,
-      interviews: {
+      Interview: {
         include: {
           _count: {
             select: { InterviewSession: true },
@@ -45,7 +45,7 @@ const JobDetailsPage = async ({
         },
       },
       _count: {
-        select: { applications: true, interviews: true },
+        select: { Application: true, Interview: true },
       },
     },
   });
@@ -68,7 +68,7 @@ const JobDetailsPage = async ({
     { label: "Perks", value: job.perks || "Not specified" },
     {
       label: "Total Applications",
-      value: job._count.applications,
+      value: job._count.Application,
       hasViewButton: true,
     },
     { label: "Recruiter", value: job.company.name },
@@ -165,7 +165,7 @@ const JobDetailsPage = async ({
                 <span className="bg-primary/10 p-2 rounded-md">
                   <Calendar className="h-5 w-5 text-primary" />
                 </span>
-                Interviews ({job._count.interviews})
+                Interviews ({job._count.Interview})
               </h2>
               <Button asChild variant="default" className="gap-2">
                 <Link href={`/recruiter/dashboard/interviews/${job.id}/new`}>
@@ -176,9 +176,9 @@ const JobDetailsPage = async ({
             </div>
           </CardHeader>
           <CardContent className="p-6">
-            {job.interviews.length > 0 ? (
+            {job.Interview.length > 0 ? (
               <div className="space-y-4">
-                {job.interviews.map((interview) => (
+                {job.Interview.map((interview) => (
                   <Card
                     key={interview.interviewId}
                     className="overflow-hidden border-muted/20"
