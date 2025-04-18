@@ -51,12 +51,11 @@ export default async function AppliedJobsPage() {
     select: {
       applicationId: true,
       score: true,
-      resume: true,
       cover_letter: true,
       comments: true,
       createdAt: true,
       status: true,
-      job: {
+      Job: {
         include: {
           company: { select: { name: true } },
         },
@@ -71,11 +70,11 @@ export default async function AppliedJobsPage() {
   const statusCounts = {
     total: applications.length,
     pending: applications.filter(
-      (app) => !app.status || app.status === "PENDING"
+      (app) => !app.status || app.status === "APPLIED"
     ).length,
-    accepted: applications.filter((app) => app.status === "ACCEPTED").length,
+    onboarded: applications.filter((app) => app.status === "ONBOARDED").length,
     rejected: applications.filter((app) => app.status === "REJECTED").length,
-    withdrawn: applications.filter((app) => app.status === "WITHDRAWN").length,
+    // withdrawn: applications.filter((app) => app.status === "WITHDRAWN").length,
   };
 
   // Helper function to get status badge details
@@ -130,8 +129,8 @@ export default async function AppliedJobsPage() {
 
           {/* Export Buttons */}
           <div className="flex gap-3 self-start md:self-auto">
-            <ExportXLSXButton applications={applications} />
-            <ExportCSVButton applications={applications} />
+            {/* <ExportXLSXButton applications={applications} /> */}
+            {/* <ExportCSVButton applications={applications} /> */}
           </div>
         </div>
 
@@ -163,7 +162,7 @@ export default async function AppliedJobsPage() {
             <Card className="bg-green-50 dark:bg-green-900/10 border-green-100 dark:border-green-900/20">
               <CardContent className="p-4 flex flex-col items-center justify-center text-center">
                 <div className="mt-2 font-semibold text-3xl text-green-700 dark:text-green-400">
-                  {statusCounts.accepted}
+                  {statusCounts.onboarded}
                 </div>
                 <p className="text-sm text-green-600 dark:text-green-500">
                   Accepted
@@ -174,7 +173,7 @@ export default async function AppliedJobsPage() {
             <Card className="bg-red-50 dark:bg-red-900/10 border-red-100 dark:border-red-900/20">
               <CardContent className="p-4 flex flex-col items-center justify-center text-center">
                 <div className="mt-2 font-semibold text-3xl text-red-700 dark:text-red-400">
-                  {statusCounts.rejected + statusCounts.withdrawn}
+                  {/* {statusCounts.rejected + statusCounts.withdrawn} */}
                 </div>
                 <p className="text-sm text-red-600 dark:text-red-500">
                   Rejected/Withdrawn
@@ -220,17 +219,17 @@ export default async function AppliedJobsPage() {
                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
                     <div>
                       <CardTitle className="text-xl font-bold group-hover:text-primary transition-colors">
-                        {app.job.title}
+                        {app.Job.title}
                       </CardTitle>
                       <CardDescription className="flex flex-wrap mt-3 gap-3">
                         <div className="flex items-center text-sm text-muted-foreground">
                           <Building2 className="w-3.5 h-3.5 mr-1.5 text-muted-foreground/70" />
-                          {app.job.company?.name || "Company not specified"}
+                          {app.Job.company?.name || "Company not specified"}
                         </div>
 
                         <div className="flex items-center text-sm text-muted-foreground">
                           <MapPin className="w-3.5 h-3.5 mr-1.5 text-muted-foreground/70" />
-                          {app.job.location || "Remote"}
+                          {app.Job.location || "Remote"}
                         </div>
 
                         <div className="flex items-center text-sm text-muted-foreground">
@@ -262,7 +261,7 @@ export default async function AppliedJobsPage() {
                       </div>
                       <div>
                         <h4 className="font-medium text-foreground">Resume</h4>
-                        {app.resume ? (
+                        {/* {app.resume ? (
                           <a
                             href={app.resume}
                             target="_blank"
@@ -276,7 +275,7 @@ export default async function AppliedJobsPage() {
                           <p className="text-sm text-muted-foreground mt-1">
                             Not provided
                           </p>
-                        )}
+                        )} */}
                       </div>
                     </div>
 
