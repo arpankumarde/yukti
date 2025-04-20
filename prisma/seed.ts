@@ -1,4 +1,4 @@
-import { PrismaClient } from "../src/generated/client";
+import { PrismaClient } from "../src/generated/prisma";
 import admin from "./data/admin.json";
 import company from "./data/company.json";
 import recruiter from "./data/recruiter.json";

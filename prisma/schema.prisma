@@ -208,6 +208,8 @@ model InterviewSession {
   rating             Int?        @db.SmallInt
   feedback           String?
   attempted          Boolean     @default(false)
+  shortlisted        Boolean     @default(false)
+  passed             Boolean     @default(false)
   createdAt          DateTime    @default(now())
   updatedAt          DateTime    @updatedAt
   Interview          Interview   @relation(fields: [interviewId], references: [interviewId], onDelete: Cascade)
@@ -258,7 +260,9 @@ enum ApplicationStatus {
   APPLIED
   PROCESSING
   REJECTED
+  ACCEPTED
   ONBOARDED
+  WITHDRAWN
 }
 
 enum InterviewType {
