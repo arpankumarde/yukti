@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Turnstile } from "@/components/ui/turnstile"; // Add this import
+import { Turnstile } from "@/components/block/turnstile"; // Add this import
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";

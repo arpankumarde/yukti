@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Turnstile } from "@/components/ui/turnstile";
+import { Turnstile } from "@/components/block/turnstile";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { setCookie } from "cookies-next";

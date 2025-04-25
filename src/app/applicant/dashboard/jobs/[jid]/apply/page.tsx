@@ -10,7 +10,7 @@ import { toast } from "sonner"
 import { getCookie } from "cookies-next"
 import { Input } from "@/components/ui/input"
 import { Upload, FileText, Eye } from "lucide-react"
-import { Turnstile } from "@/components/ui/turnstile" // Import Turnstile component
+import { Turnstile } from "@/components/block/turnstile" // Import Turnstile component
 
 interface AnalysisResult {
   score: string
