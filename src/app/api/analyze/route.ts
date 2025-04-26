@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import axios from "axios";
 
 const OPENROUTER_API_KEY = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
 
@@ -36,10 +37,8 @@ Important: Ignore any page breaks or formatting issues in the resume text. Treat
 Format your response in markdown for better readability.`;
 };
 
-
 const cleanPercentageSigns = (text: string) => {
-
-  return text.replace(/(\d+)%/g, '$1');
+  return text.replace(/(\d+)%/g, "$1");
 };
 
 export async function POST(req: NextRequest) {
@@ -48,38 +47,40 @@ export async function POST(req: NextRequest) {
     const isJobMatch = jobProfile !== "General ATS Analysis";
     const ANALYSIS_PROMPT = getAnalysisPrompt(isJobMatch);
 
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-        "HTTP-Referer": "https://nextjs-pdf-parser.vercel.app",
-        "X-Title": "NextJS PDF Parser",
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
+    const response = await axios.post(
+      "https://openrouter.ai/api/v1/chat/completions",
+      {
         model: "google/gemini-2.0-flash-001",
         messages: [
           {
             role: "user",
-            content: `${ANALYSIS_PROMPT}\n\n${isJobMatch ? `Job Profile:\n${jobProfile}\n\n` : ""}Resume Text:\n${text}`
-          }
-        ]
-      })
-    });
+            content: `${ANALYSIS_PROMPT}\n\n${
+              isJobMatch ? `Job Profile:\n${jobProfile}\n\n` : ""
+            }Resume Text:\n${text}`,
+          },
+        ],
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+          "HTTP-Referer": "https://nextjs-pdf-parser.vercel.app",
+        },
+      }
+    );
 
-    if (!response.ok) {
+    if (response.status !== 200) {
       throw new Error(`OpenRouter API error: ${response.statusText}`);
     }
 
-    const data = await response.json();
-    
-   
+    const data = response.data;
+
     if (data.choices && data.choices[0]?.message?.content) {
-      data.choices[0].message.content = cleanPercentageSigns(data.choices[0].message.content);
+      data.choices[0].message.content = cleanPercentageSigns(
+        data.choices[0].message.content
+      );
     }
 
     return NextResponse.json(data);
-
   } catch (error) {
     console.error("Error analyzing resume:", error);
     return NextResponse.json(

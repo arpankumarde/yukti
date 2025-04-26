@@ -1,110 +1,111 @@
-"use client"
+"use client";
 
-import { uploadFile } from "@/lib/uploadFile"
-import React, { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { toast } from "sonner"
-import { getCookie } from "cookies-next"
-import { Input } from "@/components/ui/input"
-import { Upload, FileText, Eye } from "lucide-react"
-import { Turnstile } from "@/components/block/turnstile" // Import Turnstile component
+import { uploadFile } from "@/lib/uploadFile";
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { getCookie } from "cookies-next";
+import { Input } from "@/components/ui/input";
+import { Upload, FileText, Eye } from "lucide-react";
+import { Turnstile } from "@/components/block/turnstile";
+import axios from "axios";
 
 interface AnalysisResult {
-  score: string
-  strength: string | string[]
-  weakness: string | string[]
-  keywords: string[]
+  score: string;
+  strength: string | string[];
+  weakness: string | string[];
+  keywords: string[];
 }
 
 const ApplyJobPage = ({ params }: { params: Promise<{ jid: string }> }) => {
-  const jobId = React.use(params).jid
-  const [resume, setResume] = useState<string>("")
-  const [coverLetter, setCoverLetter] = useState<string>("")
-  const [fileName, setFileName] = useState<string>("")
-  const [coverLetterFileName, setCoverLetterFileName] = useState<string>("")
-  const [isUploading, setIsUploading] = useState(false)
-  const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const [analysisResults, setAnalysisResults] = useState<AnalysisResult | null>(null)
-  const router = useRouter()
-  const [turnstileToken, setTurnstileToken] = useState<string>("") // Add state for turnstile token
+  const jobId = React.use(params).jid;
+  const [resume, setResume] = useState<string>("");
+  const [coverLetter, setCoverLetter] = useState<string>("");
+  const [fileName, setFileName] = useState<string>("");
+  const [coverLetterFileName, setCoverLetterFileName] = useState<string>("");
+  const [isUploading, setIsUploading] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisResults, setAnalysisResults] = useState<AnalysisResult | null>(
+    null
+  );
+  const router = useRouter();
+  const [turnstileToken, setTurnstileToken] = useState<string>(""); // Add state for turnstile token
 
   const analyzeResume = async (text: string) => {
     try {
-      const response = await fetch("/api/analyze-resume", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          text,
-          jobProfile: "General ATS Analysis",
-        }),
-      })
+      const response = await axios.post("/api/analyze-resume", {
+        text,
+        jobProfile: "General ATS Analysis",
+      });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+      if (response.status !== 200) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json()
-      console.log("Raw API Response:", data)
-      
+      const data = response.data;
+      console.log("Raw API Response:", data);
+
       if (!data?.choices?.[0]?.message?.content) {
-        throw new Error("Invalid response format from analysis API")
+        throw new Error("Invalid response format from analysis API");
       }
-      
-      let analysisResult = data.choices[0].message.content
-      console.log("Message Content:", analysisResult)
+
+      let analysisResult = data.choices[0].message.content;
+      console.log("Message Content:", analysisResult);
 
       // Clean up the JSON string
       analysisResult = analysisResult
-        .replace(/^[\s\S]*?```json\s*/, "")  // Remove everything before JSON
-        .replace(/\s*```[\s\S]*$/, "")       // Remove everything after JSON
-        .trim()
+        .replace(/^[\s\S]*?```json\s*/, "") // Remove everything before JSON
+        .replace(/\s*```[\s\S]*$/, "") // Remove everything after JSON
+        .trim();
 
-      console.log("Cleaned Analysis Result:", analysisResult)
+      console.log("Cleaned Analysis Result:", analysisResult);
 
       try {
-        const parsedAnalysis = JSON.parse(analysisResult)
-        
+        const parsedAnalysis = JSON.parse(analysisResult);
+
         // Format and normalize the data structure
         const formattedAnalysis: AnalysisResult = {
           score: parsedAnalysis.score?.toString() || "0",
           strength: parsedAnalysis.strength || "",
           weakness: parsedAnalysis.weakness || "",
-          keywords: Array.isArray(parsedAnalysis.keywords) ? 
-            parsedAnalysis.keywords : 
-            (parsedAnalysis.keywords ? [parsedAnalysis.keywords] : [])
-        }
-        
-        console.log("Successfully Formatted Analysis:", formattedAnalysis)
-        return formattedAnalysis
+          keywords: Array.isArray(parsedAnalysis.keywords)
+            ? parsedAnalysis.keywords
+            : parsedAnalysis.keywords
+            ? [parsedAnalysis.keywords]
+            : [],
+        };
+
+        console.log("Successfully Formatted Analysis:", formattedAnalysis);
+        return formattedAnalysis;
       } catch (parseError) {
-        console.error("JSON Parse Error:", parseError)
-        console.error("Failed JSON string:", analysisResult)
-        throw new Error("Failed to parse analysis results")
+        console.error("JSON Parse Error:", parseError);
+        console.error("Failed JSON string:", analysisResult);
+        throw new Error("Failed to parse analysis results");
       }
     } catch (error) {
-      console.error("Resume analysis error:", error)
-      throw error
+      console.error("Resume analysis error:", error);
+      throw error;
     }
-  }
+  };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const file = e.target.files?.[0];
+    if (!file) return;
 
     if (!file.type.includes("pdf")) {
-      toast.error("Please upload a PDF file")
-      return
+      toast.error("Please upload a PDF file");
+      return;
     }
 
-    setIsUploading(true)
-    setIsAnalyzing(true)
-    setFileName(file.name)
+    setIsUploading(true);
+    setIsAnalyzing(true);
+    setFileName(file.name);
 
     try {
-      console.log("Starting parallel file processing...")
+      console.log("Starting parallel file processing...");
 
       const [fileUploadPromise, fileAnalysisPromise] = await Promise.all([
         uploadFile({
@@ -114,75 +115,78 @@ const ApplyJobPage = ({ params }: { params: Promise<{ jid: string }> }) => {
         }),
 
         (async () => {
-          const formData = new FormData()
-          formData.append("filepond", "")
-          formData.append("filepond", file)
+          const formData = new FormData();
+          formData.append("filepond", "");
+          formData.append("filepond", file);
 
-          console.log("Uploading file for analysis...")
-          const uploadResponse = await fetch("/api/upload", {
-            method: "POST",
-            body: formData,
-          })
+          console.log("Uploading file for analysis...");
+          const uploadResponse = await axios.post("/api/upload", formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          });
 
-          if (!uploadResponse.ok) {
-            console.error("Upload Response:", await uploadResponse.json())
-            throw new Error("Failed to upload file for analysis")
+          if (uploadResponse.status !== 200) {
+            console.error("Upload Response:", uploadResponse.data);
+            throw new Error("Failed to upload file for analysis");
           }
 
-          const uploadData = await uploadResponse.json()
-          console.log("Upload Response:", uploadData)
+          const uploadData = uploadResponse.data;
+          console.log("Upload Response:", uploadData);
 
           if (!uploadData.parsedText) {
-            throw new Error("No parsed text received from upload")
+            throw new Error("No parsed text received from upload");
           }
 
-          return await analyzeResume(uploadData.parsedText)
-        })()
-      ])
+          return await analyzeResume(uploadData.parsedText);
+        })(),
+      ]);
 
       if (fileUploadPromise) {
-        setResume(fileUploadPromise)
-        console.log("AWS Upload Success - URL:", fileUploadPromise)
+        setResume(fileUploadPromise);
+        console.log("AWS Upload Success - URL:", fileUploadPromise);
       }
 
       if (fileAnalysisPromise) {
-        setAnalysisResults(fileAnalysisPromise)
-        console.log("Analysis Results:", fileAnalysisPromise)
+        setAnalysisResults(fileAnalysisPromise);
+        console.log("Analysis Results:", fileAnalysisPromise);
       }
 
-      toast.success("Resume processed successfully")
+      toast.success("Resume processed successfully");
     } catch (error) {
-      console.error("Error processing resume:", error)
-      toast.error("Failed to process resume")
+      console.error("Error processing resume:", error);
+      toast.error("Failed to process resume");
     } finally {
-      setIsUploading(false)
-      setIsAnalyzing(false)
+      setIsUploading(false);
+      setIsAnalyzing(false);
     }
-  }
+  };
 
-  const handleCoverLetterUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+  const handleCoverLetterUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
     if (!file.type.includes("pdf")) {
-      toast.error("Please upload a PDF file for cover letter")
-      return
+      toast.error("Please upload a PDF file for cover letter");
+      return;
     }
 
     try {
-      setCoverLetterFileName(file.name)
+      setCoverLetterFileName(file.name);
       const awsUrl = await uploadFile({
         file,
         fileExt: "pdf",
         folderPath: "coverLetters",
-      })
-      setCoverLetter(awsUrl)
-      toast.success("Cover letter uploaded successfully")
+      });
+      setCoverLetter(awsUrl);
+      toast.success("Cover letter uploaded successfully");
     } catch (error) {
-      console.error("Cover letter upload error:", error)
-      toast.error("Failed to upload cover letter")
+      console.error("Cover letter upload error:", error);
+      toast.error("Failed to upload cover letter");
     }
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -199,7 +203,9 @@ const ApplyJobPage = ({ params }: { params: Promise<{ jid: string }> }) => {
     }
 
     const applicantCookie = getCookie("ykapptoken");
-    const applicant = applicantCookie ? JSON.parse(applicantCookie as string) : null;
+    const applicant = applicantCookie
+      ? JSON.parse(applicantCookie as string)
+      : null;
 
     if (!applicant) {
       toast.error("You must be logged in to apply for jobs");
@@ -211,55 +217,61 @@ const ApplyJobPage = ({ params }: { params: Promise<{ jid: string }> }) => {
       let cleanScore = null;
       if (analysisResults?.score) {
         // Remove % if present and convert to number
-        const scoreStr = analysisResults.score.toString().replace(/%/g, '');
+        const scoreStr = analysisResults.score.toString().replace(/%/g, "");
         cleanScore = !isNaN(Number(scoreStr)) ? Number(scoreStr) : null;
       }
 
       // Format strength (handle both string and array cases)
-      const strength = analysisResults?.strength ? 
-        (typeof analysisResults.strength === 'string' ? analysisResults.strength : 
-         Array.isArray(analysisResults.strength) ? analysisResults.strength.join(", ") : null) : 
-        null;
-      
+      const strength = analysisResults?.strength
+        ? typeof analysisResults.strength === "string"
+          ? analysisResults.strength
+          : Array.isArray(analysisResults.strength)
+          ? analysisResults.strength.join(", ")
+          : null
+        : null;
+
       // Format weakness (handle both string and array cases)
-      const weakness = analysisResults?.weakness ? 
-        (typeof analysisResults.weakness === 'string' ? analysisResults.weakness : 
-         Array.isArray(analysisResults.weakness) ? analysisResults.weakness.join(", ") : null) : 
-        null;
-      
+      const weakness = analysisResults?.weakness
+        ? typeof analysisResults.weakness === "string"
+          ? analysisResults.weakness
+          : Array.isArray(analysisResults.weakness)
+          ? analysisResults.weakness.join(", ")
+          : null
+        : null;
+
       // Ensure keywords is always a valid array
-      const keywords = analysisResults?.keywords && Array.isArray(analysisResults.keywords) 
-        ? analysisResults.keywords.filter(k => typeof k === 'string' && k.trim() !== '')
-        : [];
-      
+      const keywords =
+        analysisResults?.keywords && Array.isArray(analysisResults.keywords)
+          ? analysisResults.keywords.filter(
+              (k) => typeof k === "string" && k.trim() !== ""
+            )
+          : [];
+
       // Log the data we're about to send
       console.log("Submitting application with data:", {
-        jobId, applicantId: applicant.applicantId, 
-        score: cleanScore, strength, weakness, keywords
+        jobId,
+        applicantId: applicant.applicantId,
+        score: cleanScore,
+        strength,
+        weakness,
+        keywords,
       });
 
-      const response = await fetch("/api/applications", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          jobId: jobId,
-          applicantId: applicant.applicantId,
-          status: "PENDING",
-          resume: resume,
-          coverLetter: coverLetter || null,
-          score: cleanScore,
-          strength: strength,
-          weakness: weakness,
-          keywords: keywords,
-          turnstileToken: turnstileToken, // Include turnstile token in the request
-        }),
+      const response = await axios.post("/api/applications", {
+        jobId: jobId,
+        applicantId: applicant.applicantId,
+        status: "PENDING",
+        resume: resume,
+        coverLetter: coverLetter || null,
+        score: cleanScore,
+        strength: strength,
+        weakness: weakness,
+        keywords: keywords,
+        turnstileToken: turnstileToken, // Include turnstile token in the request
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error("Application submission error:", errorData);
+      if (response.status !== 200) {
+        console.error("Application submission error:", response.data);
         throw new Error("Failed to submit application");
       }
 
@@ -273,15 +285,15 @@ const ApplyJobPage = ({ params }: { params: Promise<{ jid: string }> }) => {
 
   const handlePreview = () => {
     if (resume) {
-      window.open(resume, "_blank")
+      window.open(resume, "_blank");
     }
-  }
+  };
 
   const handleCoverLetterPreview = () => {
     if (coverLetter) {
-      window.open(coverLetter, "_blank")
+      window.open(coverLetter, "_blank");
     }
-  }
+  };
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-muted p-6 md:p-10">
@@ -321,7 +333,7 @@ const ApplyJobPage = ({ params }: { params: Promise<{ jid: string }> }) => {
                       variant="outline"
                       disabled={isUploading || isAnalyzing}
                       onClick={() => {
-                        document.getElementById("resume")?.click()
+                        document.getElementById("resume")?.click();
                       }}
                     >
                       {isUploading || isAnalyzing
@@ -333,7 +345,12 @@ const ApplyJobPage = ({ params }: { params: Promise<{ jid: string }> }) => {
                     {resume && (
                       <div className="flex items-center gap-2">
                         <p className="text-sm font-medium">{fileName}</p>
-                        <Button type="button" variant="ghost" size="sm" onClick={handlePreview}>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={handlePreview}
+                        >
                           <Eye className="w-4 h-4 mr-2" />
                           Preview
                         </Button>
@@ -351,7 +368,9 @@ const ApplyJobPage = ({ params }: { params: Promise<{ jid: string }> }) => {
 
                 {/* Cover Letter Upload */}
                 <div className="grid gap-2">
-                  <Label htmlFor="coverLetter">Cover Letter Upload (Optional)</Label>
+                  <Label htmlFor="coverLetter">
+                    Cover Letter Upload (Optional)
+                  </Label>
                   <div className="flex flex-col items-center gap-4 p-6 border-2 border-dashed rounded-lg">
                     {coverLetter ? (
                       <FileText className="w-8 h-8 text-primary" />
@@ -369,15 +388,24 @@ const ApplyJobPage = ({ params }: { params: Promise<{ jid: string }> }) => {
                       type="button"
                       variant="outline"
                       onClick={() => {
-                        document.getElementById("coverLetter")?.click()
+                        document.getElementById("coverLetter")?.click();
                       }}
                     >
-                      {coverLetter ? "Change Cover Letter" : "Select Cover Letter"}
+                      {coverLetter
+                        ? "Change Cover Letter"
+                        : "Select Cover Letter"}
                     </Button>
                     {coverLetter && (
                       <div className="flex items-center gap-2">
-                        <p className="text-sm font-medium">{coverLetterFileName}</p>
-                        <Button type="button" variant="ghost" size="sm" onClick={handleCoverLetterPreview}>
+                        <p className="text-sm font-medium">
+                          {coverLetterFileName}
+                        </p>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleCoverLetterPreview}
+                        >
                           <Eye className="w-4 h-4 mr-2" />
                           Preview
                         </Button>
@@ -396,7 +424,10 @@ const ApplyJobPage = ({ params }: { params: Promise<{ jid: string }> }) => {
                   <Label>CAPTCHA Verification</Label>
                   <div className="flex justify-center">
                     <Turnstile
-                      siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"}
+                      siteKey={
+                        process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ||
+                        "1x00000000000000000000AA"
+                      }
                       onVerify={(token) => setTurnstileToken(token)}
                     />
                   </div>
@@ -406,7 +437,9 @@ const ApplyJobPage = ({ params }: { params: Promise<{ jid: string }> }) => {
               <Button
                 type="submit"
                 className="w-full"
-                disabled={!resume || isUploading || isAnalyzing || !turnstileToken}
+                disabled={
+                  !resume || isUploading || isAnalyzing || !turnstileToken
+                }
               >
                 Submit Application
               </Button>
@@ -415,7 +448,7 @@ const ApplyJobPage = ({ params }: { params: Promise<{ jid: string }> }) => {
         </Card>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ApplyJobPage
+export default ApplyJobPage;

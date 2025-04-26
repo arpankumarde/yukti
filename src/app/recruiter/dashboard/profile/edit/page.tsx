@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import axios from "axios";
 import { getCookie, setCookie } from "cookies-next";
 import { toast } from "sonner";
 import {
@@ -70,18 +71,12 @@ export default function EditProfilePage() {
     }
 
     try {
-      const response = await fetch("/api/recruiter/profile", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          recruiterId: recruiter.recruiterId,
-          name,
-        }),
+      const response = await axios.patch("/api/recruiter/profile", {
+        recruiterId: recruiter.recruiterId,
+        name,
       });
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         throw new Error("Failed to update profile");
       }
 
@@ -90,6 +85,7 @@ export default function EditProfilePage() {
         ...recruiter,
         name,
       };
+
       setCookie("ykrectoken", JSON.stringify(updatedRecruiter));
 
       toast.success("Profile updated successfully");
@@ -118,28 +114,21 @@ export default function EditProfilePage() {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/recruiter/change-password", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          recruiterId: recruiter?.recruiterId,
-          currentPassword: passwordCurrent,
-          newPassword: passwordNew,
-        }),
+      const response = await axios.post("/api/recruiter/change-password", {
+        recruiterId: recruiter?.recruiterId,
+        currentPassword: passwordCurrent,
+        newPassword: passwordNew,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to update password");
+      if (response.status !== 200) {
+        throw new Error(response.data.message || "Failed to update password");
       }
 
       toast.success("Password updated successfully");
       setPasswordCurrent("");
       setPasswordNew("");
       setPasswordConfirm("");
+      router.push("/recruiter/dashboard/profile");
     } catch (error) {
       console.log("Error updating password:", error);
       toast.error("Failed to update password");

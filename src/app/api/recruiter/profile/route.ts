@@ -6,16 +6,22 @@ export async function PATCH(req: NextRequest) {
     const { recruiterId, name } = await req.json();
 
     if (!recruiterId) {
-      return NextResponse.json({ error: "Missing recruiterId" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing recruiterId" },
+        { status: 400 }
+      );
     }
 
     // Check if recruiter exists
     const existingRecruiter = await prisma.recruiter.findUnique({
-      where: { recruiterId }
+      where: { recruiterId },
     });
 
     if (!existingRecruiter) {
-      return NextResponse.json({ error: "Recruiter not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Recruiter not found" },
+        { status: 404 }
+      );
     }
 
     // Update recruiter profile
@@ -28,7 +34,7 @@ export async function PATCH(req: NextRequest) {
         recruiterId: true,
         name: true,
         email: true,
-      }
+      },
     });
 
     return NextResponse.json({ success: true, recruiter: updatedRecruiter });

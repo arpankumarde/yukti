@@ -40,7 +40,7 @@ export default async function ProfilePage() {
         recruiterId: true,
         name: true,
         email: true,
-        company: true,
+        Company: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -119,7 +119,7 @@ export default async function ProfilePage() {
                     </h3>
                     <div className="flex items-center gap-2">
                       <Briefcase className="h-4 w-4 text-primary" />
-                      <p className="font-medium">{recruiter.company.name}</p>
+                      <p className="font-medium">{recruiter.Company.name}</p>
                     </div>
                   </div>
 

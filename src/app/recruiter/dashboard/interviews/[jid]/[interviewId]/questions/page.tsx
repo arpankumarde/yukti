@@ -22,8 +22,8 @@ const Page = async ({
   const interview = await prisma.interview.findUnique({
     where: { interviewId },
     include: {
-      questions: true,
-      job: true,
+      InterviewQA: true,
+      Job: true,
     },
   });
 
@@ -42,8 +42,8 @@ const Page = async ({
   }
 
   // Ensure questions is an array and calculate the correct length
-  const questionCount = Array.isArray(interview.questions)
-    ? interview.questions.length
+  const questionCount = Array.isArray(interview.InterviewQA)
+    ? interview.InterviewQA.length
     : 0;
 
   return (
@@ -80,10 +80,10 @@ const Page = async ({
 
             <div className="bg-background rounded-md">
               <Questions
-                questionProps={interview?.questions || []}
+                questionProps={interview?.InterviewQA || []}
                 interviewId={interviewId}
                 interviewTitle={interview?.title || ""}
-                job={interview?.job}
+                job={interview?.Job || null}
               />
             </div>
           </div>

@@ -21,6 +21,7 @@ import {
   ChevronRight,
   Loader2,
 } from "lucide-react";
+import axios from "axios";
 import { useState } from "react";
 import {
   addQuestionAction,
@@ -132,25 +133,19 @@ const Questions = ({
   const generateQuestions = async () => {
     setIsGenerating(true);
     try {
-      const response = await fetch("/api/question-creation", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: job.title,
-          description: job.description,
-          experience: job.experience.toString(),
-          interviewTitle: interviewTitle,
-        }),
+      const response = await axios.post("/api/question-creation", {
+        title: job.title,
+        description: job.description,
+        experience: job.experience.toString(),
+        interviewTitle: interviewTitle,
       });
 
-      if (!response.ok) {
+      if (response.status !== 200) {
         console.error("Failed to generate questions");
         return;
       }
 
-      const jsonRes: AIQuestion[] = await response.json();
+      const jsonRes: AIQuestion[] = response.data;
       console.log("Questions generated", jsonRes);
 
       for (const q of jsonRes) {

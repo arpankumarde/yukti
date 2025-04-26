@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getCookie, setCookie } from "cookies-next";
 import { toast } from "sonner";
+import axios from "axios";
 import {
   Card,
   CardContent,
@@ -33,26 +34,20 @@ async function updateApplicantProfile(
   data: { name: string; phone: string }
 ) {
   try {
-    const response = await fetch("/api/applicant/profile", {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        applicantId,
-        name: data.name,
-        phone: data.phone,
-      }),
+    const response = await axios.patch("/api/applicant/profile", {
+      applicantId,
+      name: data.name,
+      phone: data.phone,
     });
 
-    if (!response.ok) {
+    if (response.status !== 200) {
       throw new Error("Failed to update profile");
     }
 
     return { success: true };
   } catch (error: any) {
     console.error("Error updating profile:", error);
-    return { success: false, error: error };
+    return { success: false, error: error.message };
   }
 }
 

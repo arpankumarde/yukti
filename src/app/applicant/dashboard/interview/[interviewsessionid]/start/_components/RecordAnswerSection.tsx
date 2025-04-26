@@ -10,6 +10,7 @@ import { saveAnswer } from "@/actions/interview";
 import { InterviewQA } from "@/generated/prisma";
 import { getCookie } from "cookies-next";
 import { Textarea } from "@/components/ui/textarea";
+import axios from "axios";
 
 // Define AuthCookie interface based on your app's cookie structure
 interface AuthCookie {
@@ -36,15 +37,11 @@ Provide strictly formatted JSON:
   "feedback": "[concise evaluation of gaps/strengths]"
 }`;
 
-    const response = await fetch("/api/ai/feedback", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ prompt: feedbackPrompt }),
+    const response = await axios.post("/api/ai/feedback", {
+      prompt: feedbackPrompt,
     });
 
-    const data = await response.json();
+    const data = response.data;
 
     // Parse the JSON response
     if (data.result) {
@@ -221,17 +218,14 @@ export default function RecordAnswerSection({
       // formData.append("language", "en");
 
       // Send the audio to our Whisper API endpoint
-      const response = await fetch("/api/ai/transcribe", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await axios.post("/api/ai/transcribe", formData);
 
-      if (!response.ok) {
-        const error = await response.json();
+      if (response.status !== 200) {
+        const error = response.data;
         throw new Error(error.message || "Failed to transcribe audio");
       }
 
-      const data = await response.json();
+      const data = response.data;
 
       if (data.success && data.text) {
         setUserAnswer((prev) => prev + " " + data.text.trim());

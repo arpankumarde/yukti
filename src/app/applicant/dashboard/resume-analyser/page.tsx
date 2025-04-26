@@ -3,6 +3,7 @@
 import { FilePond } from "react-filepond";
 import "filepond/dist/filepond.min.css";
 import { useState, useRef } from "react";
+import axios from "axios";
 import { Toaster } from "sonner";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
@@ -63,26 +64,20 @@ export default function ResumeAnalyzer() {
 
     setIsAnalyzing(true);
     try {
-      const response = await fetch("/api/analyze", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          text,
-          jobProfile:
-            analysisType === "jobMatch" ? jobProfile : "General ATS Analysis",
-        }),
+      const response = await axios.post("/api/analyze", {
+        text,
+        jobProfile:
+          analysisType === "jobMatch" ? jobProfile : "General ATS Analysis",
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
+      if (response.status !== 200) {
+        const errorData = response.data;
         throw new Error(
           errorData.error || `HTTP error! status: ${response.status}`
         );
       }
 
-      const data = await response.json();
+      const data = response.data;
       if (!data.choices?.[0]?.message?.content) {
         throw new Error("Invalid response format from analysis service");
       }

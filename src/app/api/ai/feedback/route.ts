@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-
-const OPENROUTER_API_KEY = process.env.OPENAI_API_KEY || process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
+import axios from "axios";
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,32 +12,33 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // You can use OpenAI API or OpenRouter API
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-      },
-      body: JSON.stringify({
+    const response = await axios.post(
+      "https://api.openai.com/v1/chat/completions",
+      {
         model: "gpt-4o",
         messages: [
           {
             role: "system",
-            content: "You are a helpful AI interview assistant that evaluates interview answers."
+            content:
+              "You are a helpful AI interview assistant that evaluates interview answers.",
           },
           {
             role: "user",
-            content: prompt
-          }
+            content: prompt,
+          },
         ],
         temperature: 0.7,
-        max_tokens: 500
-      }),
-    });
+        max_tokens: 500,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        },
+      }
+    );
 
-    const data = await response.json();
-    
+    const data = response.data;
+
     if (data.error) {
       console.error("AI API error:", data.error);
       return NextResponse.json(
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({
-      result: data.choices[0]?.message?.content || "No feedback available"
+      result: data.choices[0]?.message?.content || "No feedback available",
     });
   } catch (error) {
     console.error("Server error:", error);
