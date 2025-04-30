@@ -25,6 +25,7 @@ import {
   FaUser,
 } from "react-icons/fa";
 import Image from "next/image";
+import { FileText } from "lucide-react";
 
 export function ApplicantSidebar({
   ...props
@@ -101,6 +102,18 @@ export function ApplicantSidebar({
                   <Link href="/applicant/dashboard/interview">
                     <FaUserTie className="!size-5" />
                     <span>Interviews</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  className="py-6 text-lg duration-200 transition-colors"
+                  asChild
+                >
+                  <Link href="/applicant/dashboard/resumes">
+                    <FileText className="!size-5" />
+                    <span>Resumes</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
