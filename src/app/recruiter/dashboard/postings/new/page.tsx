@@ -31,6 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { JobStatus } from "@/generated/prisma";
 
 const NewJobPostingPage = () => {
   const [title, setTitle] = useState("");
@@ -42,7 +43,7 @@ const NewJobPostingPage = () => {
   const [vacancy, setVacancy] = useState<number>(1);
   const [skills, setSkills] = useState<string>("");
   const [jobType, setJobType] = useState("Full Time");
-  const [status, setStatus] = useState("ACTIVE");
+  const [status, setStatus] = useState<JobStatus>("ACTIVE");
   const [applyBy, setApplyBy] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
@@ -241,7 +242,7 @@ const NewJobPostingPage = () => {
                     Job Type
                   </Label>
                   <Select value={jobType} onValueChange={setJobType}>
-                    <SelectTrigger className="h-11">
+                    <SelectTrigger className="w-48">
                       <SelectValue placeholder="Select job type" />
                     </SelectTrigger>
                     <SelectContent>
@@ -262,13 +263,15 @@ const NewJobPostingPage = () => {
                     <Info className="h-4 w-4" />
                     Status
                   </Label>
-                  <Select value={status} onValueChange={setStatus}>
-                    <SelectTrigger className="h-11">
+                  <Select
+                    value={status}
+                    onValueChange={(value) => setStatus(value as JobStatus)}
+                  >
+                    <SelectTrigger className="w-48">
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="ACTIVE">Active</SelectItem>
-                      <SelectItem value="CLOSED">Closed</SelectItem>
                       <SelectItem value="DRAFT">Draft</SelectItem>
                     </SelectContent>
                   </Select>
@@ -288,7 +291,7 @@ const NewJobPostingPage = () => {
                     type="date"
                     value={applyBy}
                     onChange={(e) => setApplyBy(e.target.value)}
-                    className="h-11 transition-all focus:ring-2 focus:ring-primary/20"
+                    className="w-48 transition-all focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
               </div>
